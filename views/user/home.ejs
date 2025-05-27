@@ -1,0 +1,1036 @@
+<head>
+    <title></title>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<%- include("../../views/partials/user/header") %>
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    .product-section {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .section-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .section-header h1 {
+        font-size: 2.5em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .section-header p {
+        font-size: 1.1em;
+        margin-bottom: 20px;
+    }
+
+    .filter-sort {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .sort-dropdown {
+        padding: 10px;
+        font-size: 1em;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        width: 200px;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+        margin-bottom: 50px;
+    }
+
+    .product-card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        background-color: white;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+    }
+
+    .product-details {
+        padding: 20px;
+        text-align: center;
+    }
+
+    .product-details h3 {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        font-weight: bold;
+    }
+
+    .price {
+        font-size: 1.1em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .rating {
+        font-size: 0.9em;
+        margin-bottom: 15px;
+    }
+
+    .add-to-cart {
+        padding: 10px 20px;
+        font-size: 1em;
+        border-radius: 5px;
+        cursor: pointer;
+        width: 100%;
+        border: 1px solid #000;
+        background: transparent;
+    }
+
+    .see-more {
+        text-align: center;
+    }
+
+    .see-more-button {
+        display: inline-block;
+        background: linear-gradient(90deg, #636566 0%, #262729 100%);
+        color: white;
+        padding: 16px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: 0 10px 20px rgba(10, 10, 11, 0.3);
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.8s;
+        margin-bottom: 150px;
+    }
+
+    .discover-section {
+        width: 100%;
+        max-width: 2000px;
+        height: 80%;
+    }
+
+    .discover-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 140px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .discover-container::before {
+        content: '';
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(15, 15, 17, 0.1) 0%, rgba(34, 36, 37, 0.05) 100%);
+        top: -50px;
+        left: -50px;
+        z-index: -1;
+    }
+
+    .discover-container::after {
+        content: '';
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(15, 15, 17, 0.1) 0%, rgba(34, 36, 37, 0.05) 100%);
+        bottom: -30px;
+        right: -30px;
+        z-index: -1;
+    }
+
+    .discover-subtitle {
+        color: #3e3f3fc2;
+        font-size: 18px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 3px;
+        margin-bottom: 20px;
+        opacity: 0;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.2s;
+    }
+
+    .discover-title {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 30px;
+        position: relative;
+        opacity: 0;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.4s;
+        font-family: 'Unbounded', cursive;
+    }
+
+    .discover-title::after {
+        content: '';
+        display: block;
+        width: 100px;
+        height: 5px;
+        margin: 25px auto 0;
+        border-radius: 3px;
+    }
+
+    .discover-description {
+        max-width: 700px;
+        font-size: 18px;
+        line-height: 1.8;
+        color: #666;
+        margin-bottom: 40px;
+        opacity: 0;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.6s;
+    }
+
+    .discover-button {
+        display: inline-block;
+        background: linear-gradient(90deg, #636566 0%, #262729 100%);
+        color: white;
+        padding: 16px 40px;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 16px;
+        box-shadow: 0 10px 20px rgba(10, 10, 11, 0.3);
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+        opacity: 0;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.8s;
+    }
+
+    .discover-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.7s;
+    }
+
+    .discover-button:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(11, 12, 12, 0.4);
+    }
+
+    .discover-button:hover::before {
+        left: 100%;
+    }
+
+    .decoration {
+        position: absolute;
+        opacity: 0.1;
+        z-index: -1;
+    }
+
+    @keyframes float {
+        0% {
+            transform: translateY(0);
+        }
+        100% {
+            transform: translateY(-20px);
+        }
+    }
+
+    @keyframes fadeUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive styles */
+    @media screen and (max-width: 992px) {
+        .discover-title {
+            font-size: 60px;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .discover-title {
+            font-size: 48px;
+        }
+        .discover-description {
+            font-size: 16px;
+        }
+        .decoration {
+            display: none;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .discover-title {
+            font-size: 36px;
+        }
+        .discover-subtitle {
+            font-size: 14px;
+        }
+        .discover-description {
+            font-size: 14px;
+        }
+        .discover-button {
+            padding: 14px 30px;
+            font-size: 14px;
+        }
+    }
+
+    /* Benefits */
+    .benefits {
+        padding: 4rem 5%;
+        background: #f8fafc;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 2rem;
+    }
+
+    .benefit-item {
+        text-align: center;
+        padding: 2rem;
+    }
+
+    .benefit-item img {
+        width: 48px;
+        height: 48px;
+        margin-bottom: 1rem;
+    }
+
+    .benefit-item h3 {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+        color: #1e293b;
+    }
+
+    .benefit-item p {
+        color: #64748b;
+    }
+
+    .ecom-banner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 80px 60px;
+        background: linear-gradient(to right, #ffffff, #ffffff);
+        font-family: 'Nunito', sans-serif;
+        overflow: hidden;
+        gap: 40px;
+    }
+
+    .ecom-banner .text-content {
+        flex: 1;
+        animation: slideInLeft 1s ease-out;
+    }
+
+    .ecom-banner .title {
+        font-family: 'Unbounded', cursive;
+        font-size: 3.5em;
+        margin-bottom: 20px;
+        line-height: 1.2;
+        background: linear-gradient(90deg, #111, #333);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .ecom-banner .description {
+        font-size: 1.2em;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    .ecom-banner .image-content {
+        flex: 0 0 50%;
+        animation: slideInRight 1s ease-out;
+        text-align: right;
+    }
+
+    .ecom-banner .banner-img {
+        width: 100%;
+        max-width: none;
+        border-radius: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes slideInRight {
+        from { opacity: 0; transform: translateX(50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    @media (max-width: 768px) {
+        .ecom-banner {
+            flex-direction: column;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .ecom-banner .image-content {
+            flex: none;
+            width: 100%;
+            text-align: center;
+        }
+
+        .ecom-banner .banner-img {
+            width: 90%;
+            max-width: 350px;
+            height: 90%;
+        }
+    }
+
+    .products-container {
+        font-family: 'Poppins', sans-serif;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+
+    .product-listing {
+        margin: 40px 0;
+        display: grid;
+        gap: 40px;
+    }
+
+    .section {
+        background: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+    }
+
+    .section h2 {
+        color: #4a5568;
+        font-size: 24px;
+        font-weight: 600;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 15px;
+        margin-bottom: 25px;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 30px;
+    }
+
+    .product-card {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        transition: none;
+    }
+
+    .product-card img {
+        max-width: 100%;
+        height: 250px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+
+    .product-card h3 {
+        font-size: 18px;
+        color: #4a5568;
+        margin: 15px 0;
+        font-weight: 600;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .product-card .price {
+        color: #718096;
+        font-size: 20px;
+        font-weight: bold;
+        margin: 15px 0;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .product-card button {
+        background: #edf2f7;
+        color: #4a5568;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        font-family: 'Poppins', sans-serif;
+        box-shadow: none;
+    }
+
+    @media (max-width: 768px) {
+        .products {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+
+        .section {
+            padding: 20px;
+        }
+
+        .section h2 {
+            font-size: 20px;
+        }
+
+        .product-card {
+            padding: 15px;
+        }
+
+        .product-card img {
+            height: 200px;
+        }
+
+        .product-card button {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    }
+
+    .carousel-container {
+        position: relative;
+        width: 100vw;
+        max-width: none;
+        margin: 0;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        border-radius: 8px;
+    }
+
+    .carousel-track {
+        display: flex;
+        transition: transform 0.5s ease;
+        width: 100%;
+    }
+
+    .carousel-slide {
+        min-width: 100%;
+        width: 100%;
+        height: 700px;
+        position: relative;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    .carousel-buttons {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        pointer-events: none;
+    }
+
+    .carousel-button {
+        background: rgba(255, 255, 255, 0.7);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        pointer-events: auto;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        font-size: 24px;
+    }
+
+    .carousel-button:hover {
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .carousel-dots {
+        position: absolute;
+        bottom: 20px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .carousel-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        border: none;
+    }
+
+    .carousel-dot.active {
+        background: white;
+        transform: scale(1.2);
+    }
+
+    /* Responsive carousel styles */
+    @media screen and (max-width: 768px) {
+        .carousel-container {
+            width: 100vw;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .carousel-slide {
+            height: 50vh;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .carousel-button {
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+        }
+
+        .carousel-dots {
+            bottom: 10px;
+        }
+
+        .carousel-dot {
+            width: 10px;
+            height: 10px;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .carousel-container {
+            width: 100vw;
+            margin: 0;
+            border-radius: 0;
+            box-shadow: none;
+        }
+
+        .carousel-slide {
+            height: 40vh;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .carousel-button {
+            width: 35px;
+            height: 35px;
+            font-size: 18px;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+        }
+    }
+
+    .product-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+
+    .product-card {
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 280px;
+        object-fit: contain;
+        margin-bottom: 15px;
+        transition: transform 0.2s ease;
+    }
+
+    .product-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .view-details {
+        background: linear-gradient(90deg, #636566 0%, #262729 100%);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .view-details:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-card h3 {
+        color: #1a1a1a;
+        margin: 10px 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .price {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 10px 0;
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #e94444;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 0.9em;
+        z-index: 1;
+    }
+
+    .price-container {
+        margin: 10px 0;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #666;
+        font-size: 0.9em;
+        margin-left: 8px;
+    }
+
+    .savings {
+        color: #059669;
+        font-size: 0.9em;
+        margin-top: 5px;
+        font-weight: 600;
+    }
+</style>
+
+<div class="carousel-container">
+    <div class="carousel-track">
+        <div class="carousel-slide" style="background-image: url('/img/miPhone.avif');"></div>
+        <div class="carousel-slide" style="background-image: url('/img/56f120efa4b0d158e2fc278a77216b62.jpg');"></div>
+        <div class="carousel-slide" style="background-image: url('/img/13_Desktop.jpg');"></div>
+    </div>
+    
+    <div class="carousel-buttons">
+        <button class="carousel-button prev-button">←</button>
+        <button class="carousel-button next-button">→</button>
+    </div>
+    
+    <div class="carousel-dots">
+        <button class="carousel-dot active" data-index="0"></button>
+        <button class="carousel-dot" data-index="1"></button>
+        <button class="carousel-dot" data-index="2"></button>
+    </div>
+</div>
+
+<section class="discover-section">
+    <div class="discover-container">
+        <div class="decoration decoration-1"></div>
+        <div class="decoration decoration-2"></div>
+        <div class="decoration decoration-3"></div>
+        <h3 class="discover-subtitle">Welcome to our collection</h3>
+        <h1 class="discover-title">Discover Style That Speaks</h1>
+        <p class="discover-description">Experience premium quality products designed to elevate your everyday life. Our carefully curated collections bring together the finest brands and artisans from around the world.</p>
+        <a href="/shop" class="discover-button">Explore Now</a>
+    </div>
+</section>
+
+<section class="ecom-banner">
+    <div class="text-content">
+        <div class="title">Upgrade Your Pocket</div>
+        <div class="description">
+            Discover flagship smartphones, unbeatable offers, and futuristic designs — all in one place. Browse top-rated brands and the latest arrivals built for speed, style, and smarts.
+        </div>
+    </div>
+    <div class="image-content">
+        <video autoplay muted loop playsinline class="banner-img" src="video/012aab464f841662f30553bd2b4855d4.mp4" alt="Modern smartphone"></video>
+    </div>
+</section>
+
+<div class="products-container">
+    <div class="product-listing">
+        <!-- Featured Product Section -->
+        <div class="section">
+            <h2>Featured Product</h2>
+            <div class="products">
+                <% if (products && products.featured && products.featured.length > 0) { %>
+                    <% products.featured.forEach(function(product) { %>
+                        <div class="product-card">
+                            <a href="/product/<%= product._id %>" class="product-link">
+                                <img 
+                                    src="<%= product.productImage && product.productImage.length > 0 ? 
+                                        `${imageBasePath}${product.productImage[0]}` : 
+                                        '/img/products/default-product.jpg' %>" 
+                                    alt="<%= product.productName %>"
+                                    onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
+                                >
+                                <h3><%= product.productName %></h3>
+                                <p class="price">₹<%= product.salePrice.toLocaleString('en-IN') %></p>
+                                <% if (product.discount > 0) { %>
+                                    <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">
+                                        Save ₹<%= product.discount.toLocaleString('en-IN') %>
+                                    </p>
+                                <% } %>
+                                <button class="view-details">View Details</button>
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="product-card">
+                        <a href="/product/iphone-15-pro" class="product-link">
+                            <img src="/img/products/iphone15pro.jpg" alt="iPhone 15 Pro">
+                            <h3>iPhone 15 Pro</h3>
+                            <p class="price">₹134,900</p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Top Offers Section -->
+        <div class="section">
+            <h2>Top Offers</h2>
+            <div class="products">
+                <% if (products && products.topOffers && products.topOffers.length > 0) { %>
+                    <% products.topOffers.forEach(function(product) { %>
+                        <div class="product-card">
+                            <a href="/product/<%= product._id %>" class="product-link">
+                                <div class="discount-badge">
+                                    <%= product.discountPercentage %>% OFF
+                                </div>
+                                <img 
+                                    src="<%= product.productImage && product.productImage.length > 0 ? 
+                                        `${imageBasePath}${product.productImage[0]}` : 
+                                        '/img/products/default-product.jpg' %>" 
+                                    alt="<%= product.productName || 'Product' %>"
+                                    onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
+                                >
+                                <h3><%= product.productName || 'Product Name' %></h3>
+                                <div class="price-container">
+                                    <p class="price">
+                                        ₹<%= (product.salePrice || 0).toLocaleString('en-IN') %>
+                                        <span class="original-price">
+                                            ₹<%= ((product.salePrice || 0) + (product.discount || 0)).toLocaleString('en-IN') %>
+                                        </span>
+                                    </p>
+                                    <p class="savings">
+                                        Save ₹<%= (product.discount || 0).toLocaleString('en-IN') %>
+                                    </p>
+                                </div>
+                                <button class="view-details">View Details</button>
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="product-card">
+                        <a href="/product/samsung-s23-fe" class="product-link">
+                            <img src="/img/products/samsung-s23-fe.jpg" alt="Samsung S23 FE">
+                            <h3>Samsung S23 FE 5G</h3>
+                            <p class="price">₹49,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹59,999</span></p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="/product/oneplus-11r" class="product-link">
+                            <img src="/img/products/oneplus-11r.jpg" alt="OnePlus 11R">
+                            <h3>OnePlus 11R 5G</h3>
+                            <p class="price">₹39,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹44,999</span></p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Under 25000 Mobiles Section -->
+        <div class="section">
+            <h2>Under ₹25,000 Mobiles</h2>
+            <div class="products">
+                <% if (products && products.under25000 && products.under25000.length > 0) { %>
+                    <% products.under25000.forEach(function(product) { %>
+                        <div class="product-card">
+                            <a href="/product/<%= product._id %>" class="product-link">
+                                <img 
+                                    src="<%= product.productImage && product.productImage.length > 0 ? 
+                                        `${imageBasePath}${product.productImage[0]}` : 
+                                        '/img/products/default-product.jpg' %>" 
+                                    alt="<%= product.productName %>"
+                                    onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
+                                >
+                                <h3><%= product.productName %></h3>
+                                <p class="price">₹<%= product.salePrice.toLocaleString('en-IN') %></p>
+                                <button class="view-details">View Details</button>
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="product-card">
+                        <a href="/product/redmi-note-13" class="product-link">
+                            <img src="/img/products/redmi-note-13.jpg" alt="Redmi Note 13">
+                            <h3>Redmi Note 13 5G</h3>
+                            <p class="price">₹19,999</p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="/product/realme-11" class="product-link">
+                            <img src="/img/products/realme-11.jpg" alt="Realme 11">
+                            <h3>Realme 11 5G</h3>
+                            <p class="price">₹21,999</p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="/product/poco-x6" class="product-link">
+                            <img src="/img/products/poco-x6.jpg" alt="POCO X6">
+                            <h3>POCO X6 5G</h3>
+                            <p class="price">₹23,999</p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+        <!-- Best Deals on Smartphones Section -->
+        <div class="section">
+            <h2>Best Deals on Smartphones</h2>
+            <div class="products">
+                <% if (products && products.bestDeals && products.bestDeals.length > 0) { %>
+                    <% products.bestDeals.forEach(function(product) { %>
+                        <div class="product-card">
+                            <a href="/product/<%= product._id %>" class="product-link">
+                                <img 
+                                    src="<%= product.productImage && product.productImage.length > 0 ? 
+                                        `${imageBasePath}${product.productImage[0]}` : 
+                                        '/img/products/default-product.jpg' %>" 
+                                    alt="<%= product.productName || 'Product' %>"
+                                    onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
+                                >
+                                <h3><%= product.productName || 'Product Name' %></h3>
+                                <p class="price">
+                                    ₹<%= (product.salePrice || 0).toLocaleString('en-IN') %>
+                                    <% if (product.discount && product.discount > 0) { %>
+                                        <span class="original-price">
+                                            ₹<%= ((product.salePrice || 0) + (product.discount || 0)).toLocaleString('en-IN') %>
+                                        </span>
+                                    <% } %>
+                                </p>
+                                <% if (product.discount && product.discount > 0) { %>
+                                    <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">
+                                        Save ₹<%= (product.discount || 0).toLocaleString('en-IN') %>
+                                    </p>
+                                <% } %>
+                                <button class="view-details">View Details</button>
+                            </a>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="product-card">
+                        <a href="/product/pixel-7a" class="product-link">
+                            <img src="/img/products/pixel-7a.jpg" alt="Google Pixel 7a">
+                            <h3>Google Pixel 7a</h3>
+                            <p class="price">₹35,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹43,999</span></p>
+                            <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">Save ₹8,000</p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                    <div class="product-card">
+                        <a href="/product/nothing-phone-2" class="product-link">
+                            <img src="/img/products/nothing-phone-2.jpg" alt="Nothing Phone (2)">
+                            <h3>Nothing Phone (2)</h3>
+                            <p class="price">₹32,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹39,999</span></p>
+                            <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">Save ₹7,000</p>
+                            <button class="view-details">View Details</button>
+                        </a>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="see-more">
+    <a href="/shop" class="see-more-button">See All Products</a>
+</div>
+
+<div class="benefits">
+    <div class="benefit-item">
+        <img src="https://api.iconify.design/solar:delivery-bold.svg" alt="Fast Shipping">
+        <h3>Fast Shipping</h3>
+        <p>Free delivery within 24 hours</p>
+    </div>
+    <div class="benefit-item">
+        <img src="https://api.iconify.design/solar:shield-check-bold.svg" alt="Warranty">
+        <h3>Warranty</h3>
+        <p>2 years warranty on all products</p>
+    </div>
+    <div class="benefit-item">
+        <img src="https://api.icon(rd).iconify.design/solar:card-bold.svg" alt="Secure Payment">
+        <h3>Secure Payment</h3>
+        <p>100% secure payment methods</p>
+    </div>
+    <div class="benefit-item">
+        <img src="https://api.iconify.design/streamline-emojis:twenty-four-seven.svg" width="24" height="24" alt="24/7 Service">
+        <h3>24/7 Support</h3>
+        <p>Dedicated customer support</p>
+    </div>
+</div>
+
+<%- include("../../views/partials/user/footer") %>
+<script src="/js/userHome.js"></script>

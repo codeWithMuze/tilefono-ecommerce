@@ -1,0 +1,1394 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+  :root {
+    /* Primary colors */
+    --color-primary: #262729;
+    --color-primary-light: #636566;
+    --color-primary-dark: #1a1a1a;
+    --color-secondary: #e63946;
+    --color-secondary-light: #f3a0a7;
+    --color-secondary-dark: #c81c29;
+    
+    /* Status and accent colors */
+    --color-success: #2a9d8f;
+    --color-warning: #e9c46a;
+    --color-danger: #e76f51;
+    
+    /* Neutral colors */
+    --color-light: #f8f9fa;
+    --color-dark: #212529;
+    --color-gray-100: #f8f9fa;
+    --color-gray-200: #e9ecef;
+    --color-gray-300: #dee2e6;
+    --color-gray-400: #ced4da;
+    --color-gray-500: #adb5bd;
+    --color-gray-600: #6c757d;
+    --color-gray-700: #495057;
+    --color-gray-800: #343a40;
+    --color-gray-900: #212529;
+    --color-text: #333333;
+    
+    /* UI effects */
+    --box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    --gradient-secondary: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-secondary-dark) 100%);
+  }
+  *{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  /* General Styles */
+  body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9fafb;
+    color: var(--color-text);
+  }
+
+  .track-order-container {
+    max-width: 1100px;
+    margin: 60px auto;
+    padding: 0 20px;
+  }
+
+  .page-title {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .page-title h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 38px;
+    font-weight: 800;
+    color: var(--color-primary);
+    margin-bottom: 15px;
+    position: relative;
+    display: inline-block;
+  }
+  
+  .page-title h1:after {
+    content: '';
+    position: absolute;
+    width: 70px;
+    height: 4px;
+    background-color: var(--color-secondary);
+    bottom: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-radius: 2px;
+  }
+
+  .page-title p {
+    color: var(--color-gray-600);
+    font-size: 17px;
+    max-width: 600px;
+    margin: 0 auto;
+    margin-top: 25px;
+  }
+
+  /* Order Lookup Section */
+  .order-lookup {
+    background: white;
+    border-radius: 16px;
+    padding: 35px;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 50px;
+    text-align: center;
+    position: relative;
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: var(--transition);
+  }
+  
+  .order-lookup:hover {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  .order-lookup h2 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 24px;
+    margin-bottom: 25px;
+    color: var(--color-primary);
+    font-weight: 700;
+  }
+
+  .lookup-form {
+    display: flex;
+    max-width: 650px;
+    margin: 0 auto;
+  }
+
+  .lookup-input {
+    flex: 1;
+    padding: 18px 24px;
+    border: 2px solid var(--color-gray-200);
+    border-radius: 12px 0 0 12px;
+    font-size: 16px;
+    transition: var(--transition);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  .lookup-input:focus {
+    outline: none;
+    border-color: var(--color-secondary);
+    box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.15);
+  }
+
+  .lookup-btn {
+    background: var(--gradient-secondary);
+    color: white;
+    border: none;
+    padding: 0 30px;
+    border-radius: 0 12px 12px 0;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 10px rgba(230, 57, 70, 0.3);
+  }
+
+  .lookup-btn:hover {
+    background: linear-gradient(135deg, var(--color-secondary-dark) 0%, var(--color-secondary) 100%);
+    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.4);
+  }
+
+  /* Order Details Card */
+  .order-details-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 50px;
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: var(--transition);
+  }
+  
+  .order-details-card:hover {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  }
+
+  .order-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    position: relative;
+  }
+  
+  .order-header:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='rgba(255,255,255,0.05)' fill-rule='evenodd'/%3E%3C/svg%3E");
+    opacity: 0.3;
+  }
+
+  .order-id {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .order-id .label {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .order-id .value {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+
+  .order-date {
+    text-align: right;
+  }
+
+  .order-date .label {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .order-date .value {
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  .estimated .label {
+    font-size: 14px;
+    opacity: 0.85;
+    margin-bottom: 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .estimated .value {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* Tracking Visuals */
+  .order-tracking {
+    padding: 50px 35px;
+  }
+
+  .tracking-timeline {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 50px;
+    position: relative;
+  }
+
+  .tracking-timeline::before {
+    content: "";
+    position: absolute;
+    top: 25px;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background-color: var(--color-gray-300);
+    z-index: 1;
+    border-radius: 5px;
+  }
+
+  .timeline-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    width: 20%;
+    transition: var(--transition);
+  }
+
+  .step-icon {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background-color: var(--color-gray-300);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    color: white;
+    font-size: 20px;
+    transition: all 0.5s ease;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+  }
+
+  .step-label {
+    font-size: 15px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--color-gray-600);
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+  }
+
+  .step-date {
+    font-size: 13px;
+    color: var(--color-gray-500);
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  /* Active and completed steps styling */
+  .timeline-step.active .step-icon {
+    background: var(--gradient-secondary);
+    box-shadow: 0 0 20px rgba(230, 57, 70, 0.5);
+
+  }
+
+  .timeline-step.active .step-label {
+    color: var(--color-secondary);
+    font-weight: 700;
+  }
+  
+  .timeline-step.active .step-date {
+    font-weight: 600;
+    color: var(--color-secondary);
+  }
+
+  .timeline-step.completed .step-icon {
+    background: linear-gradient(135deg, var(--color-success) 0%, #1d7268 100%);
+    box-shadow: 0 5px 15px rgba(42, 157, 143, 0.3);
+  }
+  
+  .timeline-step.completed .step-label {
+    /* color: var(--color-success); */
+  }
+
+  /* Progress coloring - This will color the timeline based on current status */
+  .tracking-timeline[data-status="ordered"]::before {
+    background: linear-gradient(to right, 
+      var(--color-secondary) 10%, 
+      var(--color-gray-300) 10% 100%);
+  }
+
+  .tracking-timeline[data-status="processing"]::before {
+    background: linear-gradient(to right, 
+      var(--color-secondary) 30%, 
+      var(--color-gray-300) 30% 100%);
+  }
+
+  .tracking-timeline[data-status="shipped"]::before {
+    background: linear-gradient(to right, 
+      var(--color-secondary) 50%, 
+      var(--color-gray-300) 50% 100%);
+  }
+
+  .tracking-timeline[data-status="out-for-delivery"]::before {
+    background: linear-gradient(to right, 
+      var(--color-secondary) 70%, 
+      var(--color-gray-300) 70% 100%);
+  }
+
+  .tracking-timeline[data-status="delivered"]::before {
+    background: linear-gradient(to right, 
+      var(--color-secondary) 100%, 
+      var(--color-gray-300) 100%);
+  }
+
+  /* Detailed Status */
+  .current-status {
+    background-color: var(--color-gray-100);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 35px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border: 1px solid var(--color-gray-200);
+    position: relative;
+    transition: var(--transition);
+  }
+  
+  .current-status:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .status-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .status-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .status-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gradient-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 16px;
+    box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
+  }
+
+  .status-label {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--color-secondary);
+    padding: 3px 10px;
+    background-color: rgba(230, 57, 70, 0.1);
+    border-radius: 6px;
+    margin-left: 5px;
+  }
+
+  .delivery-date {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-primary);
+    padding: 8px 15px;
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+  }
+  
+  .status-message {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--color-gray-700);
+    padding: 5px 0;
+  }
+
+  /* Status Updates List */
+  .status-updates {
+    margin-top: 40px;
+    background-color: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    border: 1px solid var(--color-gray-200);
+    transition: var(--transition);
+  }
+  
+  .status-updates:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  }
+
+  .updates-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: var(--color-primary);
+    border-bottom: 2px solid var(--color-gray-200);
+    padding-bottom: 15px;
+    position: relative;
+  }
+  
+  .updates-title:after {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 2px;
+    background-color: var(--color-secondary);
+    bottom: -2px;
+    left: 0;
+  }
+
+  .updates-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+  }
+  
+  .updates-list:before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: var(--color-gray-200);
+    z-index: 1;
+  }
+
+  .update-item {
+    display: flex;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--color-gray-200);
+    position: relative;
+    transition: var(--transition);
+  }
+  
+  .update-item:hover {
+    background-color: rgba(0,0,0,0.01);
+  }
+  
+  .update-item:last-child {
+    border-bottom: none;
+  }
+  
+  .update-item:before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 23px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: var(--color-secondary);
+    z-index: 2;
+    box-shadow: 0 0 0 4px rgba(230, 57, 70, 0.2);
+  }
+
+  .update-time {
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    padding-left: 50px;
+  }
+
+  .update-date {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-primary);
+  }
+
+  .update-hour {
+    font-size: 14px;
+    color: var(--color-gray-600);
+    margin-top: 3px;
+  }
+
+  .update-content {
+    flex: 1;
+    padding-left: 15px;
+  }
+
+  .update-status {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: var(--color-primary);
+  }
+
+  .update-location {
+    font-size: 14px;
+    color: var(--color-gray-600);
+    display: flex;
+    align-items: center;
+  }
+  
+  .update-location:before {
+    content: '\f3c5';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 5px;
+    color: var(--color-secondary);
+    font-size: 12px;
+  }
+
+  /* Order Summary Section */
+  .order-summary {
+    padding: 35px;
+    border-top: 1px solid var(--color-gray-200);
+    background-color: var(--color-gray-100);
+  }
+
+  .summary-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 25px;
+    color: var(--color-primary);
+    position: relative;
+    display: inline-block;
+  }
+  
+  .summary-title:after {
+    content: '';
+    position: absolute;
+    width: 50%;
+    height: 3px;
+    background-color: var(--color-secondary);
+    bottom: -8px;
+    left: 0;
+    border-radius: 2px;
+  }
+
+  .product-list {
+    margin-bottom: 35px;
+  }
+
+  .product-item {
+    display: flex;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: var(--transition);
+    border: 1px solid var(--color-gray-200);
+  }
+  
+  .product-item:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .product-image {
+    width: 90px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-right: 20px;
+    background-color: white;
+    padding: 5px;
+    border: 1px solid var(--color-gray-200);
+    transition: var(--transition);
+  }
+  
+  .product-item:hover .product-image {
+    border-color: var(--color-secondary-light);
+  }
+
+  .product-details {
+    flex: 1;
+  }
+
+  .product-name {
+    font-weight: 700;
+    font-size: 17px;
+    margin-bottom: 8px;
+    color: var(--color-primary);
+    transition: var(--transition);
+  }
+  
+  .product-item:hover .product-name {
+    color: var(--color-secondary);
+  }
+
+  .product-meta {
+    font-size: 14px;
+    color: var(--color-gray-600);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .product-meta:before {
+    content: '\f00a';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 5px;
+    color: var(--color-gray-500);
+  }
+
+  .product-price {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--color-secondary);
+    display: inline-block;
+    padding: 4px 10px;
+    background-color: rgba(230, 57, 70, 0.08);
+    border-radius: 6px;
+  }
+
+  /* Shipping Information */
+  .shipping-info {
+    background-color: white;
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 35px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border: 1px solid var(--color-gray-200);
+  }
+
+  .shipping-header {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--color-dark);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--color-gray-200);
+    padding-bottom: 15px;
+  }
+  
+  .shipping-header i {
+    color: var(--color-secondary);
+    font-size: 20px;
+  }
+
+  .shipping-address {
+    color: var(--color-gray-700);
+    line-height: 1.7;
+    font-size: 15px;
+  }
+
+  /* Helper Actions */
+  .helper-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .helper-btn {
+    padding: 14px 22px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    letter-spacing: 0.3px;
+  }
+
+  .primary-btn {
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(230, 57, 70, 0.3);
+  }
+
+  .primary-btn:hover {
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary-dark) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+  }
+
+  .secondary-btn {
+    background-color: white;
+    color: var(--color-gray-700);
+    border: 1px solid var(--color-gray-300);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+
+  .secondary-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .track-order-container {
+      margin: 40px auto;
+    }
+    
+    .page-title h1 {
+      font-size: 30px;
+    }
+    
+    .lookup-form {
+      flex-direction: column;
+    }
+
+    .lookup-input {
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .lookup-btn {
+      border-radius: 12px;
+      padding: 15px;
+    }
+
+    .tracking-timeline {
+      flex-wrap: wrap;
+      justify-content: flex-start;
+      gap: 35px;
+    }
+
+    .timeline-step {
+      width: 45%;
+    }
+
+    .tracking-timeline::before {
+      display: none;
+    }
+
+    .helper-actions {
+      justify-content: center;
+    }
+    
+    .order-header {
+      padding: 25px;
+    }
+    
+    .order-tracking {
+      padding: 30px 20px;
+    }
+    
+    .status-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 15px;
+    }
+    
+    .product-item {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .product-image {
+      margin-right: 0;
+      margin-bottom: 15px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .timeline-step {
+      width: 100%;
+    }
+    
+    .order-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    
+    .order-date {
+      text-align: left;
+    }
+    
+    .update-item {
+      flex-direction: column;
+    }
+    
+    .update-time {
+      margin-bottom: 15px;
+    }
+    
+    .update-item:before {
+      top: 24px;
+    }
+    
+    .helper-btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  /* Error Message Styles */
+  .error-message {
+    margin-top: 15px;
+    padding: 12px 20px;
+    background-color: rgba(231, 76, 60, 0.1);
+    border-left: 4px solid #e74c3c;
+    color: #c0392b;
+    font-weight: 500;
+    text-align: left;
+    border-radius: 6px;
+    font-size: 15px;
+    animation: fadeIn 0.3s ease;
+    display: none;
+  }
+  
+  .error-message.visible {
+    display: block;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Enhanced shipping info styles */
+  .shipping-name {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: var(--color-dark);
+  }
+  
+  .shipping-full-address {
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+  
+  .shipping-contact {
+    color: var(--color-gray-600);
+    margin-top: 5px;
+    font-size: 14px;
+  }
+  
+  .shipping-contact i {
+    color: var(--color-secondary);
+    margin-right: 5px;
+  }
+  
+  .address-type {
+    display: inline-block;
+    background-color: var(--color-secondary);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin-top: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* No Order Found Styles */
+  .no-order-found {
+    background-color: white;
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 40px;
+    border: 1px solid rgba(0,0,0,0.05);
+    animation: fadeIn 0.5s ease;
+  }
+  
+  .no-order-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 25px;
+  }
+  
+  .no-order-icon i {
+    font-size: 32px;
+    color: #758196;
+  }
+  
+  .no-order-found h3 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--color-dark);
+  }
+  
+  .no-order-found p {
+    color: var(--color-gray-600);
+    margin-bottom: 20px;
+    font-size: 16px;
+  }
+  
+  .no-order-suggestions {
+    background-color: var(--color-gray-100);
+    padding: 20px;
+    border-radius: 12px;
+    margin: 25px auto;
+    max-width: 90%;
+    text-align: left;
+  }
+  
+  .no-order-suggestions p {
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--color-gray-700);
+  }
+  
+  .no-order-suggestions ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .no-order-suggestions ul li {
+    padding: 8px 0 8px 25px;
+    position: relative;
+    color: var(--color-gray-600);
+  }
+  
+  .no-order-suggestions ul li:before {
+    content: '\f058';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    color: var(--color-secondary);
+  }
+  
+  /* Add responsive styles */
+  @media (max-width: 576px) {
+    .no-order-found {
+      padding: 30px 20px;
+    }
+    
+    .no-order-suggestions {
+      max-width: 100%;
+      padding: 15px;
+    }
+  }
+
+  /* Additional styles for improved address display */
+  .no-address-message {
+    color: #856404;
+    background-color: #fff3cd;
+    border-left: 4px solid #ffeeba;
+    padding: 15px;
+    border-radius: 8px;
+    line-height: 1.6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .no-address-message i {
+    font-size: 24px;
+    color: #856404;
+  }
+  
+  .debug-info {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #6c757d;
+  }
+  
+  .address-text {
+    line-height: 1.8;
+    white-space: pre-line; /* Preserves line breaks if they exist in the string */
+  }
+</style>
+
+<div class="track-order-container">
+  <!-- Page Title -->
+  <div class="page-title">
+    <h1>Track Your Order</h1>
+    <p>Enter your order ID to get real-time updates on your package</p>
+  </div>
+
+  <!-- Order Lookup Form -->
+  <div class="order-lookup">
+    <h2>Enter Order Number</h2>
+    <form class="lookup-form" action="/track-order" method="get" id="trackOrderForm">
+      <input type="text" name="orderId" class="lookup-input" placeholder="e.g., MHUB-2023-12345" value="<%= typeof order !== 'undefined' && order ? (order.orderId || '_' + order._id.toString().substr(-6)) : '' %>" />
+      <button type="submit" class="lookup-btn">Track Order</button>
+    </form>
+    <!-- Error message container (initially hidden) -->
+    <div id="errorMessage" class="error-message <%= locals.error ? 'visible' : '' %>">
+      <%= locals.error || 'Order not found. Please check the ID and try again.' %>
+    </div>
+  </div>
+
+  <% if (typeof order !== 'undefined' && order) { %>
+  <!-- Order Details Card -->
+  <div class="order-details-card">
+    <!-- Order Header -->
+    <div class="order-header">
+      <div class="order-id">
+        <span class="label">Order ID</span>
+        <span class="value"><%= order.orderId || '_' + order._id.toString().substr(-6) %></span>
+      </div>
+      <div class="estimated">
+        <span class="label">Estimated Delivery</span>
+        <span class="value"><%= new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'}) %></span>
+      </div>
+      <div class="order-date">
+        <span class="label">Order Date</span>
+        <span class="value"><%= new Date(order.invoiceDate || order.createdOn).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'}) %></span>
+      </div>
+    </div>
+
+    <!-- Order Tracking Section -->
+    <div class="order-tracking">
+      <!-- Timeline -->
+      <div class="tracking-timeline" data-status="<%= order.status.toLowerCase() %>">
+        <div class="timeline-step <%= order.status === 'Ordered' || order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered' ? 'completed' : '' %>">
+          <div class="step-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="step-label">Ordered</div>
+          <div class="step-date"><%= new Date(order.invoiceDate || order.createdOn).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></div>
+        </div>
+        <div class="timeline-step <%= order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered' ? 'completed' : '' %> <%= order.status === 'Processing' ? 'active' : '' %>">
+          <div class="step-icon">
+            <i class="fas fa-cog"></i>
+          </div>
+          <div class="step-label">Processing</div>
+          <div class="step-date"><%= new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></div>
+        </div>
+        <div class="timeline-step <%= order.status === 'Shipped' || order.status === 'Delivered' ? 'completed' : '' %> <%= order.status === 'Shipped' ? 'active' : '' %>">
+          <div class="step-icon">
+            <i class="fas fa-shipping-fast"></i>
+          </div>
+          <div class="step-label">Shipped</div>
+          <div class="step-date"><%= new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></div>
+        </div>
+        <div class="timeline-step <%= order.status === 'Out for Delivery' || order.status === 'Delivered' ? 'completed' : '' %> <%= order.status === 'Out for Delivery' ? 'active' : '' %>">
+          <div class="step-icon">
+            <i class="fas fa-truck"></i>
+          </div>
+          <div class="step-label">Out for Delivery</div>
+          <div class="step-date"><%= new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></div>
+        </div>
+        <div class="timeline-step <%= order.status === 'Delivered' ? 'completed active' : '' %>">
+          <div class="step-icon">
+            <i class="fas fa-box-open"></i>
+          </div>
+          <div class="step-label">Delivered</div>
+          <div class="step-date"><%= new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></div>
+        </div>
+      </div>
+
+      <!-- Current Status -->
+      <div class="current-status">
+        <div class="status-header">
+          <div class="status-title">
+            <span class="status-icon"><i class="fas fa-shipping-fast"></i></span>
+            <span>Current Status: <span class="status-label"><%= order.status %></span></span>
+          </div>
+          <div class="delivery-date">Estimated Delivery: <%= new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'}) %></div>
+        </div>
+        <div class="status-message">
+          <% if (order.status === 'Pending') { %>
+            Your order has been confirmed and is pending processing. We'll start preparing your items soon.
+          <% } else if (order.status === 'Processing') { %>
+            Your order is being processed and prepared for shipment. This usually takes 1-2 business days.
+          <% } else if (order.status === 'Shipped') { %>
+            Your package has been shipped and is on its way to the distribution center. You will be notified once it's out for delivery.
+          <% } else if (order.status === 'Out for Delivery') { %>
+            Your package is out for delivery today. Please ensure someone is available to receive it.
+          <% } else if (order.status === 'Delivered') { %>
+            Your order has been delivered. We hope you enjoy your purchase!
+          <% } else { %>
+            Your order is being processed. We'll update you on the status soon.
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Status Updates -->
+      <div class="status-updates">
+        <h3 class="updates-title">Status Updates</h3>
+        <ul class="updates-list">
+          <% 
+            // Create dynamic status updates based on order status
+            const statusUpdates = [];
+            
+            // Always add the order confirmation
+            statusUpdates.push({
+              date: new Date(order.invoiceDate || order.createdOn),
+              status: 'Order confirmed',
+              location: 'Online'
+            });
+            
+            // Add processing update if order status is at least Processing
+            if (['Processing', 'Shipped', 'Out for Delivery', 'Delivered'].includes(order.status)) {
+              const processingDate = new Date(order.invoiceDate || order.createdOn);
+              processingDate.setDate(processingDate.getDate() + 1);
+              statusUpdates.push({
+                date: processingDate,
+                status: 'Order processed and ready for shipment',
+                location: 'Warehouse'
+              });
+            }
+            
+            // Add shipped update if order status is at least Shipped
+            if (['Shipped', 'Out for Delivery', 'Delivered'].includes(order.status)) {
+              const shippedDate = new Date(order.invoiceDate || order.createdOn);
+              shippedDate.setDate(shippedDate.getDate() + 2);
+              statusUpdates.push({
+                date: shippedDate,
+                status: 'Package has been shipped',
+                location: 'Shipping Center'
+              });
+            }
+            
+            // Add out for delivery update if order status is at least Out for Delivery
+            if (['Out for Delivery', 'Delivered'].includes(order.status)) {
+              const deliveryDate = new Date(order.invoiceDate || order.createdOn);
+              deliveryDate.setDate(deliveryDate.getDate() + 4);
+              statusUpdates.push({
+                date: deliveryDate,
+                status: 'Package out for delivery',
+                location: 'Local Delivery Center'
+              });
+            }
+            
+            // Add delivered update if order is Delivered
+            if (order.status === 'Delivered') {
+              const deliveredDate = new Date(order.invoiceDate || order.createdOn);
+              deliveredDate.setDate(deliveredDate.getDate() + 5);
+              statusUpdates.push({
+                date: deliveredDate,
+                status: 'Package delivered',
+                location: 'Delivered to address'
+              });
+            }
+            
+            // Sort updates from newest to oldest
+            statusUpdates.sort((a, b) => b.date - a.date);
+            
+            // Display the updates
+            statusUpdates.forEach(update => {
+          %>
+            <li class="update-item">
+              <div class="update-time">
+                <span class="update-date"><%= update.date.toLocaleDateString('en-US', {month: 'long', day: 'numeric', year: 'numeric'}) %></span>
+                <span class="update-hour"><%= update.date.toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}) %></span>
+              </div>
+              <div class="update-content">
+                <div class="update-status"><%= update.status %></div>
+                <div class="update-location"><%= update.location %></div>
+              </div>
+            </li>
+          <% }); %>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="order-summary">
+      <h3 class="summary-title">Order Summary</h3>
+      <div class="product-list">
+        <% if (order.orderedItems && order.orderedItems.length > 0) { %>
+          <% order.orderedItems.forEach(item => { %>
+            <div class="product-item">
+              <img class="product-image"
+                   src="/product-images/<%= item.product && item.product.productImage && item.product.productImage[0] ? item.product.productImage[0] : '' %>"
+                   alt="<%= item.product ? item.product.productName : 'Product' %>"
+                   onerror="this.src='/images/default-product.jpg'" />
+              <div class="product-details">
+                <div class="product-name"><%= item.product ? item.product.productName : 'Product' %></div>
+                <div class="product-meta">Quantity: <%= item.quantity %></div>
+                <div class="product-price">₹<%= item.price ? item.price.toFixed(2) : '0.00' %></div>
+              </div>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <div class="product-item">
+            <div class="product-details">
+              <div class="product-name">No items in this order</div>
+            </div>
+          </div>
+        <% } %>
+      </div>
+
+      <!-- Shipping Information -->
+      <div class="shipping-info">
+        <div class="shipping-header">
+          <i class="fas fa-map-marker-alt"></i>
+          Shipping Address
+        </div>
+        <div class="shipping-address">
+          <% if (order.shippingInfo && order.shippingInfo.name) { %>
+            <div class="shipping-name"><%= order.shippingInfo.name %></div>
+            <div class="shipping-full-address">
+              <%= order.shippingInfo.address %><% if (order.shippingInfo.landmark) { %>, <%= order.shippingInfo.landmark %><% } %>
+              <br><%= order.shippingInfo.city %>, <%= order.shippingInfo.state %> <%= order.shippingInfo.pincode %>
+            </div>
+            <div class="shipping-contact">
+              <i class="fas fa-phone-alt"></i> <%= order.shippingInfo.mobile %>
+            </div>
+            <% if (order.shippingInfo.addressType) { %>
+              <div class="address-type"><%= order.shippingInfo.addressType %></div>
+            <% } %>
+          <% } else if (order.address && typeof order.address === 'object') { %>
+            <!-- Direct from address object if available -->
+            <div class="shipping-name"><%= order.address.name || 'Customer' %></div>
+            <div class="shipping-full-address">
+              <% if (order.address.addresses && order.address.addresses.length > 0) { %>
+                <%= order.address.addresses[0].address || '' %>
+                <br><%= order.address.addresses[0].city || '' %>, <%= order.address.addresses[0].state || '' %> <%= order.address.addresses[0].pincode || '' %>
+              <% } else if (order.address.address) { %>
+                <%= order.address.address %>
+                <br><%= order.address.city || '' %>, <%= order.address.state || '' %> <%= order.address.pincode || '' %>
+              <% } %>
+            </div>
+            <div class="shipping-contact">
+              <i class="fas fa-phone-alt"></i> <%= order.address.phone || order.address.mobile || 'N/A' %>
+            </div>
+          <% } else if (order.address && typeof order.address === 'string') { %>
+            <div class="address-text"><%= order.address %></div>
+          <% } else { %>
+            <div class="no-address-message">
+              <i class="fas fa-exclamation-circle"></i>
+              Address information is not available for this order.
+              <small class="debug-info">Please contact customer support and mention your order ID: <%= order.orderId || order._id %></small>
+            </div>
+          <% } %>
+        </div>
+      </div>
+
+      <!-- Helper Actions -->
+      <div class="helper-actions">
+        <button class="helper-btn primary-btn" onclick="window.location.href='/contact'">
+          <i class="fas fa-headset"></i> Need Help?
+        </button>
+        <button class="helper-btn secondary-btn" onclick="window.location.href='/order'">
+          <i class="fas fa-arrow-left"></i> Return to Orders
+        </button>
+      </div>
+    </div>
+  </div>
+  <% } else if (!locals.initial) { %>
+  <div class="no-order-found">
+    <div class="no-order-icon">
+      <i class="fas fa-search"></i>
+    </div>
+    <h3>Order Not Found</h3>
+    <p>We couldn't find any order with that ID. Please check the order ID and try again.</p>
+    <div class="no-order-suggestions">
+      <p>Your order ID can be found:</p>
+      <ul>
+        <li>In your order confirmation email</li>
+        <li>On your orders page in your account</li>
+        <li>In your order invoice</li>
+      </ul>
+    </div>
+    <a href="/order" class="helper-btn secondary-btn">
+      <i class="fas fa-list"></i> View My Orders
+    </a>
+  </div>
+  <% } %>
+</div>
+
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script>
+  // Enhanced track order form functionality
+  document.getElementById('trackOrderForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const orderId = document.querySelector('.lookup-input').value.trim();
+    
+    if (!orderId) {
+      // Show error for empty input
+      document.getElementById('errorMessage').textContent = 'Please enter a valid Order ID';
+      document.getElementById('errorMessage').classList.add('visible');
+      return;
+    }
+    
+    // Hide error message if previously shown
+    document.getElementById('errorMessage').classList.remove('visible');
+    
+    // Check if the order ID is a MongoDB ID (24 hex chars)
+    const isMongoId = /^[0-9a-fA-F]{24}$/.test(orderId);
+    
+    // Determine the correct URL based on ID format
+    let trackingUrl;
+    if (isMongoId) {
+      trackingUrl = `/track-order/${orderId}`;
+    } else {
+      // For order IDs that are not MongoDB ObjectIDs, use a query parameter
+      trackingUrl = `/track-order?orderId=${encodeURIComponent(orderId)}`;
+    }
+    
+    window.location.href = trackingUrl;
+  });
+  
+  // Add smooth scrolling to view order details when the page loads
+  window.addEventListener('load', function() {
+    // Only scroll if order details exist
+    const orderDetailsCard = document.querySelector('.order-details-card');
+    if (orderDetailsCard) {
+      // Slight delay to ensure the page is fully rendered
+      setTimeout(() => {
+        orderDetailsCard.scrollIntoView({
+          behavior: 'smooth'
+        });
+      }, 300);
+    }
+  });
+  
+  // Handle URL query parameters to show error message if needed
+  window.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('error')) {
+      const errorMsg = urlParams.get('error');
+      const errorElement = document.getElementById('errorMessage');
+      if (errorElement) {
+        errorElement.textContent = decodeURIComponent(errorMsg);
+        errorElement.classList.add('visible');
+      }
+    }
+  });
+</script>
+
+<%- include("../../views/partials/user/footer") %> 

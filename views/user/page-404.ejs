@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Page Not Found</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 800px;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+        
+        .error-code {
+            font-size: 12rem;
+            font-weight: 900;
+            color: #dee2e6;
+            letter-spacing: -8px;
+            margin-bottom: 2rem;
+            text-shadow: 4px 4px 0px #adb5bd;
+            position: relative;
+        }
+        
+        .error-code::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background-color: #dee2e6;
+            left: 0;
+            bottom: 2rem;
+        }
+        
+        .error-title {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #495057;
+        }
+        
+        .error-message {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        
+        .home-button {
+            display: inline-block;
+            background-color: #4263eb;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(66, 99, 235, 0.2);
+        }
+        
+        .home-button:hover {
+            background-color: #3b5bdb;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(66, 99, 235, 0.3);
+        }
+        
+        .lost-icon {
+            font-size: 6rem;
+            margin: 2rem 0;
+            color: #4263eb;
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+        
+        .bg-shapes div {
+            position: absolute;
+            z-index: -1;
+            opacity: 0.1;
+        }
+        
+        .bg-shapes .circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #4263eb;
+            top: 10%;
+            left: 10%;
+        }
+        
+        .bg-shapes .square {
+            width: 80px;
+            height: 80px;
+            background-color: #4263eb;
+            bottom: 20%;
+            right: 15%;
+            transform: rotate(15deg);
+        }
+        
+        .bg-shapes .triangle {
+            width: 0;
+            height: 0;
+            border-left: 75px solid transparent;
+            border-right: 75px solid transparent;
+            border-bottom: 130px solid #4263eb;
+            top: 60%;
+            left: 15%;
+            transform: rotate(-20deg);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="bg-shapes">
+            <div class="circle"></div>
+            <div class="square"></div>
+            <div class="triangle"></div>
+        </div>
+        
+        <h1 class="error-code">404</h1>
+        <h2 class="error-title">Page Not Found</h2>
+        <p class="error-message">Oops! The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.</p>
+        
+        
+        <a href="../home" class="home-button">Return to Home</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,955 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <!-- Header is in the partial -->
+    
+    <!-- Order Stats -->
+    <div class="stats-grid">
+      <div class="stat-card purple">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-info">
+          <h3>Total Orders</h3>
+          <div class="value"><%= stats.totalOrders %></div>
+        </div>
+      </div>
+      <div class="stat-card blue">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <h3>Pending Orders</h3>
+          <div class="value"><%= stats.pendingOrders %></div>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">🚚</div>
+        <div class="stat-info">
+          <h3>Delivered</h3>
+          <div class="value"><%= stats.deliveredOrders %></div>
+        </div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-icon">💰</div>
+        <div class="stat-info">
+          <h3>Total Revenue</h3>
+          <div class="value">₹<%= stats.totalRevenue.toLocaleString() %></div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Order List Section -->
+    <div class="product-section">
+      <div class="section-header">
+        <h2 class="section-title">Order List</h2>
+        <div class="date-filter">
+          <input type="text" class="date-input" placeholder="Search orders...">
+          <button class="download-btn">
+            <span>Export</span>
+            <span>📥</span>
+          </button>
+        </div>
+      </div>
+  
+      <!-- Order Table -->
+      <table>
+        <thead>
+          <tr>
+            <th>Order ID</th>
+            <th>Customer</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Payment</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if(orders && orders.length > 0) { %>
+            <% orders.forEach(order => { %>
+          <tr>
+                <td><%= order.orderId %></td>
+            <td>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                    <% 
+                      let customerName = "Customer";
+                      // Try multiple sources for customer name
+                      if (order.user && order.user.name) {
+                        customerName = order.user.name;
+                      } else if (order.address && typeof order.address === 'object' && order.address.name) {
+                        customerName = order.address.name;
+                      } else if (order.shippingInfo && order.shippingInfo.name) {
+                        customerName = order.shippingInfo.name;
+                      }
+                      
+                      const initials = customerName.split(' ').map(n => n[0]).join('').toUpperCase();
+                    %>
+                    <div class="avatar" style="width: 30px; height: 30px; font-size: 12px;"><%= initials %></div>
+                    <%= customerName %>
+              </div>
+            </td>
+                <td><%= new Date(order.invoiceDate || order.createdOn).toLocaleDateString('en-US', {day: 'numeric', month: 'short', year: 'numeric'}) %></td>
+                <td>₹<%= order.finalAmount.toLocaleString() %></td>
+                <td><%= order.paymentMethod || 'Cash on Delivery' %></td>
+                <td>
+                  <% 
+                    let statusColor;
+                    switch(order.status) {
+                      case 'Delivered':
+                        statusColor = '#27ae60';
+                        bgColor = 'rgba(39, 174, 96, 0.1)';
+                        break;
+                      case 'Processing':
+                        statusColor = '#f39c12';
+                        bgColor = 'rgba(243, 156, 18, 0.1)';
+                        break;
+                      case 'Shipped':
+                        statusColor = '#2980b9';
+                        bgColor = 'rgba(41, 128, 185, 0.1)';
+                        break;
+                      case 'Cancelled':
+                        statusColor = '#e74c3c';
+                        bgColor = 'rgba(231, 76, 60, 0.1)';
+                        break;
+                      case 'Return Request':
+                        statusColor = '#8e44ad';
+                        bgColor = 'rgba(142, 68, 173, 0.1)';
+                        break;
+                      case 'Returned':
+                        statusColor = '#d35400';
+                        bgColor = 'rgba(211, 84, 0, 0.1)';
+                        break;
+                      default:
+                        statusColor = '#95a5a6';
+                        bgColor = 'rgba(149, 165, 166, 0.1)';
+                    }
+                  %>
+              <span style="
+                padding: 4px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 500;
+                background-color: <%= bgColor %>;
+                color: <%= statusColor %>;
+              ">
+                <%= order.status %>
+                    <% if (order.returnDetails && order.returnDetails.returnRejected) { %>
+              <span style="
+                        display: inline-block;
+                        margin-left: 5px;
+                        padding: 2px 6px;
+                        background-color: #e74c3c;
+                        color: white;
+                        border-radius: 4px;
+                        font-size: 10px;
+                        vertical-align: middle;
+                      ">Return Rejected</span>
+                    <% } %>
+              </span>
+            </td>
+            <td>
+              <div style="display: flex; gap: 8px;">
+                    <button style="background: none; border: none; cursor: pointer; color: var(--accent-color);" title="Edit" onclick="openEditOrder('<%= order._id %>')">✏️</button>
+                    <button style="background: none; border: none; cursor: pointer; color: var(--card-bg-red);" title="Delete" onclick="deleteOrder('<%= order._id %>')">🗑️</button>
+                    <button style="background: none; border: none; cursor: pointer; color: var(--text-primary);" title="View Details" onclick="showOrderDetails('<%= order._id %>')">👁️</button>
+              </div>
+            </td>
+          </tr>
+            <% }); %>
+          <% } else { %>
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 20px;">No orders found</td>
+          </tr>
+          <% } %>
+        </tbody>
+      </table>
+  
+      <!-- Pagination -->
+      <div class="pagination">
+        <button <%= page <= 1 ? 'disabled' : '' %> onclick="changePage(<%= page-1 %>)">«</button>
+        <% for(let i = 1; i <= totalPages; i++) { %>
+          <span class="<%= page === i ? 'active' : '' %>" onclick="changePage(<%= i %>)"><%= i %></span>
+        <% } %>
+        <button <%= page >= totalPages ? 'disabled' : '' %> onclick="changePage(<%= page+1 %>)">»</button>
+      </div>
+    </div>
+  
+    <!-- Order Details Modal (Hidden by default) -->
+    <div id="order-details-modal" style="
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    ">
+      <div style="
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        padding: 20px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="font-size: 1.5rem;">Order Details</h2>
+          <button id="close-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary);">×</button>
+        </div>
+        <div id="order-detail-content">
+          <!-- This will be populated dynamically with JavaScript -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Order Status Modal -->
+    <div id="edit-status-modal" style="
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    ">
+      <div style="
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="font-size: 1.5rem;">Update Order Status</h2>
+          <button id="close-edit-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary);">×</button>
+        </div>
+        <form id="update-status-form" action="/admin/update-order-status" method="post">
+          <input type="hidden" id="edit-order-id" name="orderId">
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Order Status</label>
+            <select id="order-status" name="status" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color);">
+              <option value="Pending">Pending</option>
+              <option value="Processing">Processing</option>
+              <option value="Shipped">Shipped</option>
+              <option value="Delivered">Delivered</option>
+              <option value="Cancelled">Cancelled</option>
+              <option value="Return Request">Return Request</option>
+              <option value="Returned">Returned</option>
+            </select>
+          </div>
+          <div style="text-align: right;">
+            <button type="submit" style="
+              padding: 10px 20px;
+              border-radius: 5px;
+              background-color: var(--accent-color);
+              color: white;
+              border: none;
+              cursor: pointer;
+              font-weight: 500;
+            ">Update Status</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Rejection Reason Modal -->
+    <div id="rejection-modal" style="
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    ">
+      <div style="
+        background-color: var(--card-bg);
+        border-radius: 10px;
+        padding: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      ">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="font-size: 1.5rem;">Cancel Return Request</h2>
+          <button id="close-rejection-modal" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-primary);">×</button>
+        </div>
+        <p style="margin-bottom: 15px;">Please provide a reason for cancelling this return request. This information will help the customer understand why their return was cancelled.</p>
+        <input type="hidden" id="rejection-order-id" value="">
+        <div style="margin-bottom: 20px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Cancellation Reason:</label>
+          <select id="rejection-reason" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); margin-bottom: 15px;">
+            <option value="">Select a reason</option>
+            <option value="outside-window">Outside return window</option>
+            <option value="product-used">Product shows signs of use</option>
+            <option value="packaging-missing">Original packaging missing</option>
+            <option value="policy-violation">Violates return policy</option>
+            <option value="other">Other reason</option>
+          </select>
+          
+          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Additional Comments (Optional):</label>
+          <textarea id="rejection-comments" style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid var(--border-color); height: 100px; resize: vertical;"></textarea>
+        </div>
+        <div style="text-align: right;">
+          <button type="button" id="cancel-rejection" style="
+            padding: 10px 15px;
+            border-radius: 5px;
+            background-color: black;
+            color: var(--text-primary);
+            border: none;
+            cursor: pointer;
+            margin-right: 10px;
+          ">Back</button>
+          <button type="button" id="confirm-rejection" style="
+            padding: 10px 20px;
+            border-radius: 5px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+          ">Cancel Return</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Modal handling
+      const modal = document.getElementById('order-details-modal');
+      const closeModal = document.getElementById('close-modal');
+      const orderDetailContent = document.getElementById('order-detail-content');
+      
+      // Edit modal handling
+      const editModal = document.getElementById('edit-status-modal');
+      const closeEditModal = document.getElementById('close-edit-modal');
+      
+      window.showOrderDetails = function(orderId) {
+        // Show loading in modal
+        orderDetailContent.innerHTML = '<div style="text-align: center; padding: 20px;">Loading order details...</div>';
+        modal.style.display = 'flex';
+        
+        // Fetch order details from server
+        fetch(`/admin/orders/${orderId}`)
+          .then(response => response.json())
+          .then(order => {
+            console.log("Received order details:", order);
+            console.log("Order has shippingInfo:", order.shippingInfo ? "Yes" : "No");
+            console.log("Order address type:", typeof order.address);
+            
+            // Format order details for display
+            const orderDate = new Date(order.invoiceDate || order.createdOn).toLocaleDateString('en-US', {
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric'
+            });
+            
+            // Get status color
+            let statusColor, bgColor;
+            switch(order.status) {
+              case 'Delivered':
+                statusColor = '#27ae60';
+                bgColor = 'rgba(39, 174, 96, 0.1)';
+                break;
+              case 'Processing':
+                statusColor = '#f39c12';
+                bgColor = 'rgba(243, 156, 18, 0.1)';
+                break;
+              case 'Shipped':
+                statusColor = '#2980b9';
+                bgColor = 'rgba(41, 128, 185, 0.1)';
+                break;
+              case 'Cancelled':
+                statusColor = '#e74c3c';
+                bgColor = 'rgba(231, 76, 60, 0.1)';
+                break;
+              case 'Return Request':
+                statusColor = '#8e44ad';
+                bgColor = 'rgba(142, 68, 173, 0.1)';
+                break;
+              case 'Returned':
+                statusColor = '#d35400';
+                bgColor = 'rgba(211, 84, 0, 0.1)';
+                break;
+              default:
+                statusColor = '#95a5a6';
+                bgColor = 'rgba(149, 165, 166, 0.1)';
+            }
+            
+            // Generate customer name and info
+            // Try to get customer details from different possible sources in the order object
+            let customerName = "Customer";
+            let customerEmail = "N/A";
+            let customerPhone = "N/A";
+            
+            console.log("User info:", order.user);
+            console.log("Address info:", order.address);
+            
+            // Check for user object first
+            if (order.user) {
+              customerName = order.user.name || "Customer";
+              customerEmail = order.user.email || "N/A";
+              customerPhone = order.user.phone || "N/A";
+              console.log("Using user data for customer info");
+            } 
+            // If not found in user object, try to find from address (if it's populated)
+            else if (order.address && typeof order.address === 'object' && order.address.name) {
+              customerName = order.address.name || "Customer";
+              customerEmail = order.address.email || "N/A";
+              customerPhone = order.address.phone || order.address.mobile || "N/A";
+              console.log("Using address data for customer info");
+            }
+            
+            // Generate shipping address HTML with better fallbacks
+            let shippingAddress = "";
+            
+            console.log("ShippingInfo:", order.shippingInfo);
+            
+            // Check for shippingInfo first
+            if (order.shippingInfo && order.shippingInfo.name) {
+              console.log("Using shippingInfo for address");
+              shippingAddress = `
+                <p style="margin-bottom: 5px;"><strong>Name:</strong> ${order.shippingInfo.name || customerName}</p>
+                <p style="margin-bottom: 5px;"><strong>Address:</strong> ${order.shippingInfo.landmark || order.shippingInfo.address || ''}</p>
+                <p style="margin-bottom: 5px;">${order.shippingInfo.city || ''}, ${order.shippingInfo.state || ''} ${order.shippingInfo.pincode || ''}</p>
+                <p><strong>Phone:</strong> ${order.shippingInfo.phone || customerPhone}</p>
+                <p><strong>Address Type:</strong> ${order.shippingInfo.addressType || 'Shipping'}</p>
+              `;
+            } 
+            // Then check if address is an object with address fields
+            else if (order.address && typeof order.address === 'object') {
+              // Handle different address schemas
+              if (order.address.addressLine || order.address.address) {
+                const addressLine = order.address.addressLine || order.address.address || '';
+                const city = order.address.city || '';
+                const state = order.address.state || '';
+                const pincode = order.address.pincode || order.address.zipCode || '';
+                const phone = order.address.phone || order.address.mobile || customerPhone;
+                
+                shippingAddress = `
+                  <p style="margin-bottom: 5px;"><strong>Name:</strong> ${order.address.name || customerName}</p>
+                  <p style="margin-bottom: 5px;"><strong>Address:</strong> ${addressLine}</p>
+                  <p style="margin-bottom: 5px;">${city}${city && state ? ', ' : ''}${state} ${pincode}</p>
+                  <p><strong>Phone:</strong> ${phone}</p>
+                `;
+              } 
+              // If address object has a different structure
+              else if (order.address.name || order.address.email) {
+                shippingAddress = `
+                  <p style="margin-bottom: 5px;"><strong>Name:</strong> ${order.address.name || customerName}</p>
+                  <p style="margin-bottom: 5px;"><strong>Email:</strong> ${order.address.email || customerEmail}</p>
+                  <p><strong>Phone:</strong> ${order.address.phone || "N/A"}</p>
+                  <p><strong>Address:</strong> Address details not available</p>
+                `;
+              }
+            } 
+            // Finally, if address is a string ID or other format
+            else {
+              shippingAddress = `
+                <p style="margin-bottom: 5px;"><strong>Name:</strong> ${customerName}</p>
+                <p style="margin-bottom: 5px;"><strong>Email:</strong> ${customerEmail}</p>
+                <p><strong>Phone:</strong> ${customerPhone}</p>
+                <p><em>Detailed address information not available. Please check user profile.</em></p>
+              `;
+            }
+            
+            // Generate return details if applicable
+            let returnDetails = '';
+            if (order.returnDetails && (order.status === 'Return Request' || order.status === 'Returned' || 
+                (order.returnDetails.approvalStatus === 'rejected'))) {
+              
+              const returnDate = order.returnDetails.requestDate ? 
+                new Date(order.returnDetails.requestDate).toLocaleDateString('en-US', {
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric'
+                }) : 'Date not recorded';
+              
+              const reasons = {
+                'damaged': 'Product Damaged',
+                'wrong-item': 'Wrong Item Received',
+                'defective': 'Product Defective',
+                'changed-mind': 'Changed Mind',
+                'other': 'Other Reason'
+              };
+              
+              const reasonText = reasons[order.returnDetails.reason] || order.returnDetails.reason || 'Not specified';
+              
+              returnDetails = `
+                <div style="background-color: ${bgColor}; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                  <h4 style="font-size: 1rem; margin-bottom: 10px; color: ${statusColor};">Return Information</h4>
+                  <p><strong>Return Requested:</strong> ${returnDate}</p>
+                  <p><strong>Reason:</strong> ${reasonText}</p>
+                  ${order.returnDetails.comments ? `<p><strong>Comments:</strong> ${order.returnDetails.comments}</p>` : ''}
+                  <p><strong>Status:</strong> ${order.returnDetails.approvalStatus ? 
+                    order.returnDetails.approvalStatus.charAt(0).toUpperCase() + 
+                    order.returnDetails.approvalStatus.slice(1) : 'Pending'}</p>
+                </div>
+              `;
+            }
+            
+            // Generate order item rows
+            let orderItems = '';
+            let subtotal = 0;
+            
+            if (order.orderedItems && order.orderedItems.length > 0) {
+              order.orderedItems.forEach(item => {
+                const productName = item.product ? 
+                  (item.product.productName || item.product.name || 'Product') : 'Product';
+                const price = item.price || 0;
+                const quantity = item.quantity || 1;
+                const total = price * quantity;
+                subtotal += total;
+                
+                const productImage = item.product && item.product.productImage && 
+                  item.product.productImage.length > 0 ?
+                  `/product-images/${item.product.productImage[0]}` :
+                  '/images/default-product.jpg';
+                
+                orderItems += `
+                  <tr>
+                    <td style="padding: 10px 5px;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 50px; height: 50px; background-color: #f1f1f1; border-radius: 4px; overflow: hidden;">
+                          <img src="${productImage}" style="width: 100%; height: 100%; object-fit: cover;" 
+                               alt="${productName}" onerror="this.src='/images/default-product.jpg'">
+                        </div>
+                        <span>${productName}</span>
+                      </div>
+                    </td>
+                    <td style="text-align: center;">${quantity}</td>
+                    <td style="text-align: right;">₹${price.toLocaleString()}</td>
+                    <td style="text-align: right;">₹${total.toLocaleString()}</td>
+                  </tr>
+                `;
+              });
+            } else {
+              orderItems = `
+                <tr>
+                  <td colspan="4" style="text-align: center; padding: 15px;">No items in this order</td>
+                </tr>
+              `;
+            }
+            
+            // Calculate shipping and final totals
+            const shipping = order.finalAmount - subtotal > 0 ? order.finalAmount - subtotal : 0;
+            const discount = order.discount || 0;
+            
+            // Generate full order detail HTML
+          orderDetailContent.innerHTML = `
+            <div style="background-color: var(--bg-primary); border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: start;">
+                <div>
+                    <h3 style="font-size: 1.3rem; margin-bottom: 5px;">${order.orderId}</h3>
+                  <p style="color: var(--text-secondary); margin-bottom: 5px;">Placed on ${orderDate}</p>
+                </div>
+                <span style="
+                  padding: 6px 12px;
+                  border-radius: 12px;
+                  font-size: 14px;
+                  font-weight: 500;
+                    background-color: ${bgColor};
+                    color: ${statusColor};
+                  ">
+                    ${order.status}
+                </span>
+              </div>
+            </div>
+              
+              ${returnDetails}
+              
+              <% if (typeof order !== 'undefined' && order && order.status === 'Return Request') { %>
+              <div style="background-color: black; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px dashed #ccc;">
+                <h4 style="font-size: 1rem; margin-bottom: 10px;">return request prActions</h4>
+                <p style="margin-bottom: 15px;">Please review this return request and take appropriate action:</p>
+                <div style="display: flex; gap: 10px;">
+                  <button 
+                    onclick="approveReturn('<%= order._id %>')" 
+                    style="padding: 8px 15px; background-color: #27ae60; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Approve Return
+                  </button>
+                  <button 
+                    onclick="openRejectionModal('<%= order._id %>')" 
+                    style="padding: 8px 15px; background-color: #e74c3c; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                    Cancel Return
+                  </button>
+                </div>
+              </div>
+              <% } %>
+              
+              <% if (typeof order !== 'undefined' && order && order.returnDetails && order.returnDetails.returnRejected) { %>
+              <div style="background-color: #fef1f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #e74c3c;">
+                <h4 style="font-size: 1rem; margin-bottom: 10px; color: #e74c3c;">Return Request Cancelled</h4>
+                <p style="margin-bottom: 5px;">This return request was cancelled on <%= new Date(order.returnDetails.rejectionDate).toLocaleDateString('en-US', {day: 'numeric', month: 'long', year: 'numeric'}) %>.</p>
+                <p style="margin-bottom: 5px;">The customer has been notified about this cancellation.</p>
+                <p style="margin-bottom: 0;"><strong>Note:</strong> The customer cannot submit another return request for this order. If they have concerns, they will need to contact customer support directly.</p>
+              </div>
+              <% } %>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+              <div>
+                <h4 style="font-size: 1rem; margin-bottom: 10px;">Customer Information</h4>
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                  <div class="avatar" style="width: 40px; height: 40px; font-size: 16px;">
+                      ${customerName.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </div>
+                  <div>
+                    <p style="font-weight: 500;">${customerName}</p>
+                      <p style="color: var(--text-secondary); font-size: 0.9rem;">${customerEmail}</p>
+                    </div>
+                  </div>
+                  <p><strong>Phone:</strong> ${customerPhone}</p>
+              </div>
+              <div>
+                <h4 style="font-size: 1rem; margin-bottom: 10px;">Shipping Information</h4>
+                  ${shippingAddress}
+                <p><strong>Shipping Method:</strong> Standard Shipping</p>
+              </div>
+            </div>
+            
+            <h4 style="font-size: 1rem; margin-bottom: 10px;">Order Items</h4>
+            <table style="width: 100%; margin-bottom: 20px;">
+              <thead>
+                <tr>
+                  <th style="text-align: left;">Product</th>
+                  <th style="text-align: center;">Quantity</th>
+                  <th style="text-align: right;">Price</th>
+                  <th style="text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                  ${orderItems}
+              </tbody>
+            </table>
+            
+            <div style="background-color: var(--bg-primary); border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Subtotal:</span>
+                  <span>₹${subtotal.toLocaleString()}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span>Shipping:</span>
+                  <span>₹${shipping.toLocaleString()}</span>
+              </div>
+                ${discount > 0 ? `
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                  <span>Discount:</span>
+                  <span>-₹${discount.toLocaleString()}</span>
+                </div>` : ''}
+              <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--border-color); padding-top: 10px; font-weight: bold;">
+                <span>Total:</span>
+                  <span>₹${order.finalAmount.toLocaleString()}</span>
+              </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+              <div>
+                <h4 style="font-size: 1rem; margin-bottom: 5px;">Payment Information</h4>
+                  <p><strong>Method:</strong> ${order.paymentMethod || 'Cash on Delivery'}</p>
+              </div>
+              <div>
+                  <button 
+                    style="padding: 8px 15px; border-radius: 4px; background-color: var(--accent-color); color: white; border: none; cursor: pointer;"
+                    onclick="openEditOrder('${order._id}', '${order.status}')">
+                    Change Status
+                  </button>
+              </div>
+            </div>
+            
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+              <button style="
+                padding: 10px 15px;
+                border: 1px solid var(--border-color);
+                border-radius: 4px;
+                color:white;
+                background-color: transparent;
+                cursor: pointer;
+                " onclick="printInvoice('${order._id}')">Print Invoice</button>
+            </div>
+          `;
+          })
+          .catch(error => {
+            console.error('Error fetching order details:', error);
+            orderDetailContent.innerHTML = '<div style="text-align: center; padding: 20px; color: red;">Error loading order details. Please try again.</div>';
+          });
+      };
+      
+      closeModal.addEventListener('click', function() {
+        modal.style.display = 'none';
+      });
+      
+      // Window click to close modals
+      window.addEventListener('click', function(event) {
+        if (event.target === modal) {
+          modal.style.display = 'none';
+        }
+        if (event.target === editModal) {
+          editModal.style.display = 'none';
+        }
+      });
+      
+      // Edit order status functionality
+      window.openEditOrder = function(orderId, currentStatus) {
+        document.getElementById('edit-order-id').value = orderId;
+        
+        // Set current status in dropdown if provided
+        if (currentStatus) {
+          document.getElementById('order-status').value = currentStatus;
+        }
+        
+        editModal.style.display = 'flex';
+      };
+      
+      closeEditModal.addEventListener('click', function() {
+        editModal.style.display = 'none';
+      });
+      
+      // Delete order confirmation
+      window.deleteOrder = function(orderId) {
+        if (confirm('Are you sure you want to delete this order? This action cannot be undone.')) {
+          window.location.href = `/admin/delete-order/${orderId}`;
+        }
+      };
+      
+      // Print invoice function
+      window.printInvoice = function(orderId) {
+        window.open(`/admin/invoice/${orderId}`, '_blank');
+      };
+      
+      // Page navigation
+      window.changePage = function(page) {
+        window.location.href = `/admin/orders?page=${page}`;
+      };
+      
+      // Search functionality
+      const searchInput = document.querySelector('.date-input[placeholder="Search orders..."]');
+      const orderRows = document.querySelectorAll('table tbody tr');
+      
+      searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        orderRows.forEach(row => {
+          // Skip the "No orders found" row
+          if (row.cells.length === 1) return;
+          
+          const orderId = row.cells[0].textContent.toLowerCase();
+          const customerName = row.cells[1].textContent.toLowerCase();
+          const orderDate = row.cells[2].textContent.toLowerCase();
+          const orderStatus = row.cells[5].textContent.toLowerCase();
+          
+          const matches = 
+            orderId.includes(searchTerm) || 
+            customerName.includes(searchTerm) || 
+            orderDate.includes(searchTerm) || 
+            orderStatus.includes(searchTerm);
+          
+          if (matches) {
+            row.style.display = '';
+          } else {
+            row.style.display = 'none';
+          }
+        });
+      });
+      
+      // Export button functionality
+      const downloadBtn = document.querySelector('.download-btn');
+      
+      downloadBtn.addEventListener('click', function() {
+        const visibleRows = Array.from(orderRows).filter(row => row.style.display !== 'none' && row.cells.length > 1);
+        
+        let csvContent = "Order ID,Customer,Date,Amount,Payment,Status\n";
+        
+        visibleRows.forEach(row => {
+          const orderId = row.cells[0].textContent;
+          const customerName = row.cells[1].textContent.trim();
+          const orderDate = row.cells[2].textContent;
+          const amount = row.cells[3].textContent;
+          const payment = row.cells[4].textContent;
+          const status = row.cells[5].querySelector('span').textContent.trim();
+          
+          const csvRow = [
+            orderId,
+            customerName,
+            orderDate,
+            amount,
+            payment,
+            status
+          ].join(',');
+          
+          csvContent += csvRow + '\n';
+        });
+        
+        const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + csvContent);
+        const link = document.createElement('a');
+        link.setAttribute('href', encodedUri);
+        link.setAttribute('download', 'order_list.csv');
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+      
+      // Return approval functions
+      window.approveReturn = function(orderId) {
+        // Use SweetAlert to confirm return approval
+        Swal.fire({
+          title: 'Approve Return?',
+          text: 'This will mark the order as returned and restore product stock to inventory.',
+          icon: 'question',
+          showCancelButton: true,
+          confirmButtonColor: '#3085d6',
+          cancelButtonColor: '#d33',
+          confirmButtonText: 'Yes, approve it!',
+          cancelButtonText: 'Cancel'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Approving return request',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+            
+            // Make the fetch request
+            fetch('/admin/approve-return', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ orderId })
+            })
+            .then(response => {
+              if (response.ok) {
+                Swal.fire({
+                  icon: 'success',
+                  title: 'Return Approved',
+                  text: 'The order status has been updated to "Returned" and product stock has been restored to inventory.',
+                  confirmButtonColor: '#3085d6'
+                }).then(() => {
+                  window.location.reload();
+                });
+              } else {
+                throw new Error('Failed to approve return request');
+              }
+            })
+            .catch(error => {
+              console.error('Error approving return:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while approving the return request. Please try again.',
+                confirmButtonColor: '#3085d6'
+              });
+            });
+          }
+        });
+      };
+      
+      window.openRejectionModal = function(orderId) {
+        document.getElementById('rejection-order-id').value = orderId;
+        document.getElementById('rejection-modal').style.display = 'flex';
+      };
+      
+      document.getElementById('close-rejection-modal').addEventListener('click', function() {
+        document.getElementById('rejection-modal').style.display = 'none';
+      });
+      
+      document.getElementById('cancel-rejection').addEventListener('click', function() {
+        document.getElementById('rejection-modal').style.display = 'none';
+      });
+      
+      document.getElementById('confirm-rejection').addEventListener('click', function() {
+        const reasonSelect = document.getElementById('rejection-reason');
+        const reason = reasonSelect.value;
+        const reasonText = reason ? reasonSelect.options[reasonSelect.selectedIndex].text : '';
+        const comments = document.getElementById('rejection-comments').value;
+        const orderId = document.getElementById('rejection-order-id').value;
+        
+        if (!reason) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Missing Reason',
+            text: 'Please select a reason for cancelling the return request.',
+            confirmButtonColor: '#3085d6'
+          });
+          return;
+        }
+        
+        // Confirm rejection using SweetAlert
+        Swal.fire({
+          title: 'Cancel Return Request?',
+          text: 'The customer will not be able to submit another return request for this order. A notification will be shown to the customer.',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#d33',
+          cancelButtonColor: '#3085d6',
+          confirmButtonText: 'Yes, cancel it',
+          cancelButtonText: 'No, keep it'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            // Show loading state
+            Swal.fire({
+              title: 'Processing...',
+              text: 'Cancelling return request',
+              allowOutsideClick: false,
+              didOpen: () => {
+                Swal.showLoading();
+              }
+            });
+            
+            const rejectionReason = comments ? `${reasonText}: ${comments}` : reasonText;
+          
+          // Make API call
+          fetch('/admin/reject-return', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 
+              orderId: orderId,
+              rejectionReason: rejectionReason
+            })
+          })
+          .then(response => {
+            if (response.ok) {
+              Swal.fire({
+                icon: 'success',
+                title: 'Return Request Cancelled',
+                text: 'The order status has been reverted to "Delivered" and the customer has been notified. They cannot submit another return request for this order.',
+                confirmButtonColor: '#3085d6'
+              }).then(() => {
+                window.location.reload();
+              });
+            } else {
+              throw new Error('Failed to cancel return request');
+            }
+          })
+          .catch(error => {
+            console.error('Error cancelling return:', error);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'An error occurred while cancelling the return request. Please try again.',
+              confirmButtonColor: '#3085d6'
+            });
+            // Reset the modal state
+            document.getElementById('rejection-modal').style.display = 'none';
+          });
+        }
+      });
+    });
+  });
+</script>
+      <%- include("../../views/partials/admin/footer") %>

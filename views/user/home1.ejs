@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exclusive - Online Shopping</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: white;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      width: 100%;
+    }
+    
+    /* Announcement Bar */
+    .announcement-bar {
+      background-color: #000;
+      color: white;
+      padding: 10px 0;
+      text-align: center;
+      position: relative;
+    }
+    
+    .announcement-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .sign-up-link {
+      color: white;
+      text-decoration: none;
+      position: absolute;
+      left: 20px;
+    }
+    
+    .announcement-text {
+      margin: 0 auto;
+    }
+    
+    .language-selector {
+      color: white;
+      position: absolute;
+      right: 20px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .language-selector span {
+      margin-right: 5px;
+    }
+    
+    /* Header Styles */
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+      text-decoration: none;
+    }
+    
+    .nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0 auto;
+    }
+    
+    .nav-links li {
+      margin: 0 15px;
+    }
+    
+    .nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      padding: 8px 15px;
+      width: 300px;
+      max-width: 100%;
+    }
+    
+    .search-bar input {
+      border: none;
+      background: transparent;
+      width: 100%;
+      outline: none;
+      font-size: 14px;
+    }
+    
+    .search-icon {
+      margin-left: 10px;
+    }
+    
+    .icons {
+      display: flex;
+      align-items: center;
+    }
+    
+    .icon {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    
+    /* Mobile menu */
+    .mobile-menu-btn {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    
+    /* Main Content */
+    .main-content {
+      display: flex;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+    
+    /* Categories Sidebar */
+    .sidebar {
+      width: 220px;
+      padding-right: 20px;
+    }
+    
+    .category-list {
+      list-style: none;
+    }
+    
+    .category-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .category-item a {
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
+    
+    /* Hero Banner */
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .hero-banner {
+      background-color: #000;
+      color: white;
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+      height: 350px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .hero-content {
+      padding: 40px;
+      z-index: 2;
+      width: 50%;
+    }
+    
+    .hero-brand {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .hero-brand img {
+      width: 30px;
+      margin-right: 10px;
+    }
+    
+    .hero-title {
+      font-size: 46px;
+      font-weight: bold;
+      margin: 20px 0;
+      line-height: 1.1;
+    }
+    
+    .shop-now-btn {
+      background-color: transparent;
+      color: white;
+      border: none;
+      padding: 10px 0;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    
+    .shop-now-btn svg {
+      margin-left: 8px;
+    }
+    
+    .hero-image {
+      position: absolute;
+      right: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 45%;
+      height: auto;
+    }
+    
+    /* Indicators */
+    .indicators {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    
+    .indicator {
+      width: 10px;
+      height: 10px;
+      background-color: #ccc;
+      border-radius: 50%;
+      margin: 0 5px;
+      cursor: pointer;
+    }
+    
+    .indicator.active {
+      background-color: #db4444;
+    }
+    
+    /* Responsive Styles */
+    @media (max-width: 1024px) {
+      .hero-title {
+        font-size: 36px;
+      }
+      
+      .hero-image {
+        max-width: 40%;
+      }
+    }
+    
+    @media (max-width: 900px) {
+      .navbar {
+        justify-content: space-between;
+      }
+      
+      .nav-links {
+        order: 3;
+        width: 100%;
+        margin-top: 15px;
+        justify-content: center;
+      }
+      
+      .search-bar {
+        order: 2;
+        width: auto;
+        max-width: 200px;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .sign-up-link, .language-selector {
+        position: static;
+      }
+      
+      .announcement-content {
+        flex-direction: column;
+        gap: 5px;
+      }
+      
+      .hero-content {
+        width: 100%;
+        padding: 30px;
+      }
+      
+      .hero-image {
+        opacity: 0.7;
+        right: 0;
+        max-width: 60%;
+      }
+      
+      .sidebar {
+        width: 100%;
+        padding-right: 0;
+        margin-bottom: 20px;
+      }
+      
+      .category-list {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      
+      .category-item {
+        width: 50%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      
+      /* Show mobile menu button */
+      .mobile-menu-btn {
+        display: block;
+        order: 1;
+      }
+      
+      .nav-links {
+        display: none; /* Hide by default on mobile */
+      }
+      
+      .nav-links.active {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      
+      .nav-links li {
+        margin: 10px 0;
+      }
+      
+      .icons {
+        order: 2;
+      }
+      
+      .search-bar {
+        order: 3;
+        width: 100%;
+        max-width: none;
+        margin-top: 15px;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .hero-title {
+        font-size: 28px;
+      }
+      
+      .hero-banner {
+        height: 280px;
+      }
+      
+      .hero-content {
+        padding: 20px;
+      }
+      
+      .category-item {
+        width: 100%;
+      }
+      
+      .icon {
+        margin-left: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Announcement Bar -->
+  <div class="announcement-bar">
+    <div class="container">
+      <div class="announcement-content">
+        <a href="#" class="sign-up-link">Sign Up</a>
+        <div class="announcement-text">Summer Sale For All Swim Suits And Free Express Delivery - OFF 50%! <strong>ShopNow</strong></div>
+        <div class="language-selector">
+          <span>English</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 9l6 6 6-6" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Section -->
+  <header>
+    <div class="container">
+      <div class="navbar">
+        <a href="#" class="logo">Exclusive</a>
+        <button class="mobile-menu-btn">☰</button>
+        <ul class="nav-links">
+          <li><a href="#">Home</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Sign Up</a></li>
+        </ul>
+        <div class="search-bar">
+          <input type="text" placeholder="What are you looking for?">
+          <div class="search-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <div class="icons">
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 22a1 1 0 100-2 1 1 0 000 2zM20 22a1 1 0 100-2 1 1 0 000 2zM1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="main-content">
+      <!-- Categories Sidebar -->
+      <div class="sidebar">
+        <ul class="category-list">
+          <li class="category-item">
+            <a href="#">Woman's Fashion</a>
+            <span>›</span>
+          </li>
+          <li class="category-item">
+            <a href="#">Men's Fashion</a>
+            <span>›</span>
+          </li>
+          <li class="category-item">
+            <a href="#">Electronics</a>
+            <span>›</span>
+          </li>
+          <li class="category-item">
+            <a href="#">Home & Lifestyle</a>
+            <span>›</span>
+          </li>
+          <li class="category-item">
+            <a href="#">Sports & Outdoor</a>
+            <span>›</span>
+          </li>
+          <li class="category-item">
+            <a href="#">Baby's & Toys</a>
+            <span>›</span>
+          </li>
+          <li class="category-item">
+            <a href="#">Groceries & Pets</a>
+            <span>›</span>
+          </li>
+          <li class="category-item">
+            <a href="#">Health & Beauty</a>
+            <span>›</span>
+          </li>
+        </ul>
+      </div>
+
+     

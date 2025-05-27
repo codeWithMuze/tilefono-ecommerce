@@ -1,0 +1,890 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <title>Admin Dashboard - Stock Count</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    
+    <style>
+        .product-image {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        
+        /* Stock status badges */
+        .stock-status {
+            padding: 4px 8px;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+        
+        .in-stock {
+            background-color: #27ae60;
+        }
+        
+        .low-stock {
+            background-color: #f39c12;
+        }
+        
+        .out-of-stock {
+            background-color: #e74c3c;
+        }
+        
+        /* Stock change colors */
+        .stock-increase {
+            color: #27ae60;
+        }
+        
+        .stock-decrease {
+            color: #e74c3c;
+        }
+        
+        /* Improved filter layout styles */
+        .search-filters {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        #search-form {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+        }
+        
+        #search-input, #category-filter, #stock-status {
+            height: 38px;
+            min-width: 150px;
+            padding: 0 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        #search-input {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .date-filter {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .date-input {
+            height: 38px;
+            min-width: 150px;
+            padding: 0 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+        
+        #history-form {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .download-btn {
+            height: 38px;
+            padding: 0 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.2s;
+        }
+        
+        .download-btn:hover {
+            background-color: #182268;
+        }
+
+        .stock-modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        overflow: auto;
+    }
+    
+    .stock-modal-content {
+        background-color: var(--card-bg);
+        color: var(--text-primary);
+        margin: 10% auto;
+        padding: 25px;
+        border-radius: 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        width: 90%;
+        max-width: 500px;
+        position: relative;
+        animation: modalFadeIn 0.3s;
+        border: 1px solid var(--border-color);
+    }
+    
+    @keyframes modalFadeIn {
+        from {opacity: 0; transform: translateY(-20px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+    
+    .close-modal {
+        position: absolute;
+        right: 20px;
+        top: 15px;
+        font-size: 28px;
+        font-weight: bold;
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    .close-modal:hover {
+        color: var(--text-primary);
+    }
+    
+    .stock-modal h2 {
+        margin-top: 0;
+        color: var(--accent-color);
+        font-size: 1.5rem;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .product-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .modal-product-image {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        margin-right: 15px;
+        background-color: var(--bg-secondary);
+    }
+    
+    .product-info h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    
+    .product-info p {
+        margin: 5px 0 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+    
+    .stock-input-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+    }
+    
+    .stock-control {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .stock-control label {
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    .quantity-control {
+        display: flex;
+        align-items: center;
+    }
+    
+    .qty-btn {
+        width: 36px;
+        height: 36px;
+        background-color: var(--table-header);
+        border: 1px solid var(--border-color);
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        color: var(--text-primary);
+    }
+    
+    .qty-btn:hover {
+        background-color: var(--table-hover);
+    }
+    
+    .qty-btn.decrease {
+        border-radius: 4px 0 0 4px;
+    }
+    
+    .qty-btn.increase {
+        border-radius: 0 4px 4px 0;
+    }
+    
+    .stock-input {
+        width: 80px;
+        height: 36px;
+        border: 1px solid var(--border-color);
+        border-left: none;
+        border-right: none;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    
+    .stock-input:focus {
+        outline: none;
+        border-color: var(--accent-color);
+    }
+    
+    .stock-status-indicator {
+        padding: 10px;
+    }
+    
+    .notes-container {
+        margin-bottom: 20px;
+    }
+    
+    .notes-container label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    
+    #modal-stock-notes {
+        width: 100%;
+        height: 80px;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        resize: none;
+        font-family: 'Poppins', sans-serif;
+        font-size: 14px;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+    }
+    
+    #modal-stock-notes:focus {
+        outline: none;
+        border-color: var(--accent-color);
+    }
+    
+    .modal-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+    
+    .modal-btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .modal-btn.cancel {
+        background-color: var(--table-header);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+    
+    .modal-btn.cancel:hover {
+        background-color: var(--table-hover);
+    }
+    
+    .modal-btn.save {
+        background-color: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        color: white;
+    }
+    
+    .modal-btn.save:hover {
+        background-color: #246b9e;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    </style>
+
+            <!-- Stock Summary Cards -->
+            <div class="stats-grid">
+                <div class="stat-card purple">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <h3>Total Products</h3>
+                        <div class="value"><%= totalProducts %></div>
+                    </div>
+                </div>
+                <div class="stat-card orange">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-info">
+                        <h3>Low Stock Items</h3>
+                        <div class="value"><%= lowStockItems %></div>
+                    </div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3>In Stock Items</h3>
+                        <div class="value"><%= inStockItems %></div>
+                    </div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-info">
+                        <h3>Out of Stock</h3>
+                        <div class="value"><%= outOfStockItems %></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stock Management Section -->
+            <div class="product-section">
+                <div class="section-header">
+                    <h2 class="section-title">Inventory Status</h2>
+                    <div class="search-filters">
+                        <form id="search-form" method="GET" action="/admin/stocks">
+                            <input type="text" id="search-input" name="search" placeholder="Search products..." value="<%= searchQuery %>">
+                            <select id="category-filter" name="category">
+                                <option value="">All Categories</option>
+                                <% categories.forEach(category => { %>
+                                <option value="<%= category._id %>" <%= categoryFilter === category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+                                <% }); %>
+                            </select>
+                            <select id="stock-status" name="status">
+                                <option value="">All Stock Status</option>
+                                <option value="in-stock" <%= stockStatus === 'in-stock' ? 'selected' : '' %>>In Stock</option>
+                                <option value="low-stock" <%= stockStatus === 'low-stock' ? 'selected' : '' %>>Low Stock</option>
+                                <option value="out-of-stock" <%= stockStatus === 'out-of-stock' ? 'selected' : '' %>>Out of Stock</option>
+                            </select>
+                            <button type="submit" class="download-btn">Filter</button>
+                        </form>
+                        <button id="update-stock-btn" class="download-btn">Update Stock</button>
+                    </div>
+                </div>
+                
+                <table id="stock-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>SKU</th>
+                            <th>Category</th>
+                            <th>Current Stock</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% products.forEach(product => { %>
+                        <tr data-reorder-level="<%= product.reorderLevel || 5 %>">
+                            <td>
+                                <div style="display: flex; align-items: center;">
+                                    <img src="<%= product.imageUrl %>" alt="<%= product.name %>" class="product-image" 
+                                        onerror="this.onerror=null; this.src='/uploads/product-images/default-image.png';">
+                                    <span style="margin-left: 10px;" title="<%= product.name %>">
+                                        <% 
+                                        // Split the name into words and take only the first 4
+                                        const words = product.name.split(' ');
+                                        const displayName = words.slice(0, 8).join(' ');
+                                        const hasTruncated = words.length > 4;
+                                        %>
+                                        <%= displayName %><%= hasTruncated ? '...' : '' %>
+                                    </span>
+                                </div>
+                            </td>
+                            <td><%= product.sku %></td>
+                            <td><%= product.category %></td>
+                            <td><%= product.stock %></td>
+                            <td>
+                                <% let statusColor = "#27ae60"; %>
+                                <% let statusText = "In Stock"; %>
+                                
+                                <% if (product.stock === 0) { %>
+                                    <% statusColor = "#e74c3c"; %>
+                                    <% statusText = "Out of Stock"; %>
+                                <% } else if (product.stock <= product.reorderLevel) { %>
+                                    <% statusColor = "#f39c12"; %>
+                                    <% statusText = "Low Stock"; %>
+                                <% } %>
+                                
+                                <span class="stock-status <%= product.stock === 0 ? 'out-of-stock' : (product.stock <= product.reorderLevel ? 'low-stock' : 'in-stock') %>"><%= statusText %></span>
+                            </td>
+                            <td>
+                                <button class="edit-stock-btn" 
+                                    data-id="<%= product.id %>" 
+                                    data-name="<%= product.name %>" 
+                                    data-stock="<%= product.stock %>"
+                                    style="background: var(--accent-color); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">Edit</button>
+                            </td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+
+                <div class="pagination">
+                    <% if (totalPages > 0) { %>
+                        <a href="/admin/stocks?page=<%= currentPage > 1 ? currentPage - 1 : 1 %>&search=<%= searchQuery %>&category=<%= categoryFilter %>&status=<%= stockStatus %>" class="<%= currentPage == 1 ? 'disabled' : '' %>">⬅️</a>
+                        
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <% if(i === currentPage) { %>
+                                <span class="active"><%= i %></span>
+                            <% } else if(i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) { %>
+                                <a href="/admin/stocks?page=<%= i %>&search=<%= searchQuery %>&category=<%= categoryFilter %>&status=<%= stockStatus %>"><%= i %></a>
+                            <% } else if(i === currentPage - 2 || i === currentPage + 2) { %>
+                                <span class="ellipsis">...</span>
+                            <% } %>
+                        <% } %>
+                        
+                        <a href="/admin/stocks?page=<%= currentPage < totalPages ? currentPage + 1 : totalPages %>&search=<%= searchQuery %>&category=<%= categoryFilter %>&status=<%= stockStatus %>" class="<%= currentPage == totalPages ? 'disabled' : '' %>">➡️</a>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Stock History Section -->
+            <div class="product-section">
+                <div class="section-header">
+                    <h2 class="section-title">Recent Stock Updates</h2>
+                    <div class="date-filter">
+                        <form id="history-form" method="GET" action="/admin/stocks">
+                            <input type="date" name="startDate" class="date-input start-date" value="<%= startDate %>">
+                            <span>to</span>
+                            <input type="date" name="endDate" class="date-input end-date" value="<%= endDate %>">
+                            <button type="submit" class="download-btn">Filter</button>
+                            <a href="/admin/export-stock-history?startDate=<%= startDate %>&endDate=<%= endDate %>" class="download-btn">
+                                <span class="icon">📥</span>
+                                <span>Export</span>
+                            </a>
+                        </form>
+                    </div>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Product</th>
+                            <th>Previous Stock</th>
+                            <th>Updated Stock</th>
+                            <th>Change</th>
+                            <th>Updated By</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% stockHistory.forEach(history => { %>
+                        <tr>
+                            <td><%= history.date %></td>
+                            <td><%= history.productName %></td>
+                            <td><%= history.previousStock %></td>
+                            <td><%= history.updatedStock %></td>
+                            <td class="<%= history.change > 0 ? 'stock-increase' : 'stock-decrease' %>"><%= history.change > 0 ? '+' : '' %><%= history.change %></td>
+                            <td><%= history.updatedBy %></td>
+                            <td><%= history.notes %></td>
+                        </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="stockModal" class="stock-modal">
+        <div class="stock-modal-content">
+            <span class="close-modal">&times;</span>
+            <!-- <h2>Edit Stock</h2>         -->
+            <div class="product-info">
+                <img id="modal-product-image" src="" alt="Product" class="modal-product-image">
+                <div>
+                    <h3 id="modal-product-name"></h3>
+                    <p id="modal-product-sku"></p>
+                </div>
+            </div>
+            <div class="stock-input-container">
+                <div class="stock-control">
+                    <label for="modal-current-stock">Current Stock:</label>
+                    <div class="quantity-control">
+                        <button type="button" class="qty-btn decrease">-</button>
+                        <input id="modal-current-stock" type="number" min="0" class="stock-input">
+                        <button type="button" class="qty-btn increase">+</button>
+                    </div>
+                </div>
+                <div class="stock-status-indicator">
+                    <span id="stock-status-badge" class="stock-status"></span>
+                </div>
+            </div>
+            <div class="notes-container">
+                <label for="modal-stock-notes">Notes:</label>
+                <textarea id="modal-stock-notes" placeholder="Enter notes about this stock update..."></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button id="cancel-stock-update" class="modal-btn cancel">Cancel</button>
+                <button id="save-stock-update" class="modal-btn save">Update Stock</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Active menu highlighting
+        const currentPath = window.location.pathname;
+        const menuLinks = document.querySelectorAll('.sidebar-menu a');
+
+        menuLinks.forEach(link => {
+            if (link.getAttribute('href') === currentPath) {
+                link.classList.add('active');
+            }
+        });
+
+        // Get modal elements
+        const modal = document.getElementById('stockModal');
+        const closeBtn = document.querySelector('.close-modal');
+        const cancelBtn = document.getElementById('cancel-stock-update');
+        const saveBtn = document.getElementById('save-stock-update');
+        const decreaseBtn = document.querySelector('.qty-btn.decrease');
+        const increaseBtn = document.querySelector('.qty-btn.increase');
+        const stockInput = document.getElementById('modal-current-stock');
+        
+        // Variables to store current product data
+        let currentProductId = null;
+        let currentProductRow = null;
+        let reorderLevel = 5;
+        
+        // Function to open the modal
+        function openStockModal(productId, productRow, productName, sku, imageUrl, currentStock) {
+            // Store current product data
+            currentProductId = productId;
+            currentProductRow = productRow;
+            reorderLevel = parseInt(productRow.getAttribute('data-reorder-level')) || 5;
+            
+            // Update modal with product info
+            document.getElementById('modal-product-name').textContent = productName;
+            document.getElementById('modal-product-sku').textContent = `SKU: ${sku}`;
+            document.getElementById('modal-product-image').src = imageUrl || '/uploads/product-images/default-image.png';
+            document.getElementById('modal-current-stock').value = currentStock;
+            document.getElementById('modal-stock-notes').value = '';
+            
+            // Update status badge
+            updateStatusBadge(currentStock);
+            
+            // Show the modal
+            modal.style.display = 'block';
+        }
+        
+        // Function to close the modal
+        function closeStockModal() {
+            modal.style.display = 'none';
+        }
+        
+        // Update stock status badge based on quantity
+        function updateStatusBadge(quantity) {
+            const badge = document.getElementById('stock-status-badge');
+            const numQuantity = parseInt(quantity);
+            
+            if (numQuantity === 0) {
+                badge.textContent = 'Out of Stock';
+                badge.className = 'stock-status out-of-stock';
+            } else if (numQuantity <= reorderLevel) {
+                badge.textContent = 'Low Stock';
+                badge.className = 'stock-status low-stock';
+            } else {
+                badge.textContent = 'In Stock';
+                badge.className = 'stock-status in-stock';
+            }
+        }
+        
+        // Event listeners for modal controls
+        closeBtn.addEventListener('click', closeStockModal);
+        cancelBtn.addEventListener('click', closeStockModal);
+        
+        decreaseBtn.addEventListener('click', function() {
+            let value = parseInt(stockInput.value);
+            if (value > 0) {
+                stockInput.value = value - 1;
+                updateStatusBadge(value - 1);
+            }
+        });
+        
+        increaseBtn.addEventListener('click', function() {
+            let value = parseInt(stockInput.value);
+            stockInput.value = value + 1;
+            updateStatusBadge(value + 1);
+        });
+        
+        stockInput.addEventListener('input', function() {
+            updateStatusBadge(this.value);
+        });
+        
+        // Save button event
+        saveBtn.addEventListener('click', function() {
+            const newStock = document.getElementById('modal-current-stock').value;
+            const notes = document.getElementById('modal-stock-notes').value;
+            
+            if (newStock === '' || isNaN(newStock) || parseInt(newStock) < 0) {
+                alert('Please enter a valid stock amount (0 or greater)');
+                return;
+            }
+            
+            // Show loading indicator
+            closeStockModal();
+            Swal.fire({
+                title: 'Updating Stock...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Send AJAX request to update the stock
+            fetch('/admin/update-stock', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    productId: currentProductId,
+                    newStock: newStock,
+                    notes: notes
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Get old stock from the row
+                    const oldStock = parseInt(currentProductRow.querySelector('td:nth-child(4)').textContent);
+                    const updatedStock = parseInt(newStock);
+                    
+                    // Update the stock value in the table
+                    currentProductRow.querySelector('td:nth-child(4)').textContent = updatedStock;
+                    
+                    // Update the status cell
+                    const statusCell = currentProductRow.querySelector('td:nth-child(5) span');
+                    
+                    if (updatedStock === 0) {
+                        statusCell.textContent = 'Out of Stock';
+                        statusCell.className = 'stock-status out-of-stock';
+                    } else if (updatedStock <= reorderLevel) {
+                        statusCell.textContent = 'Low Stock';
+                        statusCell.className = 'stock-status low-stock';
+                    } else {
+                        statusCell.textContent = 'In Stock';
+                        statusCell.className = 'stock-status in-stock';
+                    }
+                    
+                    // Update the data attribute on the edit button
+                    const editButton = currentProductRow.querySelector('.edit-stock-btn');
+                    editButton.setAttribute('data-stock', updatedStock);
+                    
+                    // Update summary cards
+                    updateSummaryCards(oldStock, updatedStock);
+                    
+                    Swal.fire({
+                        title: 'Stock Updated!',
+                        text: `Stock has been successfully updated from ${oldStock} to ${updatedStock}`,
+                        icon: 'success',
+                        confirmButtonColor: '#1e2a78'
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to update stock',
+                        icon: 'error',
+                        confirmButtonColor: '#1e2a78'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update stock. Please try again.',
+                    icon: 'error',
+                    confirmButtonColor: '#1e2a78'
+                });
+            });
+        });
+        
+        // Helper function to update summary cards without page reload
+        function updateSummaryCards(oldStock, newStock) {
+            const lowStockThreshold = 5; // Assuming standard reorder level is 5
+            
+            // Get summary card value elements
+            const totalProductsEl = document.querySelector('.stats-grid .stat-card:nth-child(1) .value');
+            const lowStockItemsEl = document.querySelector('.stats-grid .stat-card:nth-child(2) .value');
+            const inStockItemsEl = document.querySelector('.stats-grid .stat-card:nth-child(3) .value');
+            const outOfStockItemsEl = document.querySelector('.stats-grid .stat-card:nth-child(4) .value');
+            
+            // Only update if the stock status changed
+            const wasOutOfStock = oldStock === 0;
+            const isOutOfStock = newStock === 0;
+            const wasLowStock = oldStock > 0 && oldStock <= lowStockThreshold;
+            const isLowStock = newStock > 0 && newStock <= lowStockThreshold;
+            
+            if (wasOutOfStock !== isOutOfStock || wasLowStock !== isLowStock) {
+                // Update out of stock count
+                if (wasOutOfStock && !isOutOfStock) {
+                    outOfStockItemsEl.textContent = parseInt(outOfStockItemsEl.textContent) - 1;
+                } else if (!wasOutOfStock && isOutOfStock) {
+                    outOfStockItemsEl.textContent = parseInt(outOfStockItemsEl.textContent) + 1;
+                }
+                
+                // Update low stock count
+                if (wasLowStock && !isLowStock) {
+                    lowStockItemsEl.textContent = parseInt(lowStockItemsEl.textContent) - 1;
+                } else if (!wasLowStock && isLowStock) {
+                    lowStockItemsEl.textContent = parseInt(lowStockItemsEl.textContent) + 1;
+                }
+                
+                // Update in stock count
+                if (wasOutOfStock && !isOutOfStock) {
+                    inStockItemsEl.textContent = parseInt(inStockItemsEl.textContent) + 1;
+                } else if (!wasOutOfStock && isOutOfStock) {
+                    inStockItemsEl.textContent = parseInt(inStockItemsEl.textContent) - 1;
+                }
+            }
+        }
+        
+        // Update Stock Button
+        document.getElementById('update-stock-btn').addEventListener('click', function() {
+            Swal.fire({
+                title: 'Bulk Stock Update',
+                html: `
+                    <p>Upload a CSV file to update multiple products at once</p>
+                    <div style="margin: 15px 0;">
+                        <input type="file" id="stock-file" accept=".csv">
+                    </div>
+                    <p style="font-size: 0.9rem; color: #6c757d;">CSV should contain columns: SKU, Quantity, Notes</p>
+                    <a href="/admin/download-stock-template" style="font-size: 0.9rem; color: #1e2a78;">Download template</a>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Upload and Update',
+                confirmButtonColor: '#1e2a78',
+                cancelButtonText: 'Cancel',
+                focusConfirm: false,
+                preConfirm: () => {
+                    const fileInput = document.getElementById('stock-file');
+                    if (!fileInput.files.length) {
+                        Swal.showValidationMessage('Please select a CSV file');
+                        return false;
+                    }
+                    return true;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const fileInput = document.getElementById('stock-file');
+                    const file = fileInput.files[0];
+                    const formData = new FormData();
+                    formData.append('csvFile', file);
+                    
+                    Swal.fire({
+                        title: 'Processing...',
+                        text: 'Your stock update is being processed',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            
+                            fetch('/admin/bulk-stock-update', {
+                                method: 'POST',
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    Swal.fire({
+                                        title: 'Stock Updated!',
+                                        text: `Successfully updated ${data.updatedCount} products`,
+                                        icon: 'success',
+                                        confirmButtonColor: '#1e2a78'
+                                    }).then(() => {
+                                        // Reload the page to show updated stock values
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: data.message || 'Failed to update stock',
+                                        icon: 'error',
+                                        confirmButtonColor: '#1e2a78'
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: 'Error!',
+                                    text: 'Failed to process the CSV file. Please check the format and try again.',
+                                    icon: 'error',
+                                    confirmButtonColor: '#1e2a78'
+                                });
+                            });
+                        }
+                    });
+                }
+            });
+        });
+        
+        // Setup edit buttons
+        function setupEditButtons() {
+            document.querySelectorAll('.edit-stock-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = this.getAttribute('data-id');
+                    const productRow = this.closest('tr');
+                    const productNameElement = productRow.querySelector('td:first-child span');
+                    const productName = productNameElement.getAttribute('title') || productNameElement.textContent;
+                    const currentStock = this.getAttribute('data-stock') || productRow.querySelector('td:nth-child(4)').textContent;
+                    const sku = productRow.querySelector('td:nth-child(2)').textContent;
+                    
+                    // Get image URL from the row
+                    const imageEl = productRow.querySelector('.product-image');
+                    const imageUrl = imageEl ? imageEl.src : null;
+                    
+                    openStockModal(productId, productRow, productName, sku, imageUrl, currentStock);
+                });
+            });
+        }
+        
+        // Initialize button setup
+        setupEditButtons();
+    });
+    </script>
+</body>
+</html>
+<%- include("../../views/partials/admin/footer") %>

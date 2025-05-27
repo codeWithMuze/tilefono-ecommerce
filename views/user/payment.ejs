@@ -1,0 +1,586 @@
+<%- include("../../views/partials/user/header") %>
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        color: #2d3436;
+        line-height: 1.6;
+    }
+
+    .payment-container {
+        max-width: 800px;
+        margin: 40px auto;
+        background-color: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        padding: 35px;
+        text-align: center;
+    }
+
+    .payment-header {
+        margin-bottom: 30px;
+    }
+
+    .payment-header h1 {
+        font-size: 28px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 10px;
+    }
+
+    .payment-header p {
+        color: #666;
+        font-size: 16px;
+    }
+
+    .order-details {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 25px;
+        margin-bottom: 30px;
+        text-align: left;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        font-size: 15px;
+        color: #4a5568;
+    }
+
+    .detail-row:last-child {
+        margin-bottom: 0;
+    }
+
+    .detail-label {
+        font-weight: 500;
+    }
+
+    .detail-value {
+        font-weight: 600;
+        color: #2d3436;
+    }
+
+    .amount-row {
+        font-size: 18px;
+        color: #1a1a1a;
+        border-top: 1px solid #edf2f7;
+        padding-top: 15px;
+        margin-top: 15px;
+    }
+
+    .payment-btn {
+        background: #e63946;
+        color: white;
+        border: none;
+        padding: 15px 35px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+    }
+
+    .payment-btn:hover {
+        background: #dc2f3c;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px rgba(230, 57, 70, 0.2);
+    }
+
+    .cancel-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #666;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .cancel-link:hover {
+        color: #e63946;
+    }
+
+    .payment-methods {
+        margin-top: 30px;
+    }
+
+    .payment-method {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .payment-method img {
+        height: 30px;
+    }
+
+    .secure-badge {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 30px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .secure-badge i {
+        color: #4CAF50;
+    }
+</style>
+
+
+<nav class="breadcrumb">
+    <a href="/home">
+        <i class="fas fa-home" style="margin-right: 5px;"></i>
+        Home
+    </a>
+    <span>›</span>
+    <a href="/cart">Shopping Cart</a>
+    <span>›</span>
+    <a href="/checkout">Checkout</a>
+    <span>›</span>
+    <span class="breadcrumb-active">Payment</span>
+</nav>
+
+<div class="payment-container">
+    <div class="payment-header">
+        <h1>Complete Your Payment</h1>
+        <p>Your order is almost done! Please complete the payment to confirm your order.</p>
+    </div>
+
+    <div class="order-details">
+        <div class="detail-row">
+            <span class="detail-label">Order ID:</span>
+            <span class="detail-value">#<%= order._id.toString().substr(-6) %></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Order Date:</span>
+            <span class="detail-value"><%= new Date().toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'}) %></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Items:</span>
+            <span class="detail-value"><%= order.orderedItems.length %> products</span>
+        </div>
+        
+        <!-- Products and Offers Breakdown -->
+        <div class="detail-row" style="flex-direction: column; border-bottom: 1px dashed #eaeaea; padding-bottom: 15px; margin-bottom: 15px;">
+            <span class="detail-label" style="margin-bottom: 12px;">Items:</span>
+            <% if (order.orderedItems && order.orderedItems.length > 0) { %>
+                <% order.orderedItems.forEach((item, index) => { %>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; padding-left: 10px;">
+                        <div style="width: 70%;">
+                            <div style="font-size: 14px; font-weight: 500;">
+                                <%= item.product ? (item.product.productName || 'Product') : 'Product' %> × <%= item.quantity %>
+                            </div>
+                            <% if (item.product && item.product.productOffers && item.product.productOffers.length > 0) { %>
+                                <div style="font-size: 12px; color: #22c55e; margin-top: 3px;">
+                                    <i class="fas fa-tag" style="margin-right: 5px;"></i>
+                                    <%= item.product.productOffers[0].offerLabel || 'Special Offer' %>: <%= item.product.productOffers[0].discountAmount %>% off
+                                </div>
+                            <% } else if (item.product && item.product.categoryOffer) { %>
+                                <div style="font-size: 12px; color: #22c55e; margin-top: 3px;">
+                                    <i class="fas fa-tags" style="margin-right: 5px;"></i>
+                                    Category Offer: <%= item.product.categoryOffer.discountAmount %>% off
+                                </div>
+                            <% } else if (item.product && item.product.brandOffer) { %>
+                                <div style="font-size: 12px; color: #22c55e; margin-top: 3px;">
+                                    <i class="fas fa-certificate" style="margin-right: 5px;"></i>
+                                    Brand Offer: <%= item.product.brandOffer.discountAmount %>% off
+                                </div>
+                            <% } %>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 14px; font-weight: 600;">
+                                <% 
+                                let itemPrice = item.price || 0; // Get the actual price from the order item
+                                let displayPrice = itemPrice * item.quantity;
+                                let regularPrice = ((item.product && item.product.regularPrice) ? item.product.regularPrice : itemPrice) * item.quantity;
+                                let hasPriceReduction = false;
+                                
+                                // Apply any product-specific discount if not already applied in the order
+                                if (item.product) {
+                                    if (item.product.productOffers && item.product.productOffers.length > 0) {
+                                        const discountPct = item.product.productOffers[0].discountAmount || 0;
+                                        const discountedPrice = displayPrice - (displayPrice * discountPct / 100);
+                                        hasPriceReduction = true;
+                                        displayPrice = discountedPrice;
+                                    } else if (item.product.categoryOffer) {
+                                        const discountPct = item.product.categoryOffer.discountAmount || 0;
+                                        const discountedPrice = displayPrice - (displayPrice * discountPct / 100);
+                                        hasPriceReduction = true;
+                                        displayPrice = discountedPrice;
+                                    } else if (item.product.brandOffer) {
+                                        const discountPct = item.product.brandOffer.discountAmount || 0;
+                                        const discountedPrice = displayPrice - (displayPrice * discountPct / 100);
+                                        hasPriceReduction = true;
+                                        displayPrice = discountedPrice;
+                                    }
+                                }
+                                %>
+                                ₹<%= displayPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                            </div>
+                            <% if (regularPrice > displayPrice || hasPriceReduction) { %>
+                                <div style="font-size: 12px; color: #94a3b8; text-decoration: line-through;">
+                                    ₹<%= regularPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>
+                                </div>
+                                <div style="font-size: 11px; color: #22c55e;">
+                                    <%= Math.round((regularPrice - displayPrice) / regularPrice * 100) %>% off
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                <% }); %>
+            <% } %>
+        </div>
+        
+        <!-- Price Breakdown with Offers and Coupons -->
+        <div class="detail-row">
+            <span class="detail-label">Subtotal:</span>
+            <span class="detail-value">₹<%= (order.totalAmount || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+        
+        <!-- Original Price (Regular Price) -->
+        <div class="detail-row">
+            <span class="detail-label">Regular Price:</span>
+            <span class="detail-value">₹<%= order.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+        
+        <!-- Product/Offer Discounts - clearly labeled -->
+        <% if (order.productDiscount && order.productDiscount > 0) { %>
+        <div class="detail-row">
+            <span class="detail-label">Offer Discount:</span>
+            <span class="detail-value" style="color: #22c55e;">-₹<%= order.productDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+        <% } else { %>
+        <div class="detail-row">
+            <span class="detail-label">Offer Discount:</span>
+            <span class="detail-value" style="color: #6b7280;">₹0.00</span>
+        </div>
+        <% } %>
+        
+        <!-- Coupon Discounts - always show, even if zero -->
+        <% if ((order.coupenApplied || order.couponApplied) && order.couponDiscount && order.couponDiscount > 0) { %>
+        <div class="detail-row">
+            <span class="detail-label">Coupon Discount:</span>
+            <span class="detail-value" style="color: #22c55e;">-₹<%= order.couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+        <% } else { %>
+        <div class="detail-row">
+            <span class="detail-label">Coupon Discount:</span>
+            <span class="detail-value" style="color: #6b7280;">₹0.00</span>
+        </div>
+        <% } %>
+        
+        <!-- Show coupon code if applied -->
+        <% if ((order.coupenApplied || order.couponApplied) && order.couponCode) { %>
+        <div class="detail-row">
+            <span class="detail-label">Coupon Code:</span>
+            <span class="detail-value" style="color: #3b82f6;"><%= order.couponCode %></span>
+        </div>
+        <% } %>
+        
+        <!-- Subtotal after discounts -->
+        <div class="detail-row" style="border-top: 1px dashed #e2e8f0; padding-top: 8px;">
+            <span class="detail-label">Subtotal after discounts:</span>
+            <span class="detail-value">₹<%= (order.totalAmount - (order.productDiscount || 0) - (order.couponDiscount || 0)).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+        
+        <!-- Shipping Fee -->
+        <% if (order.shippingFee !== undefined) { %>
+        <div class="detail-row">
+            <span class="detail-label">Shipping Fee:</span>
+            <% if (order.shippingFee > 0) { %>
+                <span class="detail-value">₹<%= order.shippingFee.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            <% } else { %>
+                <span class="detail-value" style="color: #22c55e;">Free</span>
+            <% } %>
+        </div>
+        <% } %>
+        
+        <div class="detail-row amount-row" style="border-top: 2px solid #edf2f7; padding-top: 15px; margin-top: 10px; font-size: 18px;">
+            <span class="detail-label" style="font-weight: 600;">Total Amount:</span>
+            <span class="detail-value" style="font-weight: 700; color: #e63946;">₹<%= order.finalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+        </div>
+        
+        <% 
+        // Calculate order breakdown values
+        const subtotal = order.totalAmount || 0;
+        const productDiscounts = order.productDiscount || 0;
+        const couponDiscount = order.couponDiscount || 0;
+        const offerDiscount = order.offerDiscount || 0;
+        const shippingFee = order.shippingFee || 40;
+        const finalPrice = order.finalAmount || 0;
+        const couponApplied = order.coupenApplied || order.couponApplied;
+        const couponCode = order.couponCode;
+        %>
+
+        <!-- Price Breakdown - Styled like order page -->
+        <div class="price-breakdown" style="margin-top: 15px; font-size: 14px; border-radius: 8px; overflow: hidden; background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 16px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #64748b;">Subtotal</span>
+                <span style="font-weight: 500; color: #334155;">₹<%= subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            </div>
+            
+            <% if (productDiscounts > 0) { %>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #64748b;">Product Discounts</span>
+                <span style="font-weight: 500; color: #22c55e;">-₹<%= productDiscounts.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            </div>
+            <% } %>
+            
+            <% if (couponApplied || couponDiscount > 0) { %>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #64748b;"><%= couponApplied ? `Coupon Discount${couponCode ? ` (${couponCode})` : ''}` : 'Discount' %></span>
+                <span style="font-weight: 500; color: #22c55e;">-₹<%= couponDiscount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            </div>
+            <% } %>
+            
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #64748b;">Shipping Fee</span>
+                <span style="font-weight: 500; color: #334155;">₹<%= shippingFee.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0;">
+                <span style="font-weight: 600; color: #334155;">Total</span>
+                <span style="font-weight: 700; color: #e63946;">₹<%= finalPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></span>
+            </div>
+        </div>
+        
+        <% if (order.totalAmount > order.finalAmount) { %>
+        <div style="background-color: #f0fff4; border-radius: 8px; padding: 10px 15px; margin-top: 15px; display: flex; align-items: center;">
+            <i class="fas fa-piggy-bank" style="color: #22c55e; margin-right: 10px; font-size: 18px;"></i>
+            <div>
+                <div style="font-weight: 600; color: #22c55e;">You saved ₹<%= (order.totalAmount - order.finalAmount).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %>!</div>
+                <div style="font-size: 12px; color: #4b5563;">Includes all discounts & offers</div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <button id="pay-button" class="payment-btn">Pay Now</button>
+    <div class="payment-methods">
+        <div class="payment-method">
+            <img src="https://cdn.razorpay.com/static/assets/logo/payment/cards.png" alt="Cards">
+            <img src="https://cdn.razorpay.com/static/assets/logo/payment/upi.png" alt="UPI">
+            <img src="https://cdn.razorpay.com/static/assets/logo/payment/wallet.png" alt="Wallet">
+        </div>
+    </div>
+    
+    <div class="secure-badge">
+        <i class="fas fa-lock"></i>
+        <span>Your payment information is secure with our payment provider</span>
+    </div>
+
+    <a href="/checkout" class="cancel-link">Cancel and return to checkout</a>
+</div>
+
+<!-- Add Razorpay script -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    document.getElementById('pay-button').addEventListener('click', function() {
+        // Get the verified final amount that was stored in the session
+        // This acts as a single source of truth for both UI and payment processor
+        const finalAmount = <%= (typeof session !== 'undefined' && session.verifiedPaymentAmount) ? session.verifiedPaymentAmount : (order.finalAmount || 0) %>;
+        console.log('Using VERIFIED final amount for Razorpay payment:', finalAmount);
+        
+        // For display in the Razorpay modal
+<% 
+    let orderDescriptionBase = 'Payment for Order #' + order._id;
+    let detailedDescription = [];
+    
+    // Add coupon details if applied
+    if ((order.coupenApplied || order.couponApplied) && order.couponCode) {
+        detailedDescription.push('Coupon: ' + order.couponCode + ' (-₹' + order.couponDiscount.toFixed(2) + ')');
+    }
+    
+    // Add product discount details if any
+    if (order.productDiscount && order.productDiscount > 0) {
+        detailedDescription.push('Product Offers: -₹' + order.productDiscount.toFixed(2));
+    }
+    
+    // Add the detailed description to the order description
+    if (detailedDescription.length > 0) {
+        orderDescriptionBase += ' (' + detailedDescription.join(', ') + ')';
+    }
+    
+    // Calculate total savings
+    let totalSavings = (order.totalAmount > order.finalAmount) ? (order.totalAmount - order.finalAmount) : 0;
+%>
+        const orderDescription = '<%= orderDescriptionBase %>';
+        // Calculate the accurate amount to charge
+        // We prioritize the verified amount from session if available
+        const verifiedAmount = <%= session.verifiedPaymentAmount || 'null' %>;
+        
+        // Original calculations in UI match what's in the database exactly
+        const regularPrice = <%= order.totalAmount || 0 %>;
+        const offerDiscount = <%= order.productDiscount || 0 %>;
+        const couponDiscount = <%= order.couponDiscount || 0 %>;
+        const shippingFee = <%= order.shippingFee || 40 %>;
+        
+        // Calculate final amount the same way it's calculated on the server
+        const calculatedAmount = regularPrice - offerDiscount - couponDiscount + shippingFee;
+        
+        // Use verified amount from session, or calculated amount, or order.finalAmount as fallback
+        const finalPaymentAmount = verifiedAmount || calculatedAmount || <%= order.finalAmount %>;
+        
+        // Log all the price components for transparency and debugging
+        console.log('Payment Amount Breakdown:', {
+            regularPrice: regularPrice.toFixed(2),
+            offerDiscount: offerDiscount.toFixed(2),
+            couponDiscount: couponDiscount.toFixed(2),
+            shippingFee: shippingFee.toFixed(2),
+            calculatedAmount: calculatedAmount.toFixed(2),
+            verifiedAmount: verifiedAmount ? verifiedAmount.toFixed(2) : 'Not available',
+            finalPaymentAmount: finalPaymentAmount.toFixed(2),
+            amountInPaise: Math.round(finalPaymentAmount * 100)
+        });
+        
+        const options = {
+            key: '<%= process.env.RAZORPAY_KEY_ID || "rzp_test_Igq5n4zuOwcSH6" %>',
+            amount: String(Math.round(finalPaymentAmount * 100)), // Convert to paise/cents as string
+            currency: '<%= order.paymentDetails?.currency || "INR" %>',
+            name: 'MobileHub',
+            description: orderDescription,
+            notes: {
+                'Regular Price': '₹' + regularPrice.toFixed(2),
+                'Offer Discount': '₹' + offerDiscount.toFixed(2),
+                'Coupon Discount': '₹' + couponDiscount.toFixed(2),
+                'Shipping Fee': '₹' + shippingFee.toFixed(2),
+                'Final Amount': '₹' + finalPaymentAmount.toFixed(2)
+            },
+            order_id: '<%= order.paymentDetails?.razorpayOrderId %>',
+            image: '/images/logo.png',
+            handler: function(response) {
+                // Show processing message
+                Swal.fire({
+                    title: 'Verifying Payment...',
+                    text: 'Please wait while we verify your payment',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // Send verification request to backend
+                fetch('/verify-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature,
+                        order_id: '<%= order._id %>'
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        // Successful payment - order status is 'Processing'
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Payment Successful!',
+                            html: `
+                                <div class="payment-success-info">
+                                    <p>Your payment has been processed successfully.</p>
+                                    <p class="order-status">Your order status is now: <strong>Processing</strong></p>
+                                </div>
+                            `,
+                            timer: 3000,
+                            showConfirmButton: true,
+                            confirmButtonText: 'View Order'
+                        }).then(() => {
+                            window.location.href = `/payment-success?orderId=<%= order._id %>`;
+                        });
+                    } else {
+                        // Failed payment - order status remains 'Pending'
+                        const orderStatus = data.order ? data.order.status : 'Pending';
+                        
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Payment Failed',
+                            html: `
+                                <div class="payment-failed-info">
+                                    <p>${data.message || 'There was an issue with your payment.'}</p>
+                                    <p class="order-status">Your order status is: <strong>${orderStatus}</strong></p>
+                                    <p class="try-again-info">You can try payment again or choose a different payment method.</p>
+                                </div>
+                            `,
+                            confirmButtonText: 'Try Again',
+                            showCancelButton: true,
+                            cancelButtonText: 'View Order'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Reload page to try payment again
+                                window.location.reload();
+                            } else {
+                                // Go to order page
+                                window.location.href = `/orders`;
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Payment verification error:', error);
+                    
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Payment Verification Failed',
+                        html: `
+                            <div class="payment-error-info">
+                                <p>There was an issue verifying your payment.</p>
+                                <p class="order-status">Your order status is: <strong>Pending</strong></p>
+                                <p class="contact-info">If payment was deducted from your account, please contact customer support.</p>
+                            </div>
+                        `,
+                        confirmButtonText: 'Try Again',
+                        showCancelButton: true,
+                        cancelButtonText: 'View Order'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.reload();
+                        } else {
+                            window.location.href = `/orders`;
+                        }
+                    });
+                });
+            },
+            prefill: {
+                name: '<%= user ? user.name : "" %>',
+                email: '<%= user ? user.email : "" %>',
+                contact: '<%= user ? user.phone : "" %>'
+            },
+            theme: {
+                color: '#e63946'
+            },
+            modal: {
+                ondismiss: function() {
+                    console.log('Payment dismissed');
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Payment Cancelled',
+                        text: 'You have cancelled the payment process. Your order is still pending payment.',
+                        confirmButtonText: 'Ok'
+                    });
+                }
+            }
+        };
+        
+        const razorpayInstance = new Razorpay(options);
+        razorpayInstance.open();
+    });
+</script>
+
+<%- include("../../views/partials/user/footer") %> 

@@ -1,0 +1,436 @@
+<%- include("../../views/partials/admin/header") %>
+<style>
+    /* Styles for Add Banner content only - does not include header or menu bar styles */
+
+/* Form container */
+.form-container {
+    padding: 15px 0;
+}
+
+/* Form row for horizontal layout */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.form-row .form-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Form groups */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"],
+.form-group input[type="date"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* File upload and preview */
+.file-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.file-preview {
+    min-height: 150px;
+    border: 1px dashed var(--border-color);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    margin-top: 5px;
+    padding: 10px;
+}
+
+.file-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+}
+
+/* Toggle switch for status */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.toggle-container input[type="checkbox"] {
+    display: none;
+}
+
+.toggle-label {
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    background-color: var(--text-secondary);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-label::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    background-color: white;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+input[type="checkbox"]:checked + .toggle-label {
+    background-color: #28a745;
+}
+
+input[type="checkbox"]:checked + .toggle-label::after {
+    left: 22px;
+}
+
+.status-text {
+    font-size: 0.9rem;
+}
+
+/* Form actions */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.cancel-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background-color: var(--border-color);
+}
+
+.save-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--sidebar-bg);
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.save-btn:hover {
+    background-color: var(--sidebar-hover);
+}
+
+/* Error state */
+.form-group.has-error input,
+.form-group.has-error select,
+.form-group.has-error textarea {
+    border-color: var(--card-bg-red);
+}
+
+.error-message {
+    color: var(--card-bg-red);
+    font-size: 0.8rem;
+    margin-top: 5px;
+    display: none;
+}
+
+.form-group.has-error .error-message {
+    display: block;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .form-row .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .form-actions .cancel-btn,
+    .form-actions .save-btn {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+<body>
+    <div class="main-content">
+        <div class="header">
+            <h1>Add New Banner</h1>
+            <div class="header-actions">
+                <a href="/admin/banner"><button class="back-btn">
+                    <span>←</span>
+                    Back to Banners
+                </button></a>
+            </div>
+        </div>
+
+        <div class="product-section">
+            <div class="section-header">
+                <h2 class="section-title">Banner Information</h2>
+            </div>
+
+            <div class="form-container">
+                <form id="banner-form" action="/admin/addBanner" method="POST" enctype="multipart/form-data">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="banner-title">Banner Title*</label>
+                            <input type="text" id="banner-title" name="title" placeholder="Enter banner title" required>
+                        </div>
+                        
+                        <!-- <div class="form-group">
+                            <label for="banner-position">Position*</label>
+                            <select id="banner-position" name="position" required>
+                                <option value="">Select position</option>
+                                <option value="home_hero">Home Hero</option>
+                                <option value="category_page">Category Page</option>
+                                <option value="product_page">Product Page</option>
+                                <option value="home_footer">Home Footer</option>
+                            </select>
+                        </div> -->
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="banner-link">Link URL</label>
+                        <input type="url" id="banner-link" name="link" placeholder="https://example.com/page">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="banner-description">Description</label>
+                        <textarea id="banner-description" name="description" rows="3" placeholder="Enter banner description"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="banner-start-date">Start Date*</label>
+                            <input type="date" id="banner-start-date" name="startDate" >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="banner-end-date">End Date*</label>
+                            <input type="date" id="banner-end-date" name="enddate" >
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="banner-image">Banner Image*</label>
+                        <div class="file-input-container">
+                            <input type="file" id="banner-image" name="bannerImage" accept="image/*" >
+                            <div class="file-preview">
+                                <p>No image selected</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="banner-status">Status</label>
+                        <div class="toggle-container">
+                            <input type="checkbox" id="banner-status" name="status" checked>
+                            <label for="banner-status" class="toggle-label"></label>
+                            <span class="status-text">Active</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <a href="/admin/banners" class="cancel-btn">Cancel</a>
+                        <button type="submit" class="save-btn">Save Banner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Additional styles for the Add Banner page */
+        .back-btn {
+            display: flex;
+            align-items: center;
+            background-color: var(--sidebar-bg);
+            color: var(--text-light);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+
+        .form-container {
+            padding: 10px 0;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .file-preview {
+            min-height: 150px;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+        }
+
+        .cancel-btn {
+            display: inline-block;
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+            text-decoration: none;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .form-row .form-group {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
+
+    <script>
+        // File Preview
+        const bannerImage = document.getElementById('banner-image');
+        const filePreview = document.querySelector('.file-preview');
+        
+        bannerImage.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    filePreview.innerHTML = `<img src="${e.target.result}" alt="Banner Preview">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                filePreview.innerHTML = '<p>No image selected</p>';
+            }
+        });
+        
+        // Toggle Status
+        const bannerStatus = document.getElementById('banner-status');
+        const statusText = document.querySelector('.status-text');
+        
+        bannerStatus.addEventListener('change', () => {
+            statusText.textContent = bannerStatus.checked ? 'Active' : 'Inactive';
+        });
+
+        // Date validation - Ensure end date is after start date
+        const startDateInput = document.getElementById('banner-start-date');
+        const endDateInput = document.getElementById('banner-end-date');
+        
+        function validateDates() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            
+            if (endDate <= startDate) {
+                endDateInput.setCustomValidity('End date must be after start date');
+            } else {
+                endDateInput.setCustomValidity('');
+            }
+        }
+        
+        startDateInput.addEventListener('change', validateDates);
+        endDateInput.addEventListener('change', validateDates);
+        
+        // Set default dates (today and a month from today)
+        const today = new Date();
+        const nextMonth = new Date();
+        nextMonth.setMonth(today.getMonth() + 1);
+        
+        startDateInput.valueAsDate = today;
+        endDateInput.valueAsDate = nextMonth;
+        
+        // Form validation
+        const bannerForm = document.getElementById('banner-form');
+        bannerForm.addEventListener('submit', (event) => {
+            if (!bannerForm.checkValidity()) {
+                event.preventDefault();
+                // Highlight invalid fields
+                const invalidInputs = bannerForm.querySelectorAll(':invalid');
+                invalidInputs.forEach(input => {
+                    input.parentElement.classList.add('has-error');
+                });
+            }
+        });
+        
+    </script>
+</body>
+<%- include("../../views/partials/admin/footer") %>

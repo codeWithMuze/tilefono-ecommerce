@@ -1,0 +1,41 @@
+
+    <button id="theme-toggle" class="theme-toggle">🌙</button>
+
+    <script>
+        (function() {
+            function setTheme(themeName) {
+                localStorage.setItem('admin-theme', themeName);
+                document.documentElement.classList.toggle('dark-theme', themeName === 'dark');
+                updateThemeToggleButton(themeName);
+            }
+    
+            function toggleTheme() {
+                const currentTheme = localStorage.getItem('admin-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                setTheme(newTheme);
+            }
+    
+            function updateThemeToggleButton(themeName) {
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.innerHTML = themeName === 'dark' ? '☀️' : '🌙';
+                }
+            }
+    
+            function initTheme() {
+                const savedTheme = localStorage.getItem('admin-theme') || 'light';
+                setTheme(savedTheme);
+    
+                const themeToggle = document.getElementById('theme-toggle');
+                if (themeToggle) {
+                    themeToggle.addEventListener('click', toggleTheme);
+                }
+            }
+    
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initTheme);
+            } else {
+                initTheme();
+            }
+        })();
+    </script>

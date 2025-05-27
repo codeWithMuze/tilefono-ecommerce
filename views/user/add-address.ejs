@@ -1,0 +1,424 @@
+
+    <title>Add Address</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --primary-hover: #0052a3;
+            --error-color: #dc3545;
+            --success-color: #28a745;
+            --border-color: #ced4da;
+            --text-color: #333333;
+            --bg-light: #f8f9fa;
+            --shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            max-width: 650px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: #fff;
+        }
+        
+        .container {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+        
+        h1 {
+            color: var(--text-color);
+            margin-bottom: 24px;
+            font-size: 24px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: #555;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+        
+        input.error, select.error {
+            border-color: var(--error-color);
+        }
+        
+        .error-message {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+        
+        .error-message.visible {
+            display: block;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+        }
+        
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .button-secondary {
+            background-color: var(--bg-light);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .button-secondary:hover {
+            background-color: #e9ecef;
+        }
+        
+        .required:after {
+            content: " *";
+            color: var(--error-color);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            margin-right: 8px;
+        }
+        
+        .checkbox-group label {
+            margin-bottom: 0;
+            display: inline;
+        }
+        
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 4px;
+            padding: 12px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message.visible {
+            display: block;
+        }
+        
+        @media screen and (max-width: 576px) {
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Address</h1>
+        
+        <div id="successMessage" class="success-message">
+            Address saved successfully!
+        </div>
+        
+        <form id="addressForm" method="post" >
+            <div class="form-group">
+                <label for="addressName" class="required">Address Name</label>
+                <input type="text" id="addressName" name="addressType" placeholder="Home, Work, etc." >
+                <div id="addressNameError" class="error-message">Please enter an address name</div>
+            </div>
+        
+            <div class="form-group">
+                <label for="fullName" class="required">Full Name</label>
+                <input type="text" id="fullName" name="name" placeholder="Enter full name" >
+                <div id="fullNameError" class="error-message">Please enter your full name</div>
+            </div>
+        
+            <div class="form-group">
+                <label for="phoneNumber" class="required">Phone Number</label>
+                <input type="tel" id="phoneNumber" name="phone" placeholder="Enter phone number" >
+                <div id="phoneNumberError" class="error-message">Please enter a valid phone number</div>
+            </div>
+
+            <div class="form-group">
+                <label for="landmark">Landmark</label>
+                <input type="text" id="landmark" name="landmark" placeholder="Nearby landmark">
+              </div>
+              
+            <div class="form-group">
+                <label for="addressLine1" class="required">Address Line 1</label>
+                <input type="text" id="addressLine1" name="addressLine1" placeholder="Street address, P.O. box, company name" >
+                <div id="addressLine1Error" class="error-message">Please enter your street address</div>
+            </div>
+        
+            <div class="form-group">
+                <label for="addressLine2">Address Line 2</label>
+                <input type="text" id="addressLine2" name="addressLine2" placeholder="Apartment, suite, unit, building, floor, etc.">
+            </div>
+        
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city" class="required">City</label>
+                    <input type="text" id="city" name="city" >
+                    <div id="cityError" class="error-message">Please enter your city</div>
+                </div>
+        
+                <div class="form-group">
+                    <label for="state" class="required">State/Province</label>
+                    <input type="text" id="state" name="state" >
+                    <div id="stateError" class="error-message">Please enter your state or province</div>
+                </div>
+            </div>
+        
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="pincode" class="required">ZIP/Postal Code</label>
+                    <input type="text" id="pincode" name="pincode" >
+                    <div id="zipCodeError" class="error-message">Please enter a valid postal code</div>
+                </div>
+        
+                <div class="form-group">
+                    <label for="country" class="required">Country</label>
+                    <select id="country" name="country" >
+                        <option value="" selected disabled>Select a country</option>
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                        <option value="UK">United Kingdom</option>
+                        <option value="AU">Australia</option>
+                        <option value="DE">Germany</option>
+                        <option value="FR">France</option>
+                        <option value="JP">Japan</option>
+                        <option value="CN">China</option>
+                        <option value="IN">India</option>
+                        <option value="BR">Brazil</option>
+                        <option value="MX">Mexico</option>
+                        <option value="IT">Italy</option>
+                        <option value="ES">Spain</option>
+                        <option value="NL">Netherlands</option>
+                    </select>
+                    <div id="countryError" class="error-message">Please select a country</div>
+                </div>
+            </div>
+        
+            <div class="checkbox-group">
+                <input type="checkbox" id="defaultAddress" name="defaultAddress">
+                <label for="defaultAddress">Set as default address</label>
+            </div>
+        
+            <div class="button-group">
+                <button type="submit" id="submitButton">Save Address</button>
+                <button type="button" class="button-secondary" id="cancelButton">Cancel</button>
+            </div>
+        </form>
+              
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('addressForm');
+
+        if (!form) {
+            console.error("❌ Form NOT found! Exiting script.");
+            return;
+        }
+
+        console.log("✅ Form found! Attaching event listener...");
+
+        const fields = {
+            addressName: { element: document.getElementById('addressName'), errorElement: document.getElementById('addressNameError'), validator: value => value.trim().length > 0 },
+            fullName: { element: document.getElementById('fullName'), errorElement: document.getElementById('fullNameError'), validator: value => value.trim().length >= 3 },
+            phoneNumber: { element: document.getElementById('phoneNumber'), errorElement: document.getElementById('phoneNumberError'), validator: value => /^[0-9]{10}$/.test(value) },
+            addressLine1: { element: document.getElementById('addressLine1'), errorElement: document.getElementById('addressLine1Error'), validator: value => value.trim().length >= 5 },
+            city: { element: document.getElementById('city'), errorElement: document.getElementById('cityError'), validator: value => value.trim().length > 0 },
+            state: { element: document.getElementById('state'), errorElement: document.getElementById('stateError'), validator: value => value.trim().length > 0 },
+            pincode: { element: document.getElementById('pincode'), errorElement: document.getElementById('zipCodeError'), validator: value => /^[0-9]{5,6}$/.test(value) },
+            country: { element: document.getElementById('country'), errorElement: document.getElementById('countryError'), validator: value => value !== "" },
+            landmark: { element: document.getElementById('landmark'), errorElement: null, validator: value => true } // Optional field
+        };
+
+        Object.keys(fields).forEach(fieldName => {
+            const field = fields[fieldName];
+            if (field.element) {
+                field.element.addEventListener('input', () => validateField(fieldName));
+                field.element.addEventListener('blur', () => validateField(fieldName));
+            }
+        });
+
+        document.getElementById('cancelButton').addEventListener('click', function () {
+            Swal.fire({
+                title: "Are you sure?",
+                text: "Any unsaved changes will be lost!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, cancel",
+                cancelButtonText: "No, stay"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.reset();
+                    clearValidationErrors();
+                }
+            });
+        });
+
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            console.log("🚀 Form submit event triggered!");
+
+            let isValid = true;
+            Object.keys(fields).forEach(fieldName => {
+                if (!validateField(fieldName)) {
+                    isValid = false;
+                }
+            });
+
+            if (!isValid) {
+                for (const fieldName of Object.keys(fields)) {
+                    if (!validateField(fieldName)) {
+                        fields[fieldName].element.focus();
+                        break;
+                    }
+                }
+                return;
+            }
+
+            const formData = {
+                addressType: fields.addressName.element.value,
+                name: fields.fullName.element.value,
+                phone: fields.phoneNumber.element.value,
+                addressLine1: fields.addressLine1.element.value,
+                addressLine2: document.getElementById('addressLine2').value || "",
+                landmark: fields.landmark.element.value || "",
+                city: fields.city.element.value,
+                state: fields.state.element.value,
+                pincode: fields.pincode.element.value,
+                country: fields.country.element.value,
+                isDefault: document.getElementById('defaultAddress').checked
+            };
+
+            console.log("📬 Address submitted:", formData);
+
+            try {
+                const response = await fetch('/addAddress', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Your address has been saved successfully.",
+                        icon: "success",
+                        confirmButtonText: "OK"
+                    }).then(() => {
+                        window.location.href = "/userProfile";
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Error!",
+                        text: result.message || "Something went wrong!",
+                        icon: "error",
+                        confirmButtonText: "OK"
+                    });
+                }
+            } catch (error) {
+                console.error("Error submitting form:", error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "Failed to save the address. Please try again.",
+                    icon: "error",
+                    confirmButtonText: "OK"
+                });
+            }
+        });
+
+        function validateField(fieldName) {
+            const field = fields[fieldName];
+            const value = field.element.value;
+            const isValid = field.validator(value);
+
+            if (!isValid) {
+                field.element.classList.add('error');
+                if (field.errorElement) field.errorElement.classList.add('visible');
+                return false;
+            } else {
+                field.element.classList.remove('error');
+                if (field.errorElement) field.errorElement.classList.remove('visible');
+                return true;
+            }
+        }
+
+        function clearValidationErrors() {
+            Object.keys(fields).forEach(fieldName => {
+                const field = fields[fieldName];
+                field.element.classList.remove('error');
+                if (field.errorElement) field.errorElement.classList.remove('visible');
+            });
+        }
+    });
+</script>

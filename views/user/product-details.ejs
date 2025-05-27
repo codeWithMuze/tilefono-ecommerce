@@ -1,0 +1,1243 @@
+<%- include("../partials/user/header") %>
+
+<style>
+    * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+    :root {
+        --primary-color: #000000;
+        --secondary-color: #333333;
+        --accent-color: #db4444;
+        --text-color: #333333;
+        --light-bg: #f5f5f5;
+        --border-color: #e5e5e5;
+        --hover-color: #eeeeee;
+        --box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        --border-radius: 4px;
+        --cream-color: #f8f8f8;
+        --gray-color: #666666;
+    }
+
+    .pd-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+
+    .pd-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+    }
+
+    /* Image Gallery */
+    .pd-gallery {
+        position: relative;
+    }
+
+    .pd-gallery-flex {
+        display: flex;
+        gap: 20px;
+    }
+
+    .pd-thumbs {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 10px;
+    }
+
+    .pd-thumb {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--border-radius);
+        object-fit: cover;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        background-color: var(--cream-color);
+    }
+
+    .pd-thumb:hover {
+        transform: translateY(-2px);
+    }
+
+    .pd-thumb.active {
+        border-color: var(--accent-color);
+    }
+    
+    .pd-main-img {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+        display: block;
+        transition: transform 0.4s ease;
+        transform-origin: center center;
+        cursor: zoom-in;
+    }
+
+    .pd-main-img.zoomed {
+        transform: scale(1.3);
+        cursor: zoom-out;
+    }
+
+    /* Hover Zoom Container */
+    .pd-image-zoom-container {
+        position: relative;
+        width: 100%;
+        height: 500px;
+    }
+
+    .pd-main-img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: block;
+        cursor: crosshair;
+    }
+
+    .pd-zoom-window {
+        position: absolute;
+        top: 0;
+        left: 105%;
+        width: 100%;
+        height: 100%;
+        background-color: white;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--box-shadow);
+        display: none;
+        overflow: hidden;
+        z-index: 1000;
+    }
+
+    .pd-zoom-window img {
+        position: absolute;
+        max-width: none;
+        max-height: none;
+        transform-origin: 0 0;
+    }
+
+    @media (max-width: 1200px) {
+        .pd-zoom-window {
+            display: none !important;
+        }
+    }
+
+    /* Zoom Container */
+    .pd-zoom-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        background-color: rgba(0, 0, 0, 0.9);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .pd-zoomed-img {
+        max-width: 50%;
+        max-height: 60vh;
+        object-fit: contain;
+        cursor: zoom-out;
+    }
+
+    .pd-zoom-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        color: white;
+        font-size: 40px;
+        cursor: pointer;
+        z-index: 10000;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+    }
+
+    .pd-zoom-close:hover {
+        background: rgba(255,255,255,0.2);
+    }
+
+    /* Product Info */
+    .pd-info {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .pd-breadcrumb {
+        display: flex;
+        gap: 10px;
+        font-size: 14px;
+        color: var(--gray-color);
+        margin: 20px 0 0 100px;
+    }
+
+    .pd-breadcrumb a {
+        color: var(--gray-color);
+        text-decoration: none;
+    }
+
+    .pd-breadcrumb a:hover {
+        color: var(--accent-color);
+    }
+
+    .pd-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--primary-color);
+        margin: 0;
+    }
+
+    .pd-meta {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .pd-rating {
+        color: #ffc107;
+    }
+
+    .pd-price-box {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .pd-price {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .pd-offer-tag {
+        display: inline-block;
+        background-color: #e74c3c;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .pd-price-amount {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .pd-final-price {
+        font-size: 28px;
+        font-weight: 700;
+        color: #e74c3c;
+    }
+    
+    .pd-regular-price {
+        font-size: 18px;
+        color: #7f8c8d;
+        text-decoration: line-through;
+    }
+    
+    .pd-discount-percentage {
+        background-color: #f0f2f5;
+        color: #2ecc71;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .pd-stock {
+        color: #28a745;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .pd-divider {
+        height: 1px;
+        background-color: var(--border-color);
+        margin: 15px 0;
+    }
+
+    .pd-description {
+        color: var(--gray-color);
+        line-height: 1.6;
+    }
+
+    /* Quantity Controls */
+    .pd-quantity {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+
+    .pd-qty-input {
+        display: flex;
+        align-items: center;
+        border: 1px solid var(--border-color);
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        width: 140px;
+        background-color: white;
+    }
+
+    .pd-qty-btn {
+        width: 40px;
+        height: 40px;
+        border: none;
+        background-color: var(--light-bg);
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+    }
+
+    .pd-qty-btn:hover {
+        background-color: var(--hover-color);
+    }
+
+    .pd-qty-value {
+        width: 60px;
+        height: 40px;
+        border: none;
+        border-left: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
+        text-align: center;
+        font-size: 16px;
+        background-color: white;
+    }
+
+    /* Action Buttons */
+    .pd-actions {
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .pd-btn {
+        padding: 12px 25px;
+        border-radius: var(--border-radius);
+        border: none;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .pd-btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+        flex: 2;
+    }
+
+    .pd-btn-primary:hover {
+        background-color: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+
+    .pd-btn-secondary {
+        background-color: white;
+        color: var(--primary-color);
+        border: 1px solid var(--border-color);
+        flex: 1;
+    }
+
+    .pd-btn-secondary:hover {
+        background-color: var(--light-bg);
+        transform: translateY(-2px);
+    }
+
+    .pd-btn-success {
+        background-color: var(--accent-color);
+        color: white;
+        flex: 2;
+    }
+
+    .pd-btn-success:hover {
+        background-color: #c93333;
+        transform: translateY(-2px);
+    }
+
+    /* Wishlist Button */
+    .pd-btn-wishlist {
+        background-color: white;
+        color: var(--accent-color);
+        border: 1px solid var(--accent-color);
+        padding: 12px;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+    }
+
+    .pd-btn-wishlist:hover {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .pd-btn-wishlist.active {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    @media (max-width: 992px) {
+        .pd-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .pd-gallery-flex {
+            flex-direction: column-reverse;
+        }
+
+        .pd-thumbs {
+            flex-direction: row;
+            max-height: none;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .pd-main-img {
+            height: 350px;
+        }
+
+        .pd-actions {
+            flex-direction: column;
+        }
+
+        .pd-btn {
+            width: 100%;
+        }
+    }
+
+    .related-products-container {
+        margin: 60px 0;
+        padding: 20px 0;
+        background-color: var(--light-bg);
+    }
+    
+    .related-products-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 25px;
+        color: var(--primary-color);
+        position: relative;
+        padding-bottom: 10px;
+    }
+    
+    .related-products-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background-color: var(--accent-color);
+    }
+    
+    .related-products-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+    }
+    
+    .related-product-card {
+        background-color: white;
+        border-radius: var(--border-radius);
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .related-product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .related-product-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .related-product-image {
+        height: 200px;
+        overflow: hidden;
+        padding-top: 20px;
+    }
+    
+    .related-product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition: transform 0.3s ease;
+    }
+    
+    .related-product-card:hover .related-product-image img {
+        transform: scale(1.05);
+    }
+    
+    .related-product-info {
+        padding: 15px;
+    }
+    
+    .related-product-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--text-color);
+        line-height: 1.3;
+        height: 42px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+    
+    .related-product-brand {
+        font-size: 14px;
+        color: var(--gray-color);
+        margin-bottom: 10px;
+    }
+    
+    .related-product-price {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .current-price {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--accent-color);
+    }
+    
+    .original-price {
+        font-size: 14px;
+        text-decoration: line-through;
+        color: var(--gray-color);
+    }
+    
+    .discount-tag {
+        background-color: var(--accent-color);
+        color: white;
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    
+    .no-related-products {
+        text-align: center;
+        padding: 20px;
+        color: var(--gray-color);
+        font-style: italic;
+    }
+    
+    @media (max-width: 992px) {
+        .related-products-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .related-products-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .related-products-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+
+
+<div class="pd-container">
+    <div class="pd-grid">
+        <!-- Product Gallery -->
+        <div class="pd-gallery">
+            <div class="pd-gallery-flex">
+                <div class="pd-thumbs">
+                    <% product.productImage.forEach((image, index) => { %>
+                        <img src="/uploads/product-images/<%= image %>" 
+                             alt="<%= product.productName %> - Image <%= index + 1 %>"
+                             class="pd-thumb <%= index === 0 ? 'active' : '' %>"
+                             onclick="changePdImage(this.src, <%= index %>)">
+                    <% }) %>
+                </div>
+                <div class="pd-main-image">
+                    <div class="pd-image-zoom-container" id="imageZoomContainer" onmousemove="zoomImage(event)" onmouseenter="showZoomWindow()" onmouseleave="hideZoomWindow()">
+                        <img src="/uploads/product-images/<%= product.productImage[0] %>" 
+                             alt="<%= product.productName %>"
+                             class="pd-main-img"
+                             id="pdMainImage">
+                        <div class="pd-zoom-window" id="zoomWindow">
+                            <img src="/uploads/product-images/<%= product.productImage[0] %>" 
+                                 alt="Zoomed view"
+                                 id="zoomImage">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="pd-info">
+
+            <h1 class="pd-title"><%= product.productName %></h1>
+
+            <div class="pd-meta">
+                <!-- <div class="pd-rating">
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star"></i>
+                    <i class="fas fa-star-half-alt"></i>
+                    <span>(4.5)</span>
+                </div> -->
+                <span>SKU: <%= product._id.toString().substring(0, 8).toUpperCase() %></span>
+            </div>
+
+            <% 
+            // Fix hasOffers check to properly detect offers
+            const hasOffers = (Array.isArray(allOffers) && allOffers.length > 0) ||
+                             (Array.isArray(productOffers) && productOffers.length > 0) ||
+                             (Array.isArray(categoryOffers) && categoryOffers.length > 0) ||
+                             (Array.isArray(brandOffers) && brandOffers.length > 0);
+
+            // Get the best offer (already sorted by highest discount)
+            const bestOffer = hasOffers && allOffers && allOffers.length > 0 ? allOffers[0] : null;
+            %>
+
+            <div class="pd-price-box">
+                <% 
+                let finalPrice = product.regularPrice;
+                let discountPercentage = 0;
+                
+                if (typeof bestOffer !== 'undefined' && bestOffer && bestOffer.discountAmount > 0) {
+                    discountPercentage = bestOffer.discountAmount;
+                    finalPrice = product.regularPrice - (product.regularPrice * discountPercentage / 100);
+                }
+                %>
+
+                <div class="pd-price">
+                    <div class="pd-price-amount">
+                        <span class="pd-final-price">₹<%= finalPrice.toLocaleString('en-IN') %></span>
+                        <% if (discountPercentage > 0) { %>
+                        <span class="pd-regular-price">₹<%= product.regularPrice.toLocaleString('en-IN') %></span>
+                        <% } %>
+                        <% if (discountPercentage > 0) { %>
+                            <span class="pd-discount-percentage">
+                                <%= discountPercentage %>% Off
+                            </span>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pd-stock">
+                <% if (product.quantity > 0) { %>
+                    <% 
+                      let stockColor = "#27ae60"; // Green for good stock
+                      let stockText = "In Stock";
+                      if (product.quantity < 5) {
+                        stockColor = "#e67e22"; // Orange for low stock
+                        stockText = "Low Stock";
+                      }
+                    %>
+                    <i class="fas fa-check-circle" style="color: <%= stockColor %>;"></i>
+                    <span style="color: <%= stockColor %>;"><%= stockText %> (<%= product.quantity %> available)</span>
+                    
+                    <% if (product.quantity < 5) { %>
+                      <div style="margin-top: 5px; font-size: 13px; color: #e67e22;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Hurry! Only a few items left.
+                      </div>
+                    <% } %>
+                <% } else { %>
+                    <i class="fas fa-times-circle" style="color: #e74c3c;"></i>
+                    <span style="color: #e74c3c;">Out of Stock</span>
+                    <div style="margin-top: 5px; font-size: 13px; color: #e74c3c;">
+                      This item is currently unavailable.
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="pd-divider"></div>
+
+            <p class="pd-description"><%= product.description %></p>
+
+            <div class="pd-quantity">
+                <div class="pd-qty-input">
+                    <button class="pd-qty-btn" onclick="updatePdQuantity(-1)">-</button>
+                    <input type="number" class="pd-qty-value" id="pdQuantity" value="1" min="1" max="<%= product.quantity %>">
+                    <button class="pd-qty-btn" onclick="updatePdQuantity(1)">+</button>
+                </div>
+            </div>
+
+            <div class="pd-actions">
+                <button class="pd-btn pd-btn-primary" onclick="addPdToCart('<%= product._id %>')" <%= product.quantity < 1 ? 'disabled' : '' %> 
+                   <%= product.quantity < 1 ? 'style="background-color: #ccc; cursor: not-allowed;"' : '' %>>
+                    <i class="fas fa-shopping-cart"></i>
+                    Add to Cart
+                </button>
+                <button class="pd-btn-wishlist" id="wishlistBtn" onclick="togglePdWishlist('<%= product._id %>')">
+                    <i class="far fa-heart"></i>
+                </button>
+                <!-- <button class="pd-btn pd-btn-success" onclick="buyPdNow('<%= product._id %>')" <%= product.quantity < 1 ? 'disabled' : '' %>
+                   <%= product.quantity < 1 ? 'style="background-color: #ccc; cursor: not-allowed;"' : '' %>>
+                    <i class="fas fa-bolt"></i>
+                    Buy Now
+                </button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Zoom Overlay -->
+<div class="pd-zoom-overlay" id="zoomOverlay" onclick="closeZoom()">
+    <span class="pd-zoom-close" onclick="event.stopPropagation()">&times;</span>
+    <img src="" alt="Zoomed product image" class="pd-zoomed-img" id="zoomedImage" onclick="event.stopPropagation()">
+</div>
+<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.6.16/dist/sweetalert2.all.min.js"></script>
+
+<script>
+    // Quantity controls
+    function updatePdQuantity(change) {
+        const input = document.getElementById('pdQuantity');
+        const currentValue = parseInt(input.value);
+        const maxQuantity = parseInt('<%= product.quantity %>');
+        
+        let newValue = currentValue + change;
+        if (newValue < 1) newValue = 1;
+        if (newValue > maxQuantity) newValue = maxQuantity;
+        
+        input.value = newValue;
+    }
+
+    // Apply offer functionality
+    function applyOffer(productId, offerType, discountPercentage, expiryDate, categoryId = null, brandName = null) {
+        // Check if user is admin (handled on server side too)
+        // Don't need client-side check but it improves user experience
+
+        // Create request data
+        const requestData = {
+            productId: productId,
+            offerType: offerType,
+            discountPercentage: discountPercentage,
+            expiryDate: expiryDate
+        };
+        
+        // Add category ID if it's a category offer
+        if (categoryId) {
+            requestData.categoryId = categoryId;
+        }
+        
+        // Add brand name if it's a brand offer
+        if (brandName) {
+            requestData.brandName = brandName;
+        }
+        
+        // Show loading indicator
+        Swal.fire({
+            title: 'Applying offer...',
+            text: 'Please wait while we apply this offer',
+            allowOutsideClick: false,                   
+            jdidOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        
+        // Send offer data to server
+        fetch('/admin/offers/apply', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(result => {
+            if (result.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Offer Applied!',
+                    text: `The ${offerType} has been successfully applied.`,
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Reload the page to show the applied offer
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: result.message || 'Failed to apply the offer'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request'
+            });
+        });
+    }
+
+    // Validate quantity input
+    document.getElementById('pdQuantity').addEventListener('change', function(e) {
+        const value = parseInt(e.target.value);
+        const maxQuantity = parseInt('<%= product.quantity %>');
+        
+        if (value < 1) e.target.value = 1;
+        if (value > maxQuantity) e.target.value = maxQuantity;
+    });
+
+    // Zoom functionality
+    function zoomImage(e) {
+        const container = document.getElementById('imageZoomContainer');
+        const mainImg = document.getElementById('pdMainImage');
+        const zoomWindow = document.getElementById('zoomWindow');
+        const zoomImg = document.getElementById('zoomImage');
+        
+        // Get container and image dimensions
+        const rect = container.getBoundingClientRect();
+        const mainImgRect = mainImg.getBoundingClientRect();
+        
+        // Calculate actual image dimensions and position within container
+        const imageWidth = mainImg.naturalWidth;
+        const imageHeight = mainImg.naturalHeight;
+        const scale = Math.min(mainImgRect.width / imageWidth, mainImgRect.height / imageHeight);
+        const displayedWidth = imageWidth * scale;
+        const displayedHeight = imageHeight * scale;
+        
+        // Calculate image offset within container
+        const imageOffsetX = (mainImgRect.width - displayedWidth) / 2;
+        const imageOffsetY = (mainImgRect.height - displayedHeight) / 2;
+        
+        // Calculate mouse position relative to the actual image
+        const x = e.clientX - rect.left - imageOffsetX;
+        const y = e.clientY - rect.top - imageOffsetY;
+        
+        // Calculate position as percentage of the actual image
+        const xPercent = (x / displayedWidth) * 100;
+        const yPercent = (y / displayedHeight) * 100;
+        
+        // Set zoom level
+        const zoomLevel = 2.5;
+        
+        // Calculate dimensions for zoomed image
+        const zoomWidth = mainImgRect.width * zoomLevel;
+        const zoomHeight = mainImgRect.height * zoomLevel;
+        
+        // Update zoom image size
+        zoomImg.style.width = `${zoomWidth}px`;
+        zoomImg.style.height = `${zoomHeight}px`;
+        
+        // Calculate and set position of zoomed image
+        // Adjust the multiplier to fine-tune the alignment
+        const moveX = (xPercent * zoomWidth) / 100;
+        const moveY = (yPercent * zoomHeight) / 100;
+        
+        zoomImg.style.left = `${-moveX + (mainImgRect.width / 2)}px`;
+        zoomImg.style.top = `${-moveY + (mainImgRect.height / 2)}px`;
+    }
+
+    function showZoomWindow() {
+        const zoomWindow = document.getElementById('zoomWindow');
+        zoomWindow.style.display = 'block';
+    }
+
+    function hideZoomWindow() {
+        const zoomWindow = document.getElementById('zoomWindow');
+        zoomWindow.style.display = 'none';
+    }
+
+    // Update zoom when changing images
+    function changePdImage(src, index) {
+        document.getElementById('pdMainImage').src = src;
+        document.getElementById('zoomImage').src = src;
+        document.querySelectorAll('.pd-thumb').forEach(thumb => thumb.classList.remove('active'));
+        document.querySelectorAll('.pd-thumb')[index].classList.add('active');
+    }
+
+    function closeZoom() {
+        const overlay = document.getElementById('zoomOverlay');
+        overlay.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close zoom on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeZoom();
+        }
+    });
+
+    // Wishlist functionality
+    let isInWishlist = false;
+    function togglePdWishlist(productId) {
+        const wishlistBtn = document.getElementById('wishlistBtn');
+        const heartIcon = wishlistBtn.querySelector('i');
+        
+        isInWishlist = !isInWishlist;
+        
+        if (isInWishlist) {
+            wishlistBtn.classList.add('active');
+            heartIcon.classList.remove('far');
+            heartIcon.classList.add('fas');
+        } else {
+            wishlistBtn.classList.remove('active');
+            heartIcon.classList.remove('fas');
+            heartIcon.classList.add('far');
+        }
+        
+        // Add your wishlist logic here
+        console.log('Toggle wishlist for:', productId, 'Status:', isInWishlist);
+    }
+
+    // Cart functionality
+    function addPdToCart(productId) {
+    const quantity = parseInt(document.getElementById('pdQuantity').value);
+    const availableQuantity = parseInt('<%= product.quantity %>');
+    
+    // Check if enough stock is available
+    if (quantity > availableQuantity) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Insufficient Stock',
+            text: `Only ${availableQuantity} items available in stock.`
+        });
+        return;
+    }
+    
+    <% 
+    // Determine the correct price (offer price or regular price)
+    let priceToUse = product.salePrice;
+    if (typeof bestOffer !== 'undefined' && bestOffer && bestOffer.discountAmount > 0) {
+        priceToUse = product.regularPrice - (product.regularPrice * bestOffer.discountAmount / 100);
+    }
+    %>
+    
+    const price = parseFloat('<%= priceToUse %>');
+
+    fetch('/cart/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            productId: productId,
+            quantity: quantity,
+            price: price,
+            totalPrice: price * quantity
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Added to Cart!',
+                text: 'Product added to cart successfully!',
+                showConfirmButton: false,
+                timer: 1500
+            });
+            
+            // Update cart count in navbar if it exists
+            const cartCountElement = document.querySelector('.cart-count');
+            if (cartCountElement) {
+                const currentCount = parseInt(cartCountElement.textContent) || 0;
+                cartCountElement.textContent = currentCount + 1;
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed',
+                text: data.message || 'Failed to add product to cart'
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to add product to cart'
+        });
+    });
+}
+
+
+    // Buy Now functionality
+    function buyPdNow(productId) {
+        const quantity = parseInt(document.getElementById('pdQuantity').value);
+        const availableQuantity = parseInt('<%= product.quantity %>');
+        
+        if (quantity > availableQuantity) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Insufficient Stock',
+                text: `Only ${availableQuantity} items available in stock.`
+            });
+            return;
+        }
+        
+        const price = parseFloat('<%= product.salePrice %>');
+        
+        // Instead of adding to cart, redirect to checkout with product info in URL params
+        window.location.href = '/checkout/buy-now?productId=' + productId + '&quantity=' + quantity;
+    }
+</script>
+
+<!-- Related Products Section -->
+<div class="pd-container">
+    <% 
+    // Set offer expiry dates
+    const defaultExpiryDate = new Date();
+    defaultExpiryDate.setDate(defaultExpiryDate.getDate() + 30); // Default 30 days from now
+    // Format the expiry date
+    const getBestOfferExpiryDate = () => {
+        if (bestOffer && bestOffer.validUpto) {
+            return new Date(bestOffer.validUpto).toLocaleDateString('en-IN', { 
+                day: 'numeric', 
+                month: 'short', 
+                year: 'numeric' 
+            });
+        }
+        return new Date(defaultExpiryDate).toLocaleDateString('en-IN', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+    };
+    
+    const formattedExpiryDate = getBestOfferExpiryDate(); %>
+    
+    <% if (hasOffers) { %>
+    <!-- New Offer Section -->
+    <div class="offer-section" style="margin: 40px 0; padding: 30px; background-color: #f8f9fa; border-radius: 8px; border: 1px solid #e2e5e9; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #e2e5e9; padding-bottom: 15px;">
+            <h3 style="font-size: 22px; color: #333333; display: flex; align-items: center; margin: 0; font-weight: 600;">
+                <i class="fas fa-tag" style="margin-right: 12px; color: var(--accent-color);"></i> Available Offers
+            </h3>
+            <% if (bestOffer) { %>
+            <div style="background-color: #3a3a3a; color: white; padding: 6px 14px; border-radius: 4px; font-size: 13px; font-weight: 500; display: flex; align-items: center;">
+                <i class="fas fa-check-circle" style="margin-right: 8px; color: #8decb3;"></i> Best Offer Applied
+            </div>
+            <% } %>
+        </div>
+        
+        <% if (bestOffer) { %>
+        <!-- Best Offer -->
+        <div class="offer-item" style="display: flex; margin-bottom: 25px; background-color: white; padding: 20px; border-radius: 6px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+            <div style="background-color: #f1f1f1; color: var(--accent-color); padding: 12px; border-radius: 50%; margin-right: 18px; flex-shrink: 0;">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <div style="flex-grow: 1;">
+                <h4 style="font-size: 17px; margin-bottom: 8px; color: #333333; font-weight: 600;"><%= bestOffer.offerLabel %>: <span style="color: var(--accent-color);"><%= bestOffer.discountAmount %>% off</span></h4>
+                <p style="font-size: 14px; color: #555555; margin-bottom: 8px;"><%= bestOffer.description %></p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px;">
+                    <span style="font-size: 13px; color: #777777; display: flex; align-items: center;"><i class="far fa-calendar-alt" style="margin-right: 5px;"></i> Valid until: <%= new Date(bestOffer.validUpto).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                    <% if (typeof user !== 'undefined' && user && user.isAdmin === true) { %>
+                    <button 
+                        onclick="applyOffer('<%- product._id %>', '<%- bestOffer.offerLabel %>', <%- bestOffer.discountAmount %>, '<%- new Date(bestOffer.validUpto).toLocaleDateString() %>')" 
+                        style="font-size: 13px; color: white; background-color: #3a3a3a; border: none; text-decoration: none; padding: 6px 14px; border-radius: 4px; font-weight: 500; transition: all 0.2s ease; cursor: pointer;">
+                        Apply Offer
+                    </button>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+        <% } %>
+        
+        <div class="offer-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 15px;">
+            <% 
+            // Get unique offers for each type
+            const displayedOffers = [];
+            
+            // Display product offers
+            if (productOffers && productOffers.length > 0) {
+                // Skip the best offer if it's already displayed
+                const filteredProductOffers = productOffers.filter(offer => 
+                    !bestOffer || offer._id.toString() !== bestOffer._id.toString()
+                );
+                
+                filteredProductOffers.forEach(offer => {
+                    displayedOffers.push(offer._id.toString());
+            %>
+            <!-- Product Offer -->
+            <div class="offer-item" style="display: flex; padding: 16px; background-color: white; border-radius: 6px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 3px solid #8c8c8c;">
+                <div style="background-color: #f1f1f1; color: #555555; padding: 10px; border-radius: 50%; margin-right: 15px; flex-shrink: 0;">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 15px; margin-bottom: 5px; color: #333333; font-weight: 600;">Product Offer: <span style="color: var(--accent-color);"><%= offer.discountAmount %>% off</span></h4>
+                    <p style="font-size: 14px; color: #555555; margin-bottom: 5px;"><%= offer.description %></p>
+                    <span style="font-size: 12px; color: #777777; display: flex; align-items: center; margin-top: 8px;"><i class="far fa-calendar-alt" style="margin-right: 5px;"></i> Valid until: <%= new Date(offer.validUpto).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                    <% if (typeof user !== 'undefined' && user && user.isAdmin === true) { %>
+                    <button 
+                        onclick="applyOffer('<%- product._id %>', 'Product Offer', <%- offer.discountAmount %>, '<%- new Date(offer.validUpto).toLocaleDateString() %>')" 
+                        style="font-size: 12px; color: white; background-color: #3a3a3a; border: none; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-weight: 500; transition: all 0.2s ease; cursor: pointer;">
+                        Apply
+                    </button>
+                    <% } %>
+                </div>
+            </div>
+            <% 
+                });
+            } 
+            %>
+            
+            <% 
+            // Display category offers
+            if (categoryOffers && categoryOffers.length > 0) {
+                // Skip the best offer if it's already displayed
+                const filteredCategoryOffers = categoryOffers.filter(offer => 
+                    !bestOffer || offer._id.toString() !== bestOffer._id.toString()
+                );
+                
+                filteredCategoryOffers.forEach(offer => {
+                    if (displayedOffers.includes(offer._id.toString())) return;
+                    displayedOffers.push(offer._id.toString());
+            %>
+            <!-- Category Offer -->
+            <div class="offer-item" style="display: flex; padding: 16px; background-color: white; border-radius: 6px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 3px solid #8c8c8c">
+                <div style="background-color: #f1f1f1; color: #555555; padding: 10px; border-radius: 50%; margin-right: 15px; flex-shrink: 0;">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 15px; margin-bottom: 5px; color: #333333; font-weight: 600;">Category Offer: <span style="color: var(--accent-color);"><%= offer.discountAmount %>% off</span></h4>
+                    <p style="font-size: 14px; color: #555555; margin-bottom: 5px;"><%= offer.description %></p>
+                    <span style="font-size: 12px; color: #777777; display: flex; align-items: center; margin-top: 8px;"><i class="far fa-calendar-alt" style="margin-right: 5px;"></i> Valid until: <%= new Date(offer.validUpto).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                    <% if (typeof user !== 'undefined' && user && user.isAdmin === true) { %>
+                    <button 
+                        onclick="applyOffer('<%- product._id %>', 'Category Offer', <%- offer.discountAmount %>, '<%- new Date(offer.validUpto).toLocaleDateString() %>', '<%- product.category._id %>')" 
+                        style="font-size: 12px; color: white; background-color: #3a3a3a; border: none; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-weight: 500; transition: all 0.2s ease; cursor: pointer;">
+                        Apply
+                    </button>
+                    <% } %>
+                </div>
+            </div>
+            <% 
+                });
+            } 
+            %>
+            
+            <% 
+            // Display brand offers
+            if (brandOffers && brandOffers.length > 0) {
+                // Skip the best offer if it's already displayed
+                const filteredBrandOffers = brandOffers.filter(offer => 
+                    !bestOffer || offer._id.toString() !== bestOffer._id.toString()
+                );
+                
+                filteredBrandOffers.forEach(offer => {
+                    if (displayedOffers.includes(offer._id.toString())) return;
+                    displayedOffers.push(offer._id.toString());
+            %>
+            <!-- Brand Offer -->
+            <div class="offer-item" style="display: flex; padding: 16px; background-color: white; border-radius: 6px; align-items: flex-start; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border-left: 3px solid #8c8c8c;">
+                <div style="background-color: #f1f1f1; color: #555555; padding: 10px; border-radius: 50%; margin-right: 15px; flex-shrink: 0;">
+                    <i class="fas fa-building"></i>
+                </div>
+                <div>
+                    <h4 style="font-size: 15px; margin-bottom: 5px; color: #333333; font-weight: 600;">Brand Offer: <span style="color: var(--accent-color);"><%= offer.discountAmount %>% off</span></h4>
+                    <p style="font-size: 14px; color: #555555; margin-bottom: 5px;"><%= offer.description %></p>
+                    <span style="font-size: 12px; color: #777777; display: flex; align-items: center; margin-top: 8px;"><i class="far fa-calendar-alt" style="margin-right: 5px;"></i> Valid until: <%= new Date(offer.validUpto).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) %></span>
+                    <% if (typeof user !== 'undefined' && user && user.isAdmin === true) { %>
+                    <button 
+                        onclick="applyOffer('<%- product._id %>', 'Brand Offer', <%- offer.discountAmount %>, '<%- new Date(offer.validUpto).toLocaleDateString() %>', null, '<%- product.brand %>')" 
+                        style="font-size: 12px; color: white; background-color: #3a3a3a; border: none; text-decoration: none; padding: 4px 10px; border-radius: 4px; font-weight: 500; transition: all 0.2s ease; cursor: pointer;">
+                        Apply
+                    </button>
+                    <% } %>
+                </div>
+            </div>
+            <% 
+                });
+            } 
+            %>
+            
+            <% if (displayedOffers.length === 0 && !bestOffer) { %>
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px 20px; color: #777;">
+                    <i class="fas fa-tag" style="font-size: 32px; margin-bottom: 15px; opacity: 0.3;"></i>
+                    <p>No offers available for this product at the moment.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<!-- Related Products Section -->
+<div class="related-products-container">
+    <div class="pd-container">
+        <h2 class="related-products-title">Related Products</h2>
+        <% if (relatedProducts && relatedProducts.length > 0) { %>
+            <div class="related-products-grid">
+                <% relatedProducts.forEach(relatedProduct => { %>
+                    <div class="related-product-card">
+                        <a href="/product/<%= relatedProduct._id %>" class="related-product-link">
+                            <div class="related-product-image">
+                                <img src="/uploads/product-images/<%= relatedProduct.productImage[0] %>" 
+                                     alt="<%= relatedProduct.productName %>"
+                                     onerror="this.src='/images/default-product.jpg'">
+                            </div>
+                            <div class="related-product-info">
+                                <h3 class="related-product-title"><%= relatedProduct.productName %></h3>
+                                <p class="related-product-brand"><%= relatedProduct.brand %></p>
+                                <div class="related-product-price">
+                                    <span class="current-price">₹<%= relatedProduct.salePrice.toLocaleString() %></span>
+                                    <% if (relatedProduct.regularPrice > relatedProduct.salePrice) { %>
+                                        <span class="original-price">₹<%= relatedProduct.regularPrice.toLocaleString() %></span>
+                                        <% const discount = Math.round((relatedProduct.regularPrice - relatedProduct.salePrice) / relatedProduct.regularPrice * 100) %>
+                                        <span class="discount-tag"><%= discount %>% OFF</span>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <p class="no-related-products">No related products found.</p>
+        <% } %>
+    </div>
+</div>
+
+<%- include("../partials/user/footer") %>

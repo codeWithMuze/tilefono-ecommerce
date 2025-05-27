@@ -1,0 +1,683 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
+  <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
+  <link rel="stylesheet" href="css/elegant-icons.css" type="text/css">
+  <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
+  <link rel="stylesheet" href="css/nice-select.css" type="text/css">
+  <link rel="stylesheet" href="css/owl.carousel.min.css" type="text/css">
+  <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSF7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      font-family: "Poppins", sans-serif;
+      padding: 0;
+      margin: 0;
+    }
+    body {
+      font-weight: light !important;
+      overflow-x: hidden;
+    }
+    .header__navbar .header__nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0 auto;
+      font-weight: normal !important;
+      padding: 20px;
+    }
+    .header__navbar .header__nav-links li {
+      margin: 0 15px;
+      font-weight: normal !important;
+    }
+    .header__navbar .header__nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: normal !important;
+    }
+    .header__navbar .header__logo {
+      font-weight: bold;
+    }
+    .header__announcement-bar .header__sign-in-link {
+      color: white;
+      text-decoration: none;
+      font-weight: normal !important;
+    }
+    .header__announcement-bar .header__dropdown .header__sign-in-link {
+      font-weight: normal !important;
+    }
+    header {
+      background-color: #fff;
+      position: sticky;
+      top: 0px;
+      right: 0;
+      left: 0;
+      z-index: 10;
+      box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
+    }
+    .header__nav-option .header__sign-in-link {
+      font-size: 16px;
+      margin-right: 15px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .header__dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .header__dropdown.active .header__dropdown-content {
+      display: block;
+    }
+    .header__dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: white;
+      min-width: 160px;
+      box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      right: 0;
+    }
+    .header__dropdown-content a {
+      color: black;
+      padding: 12px 16px;
+      text-decoration: none;
+      display: block;
+      width: 100%;
+    }
+    .header__dropdown-content a:hover {
+      background-color: #f1f1f1;
+      color: #000;
+    }
+    .header {
+      position: relative;
+      z-index: 500;
+    }
+    .header__row {
+      align-items: center;
+    }
+    .header__menu ul {
+      display: flex;
+      justify-content: center;
+    }
+    .header__nav-option {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+    .header__nav-option a {
+      display: flex;
+      align-items: center;
+    }
+    .header__logo {
+      display: flex;
+      align-items: center;
+    }
+    .header__nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 14px;
+    }
+    .header__announcement-bar {
+      background-color: #000;
+      color: white;
+      padding: 10px 0;
+      text-align: center;
+      position: relative;
+    }
+    .header__announcement-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header__sign-up-link {
+      color: white;
+      text-decoration: none;
+      /* position: absolute; */
+      margin-right: 10px;
+      left: 20px;
+    }
+    .header__language-selector {
+      color: white;
+      position: absolute;
+      right: 20px;
+      display: flex;
+      align-items: center;
+    }
+    .header__language-selector span {
+      margin-right: 5px;
+    }
+    header {
+      padding: 20px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .header__navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header__logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #000;
+      text-decoration: none;
+    }
+    .header__logo:hover {
+      color: black;
+      text-decoration: none;
+    }
+    .header__nav-links {
+      display: flex;
+      list-style: none;
+      margin: 0 auto;
+    }
+    .header__nav-links li:hover {
+      text-decoration: underline;
+    }
+    .header__nav-links li {
+      margin: 0 15px;
+    }
+    .header__nav-links a {
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+    }
+    .header__search-bar {
+      display: flex;
+      align-items: center;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+      padding: 8px 15px;
+      width: 300px;
+    }
+    .header__search-bar input {
+      border: none;
+      background: transparent;
+      width: 100%;
+      outline: none;
+      font-size: 14px;
+    }
+    .header__search-icon {
+      margin-left: 10px;
+    }
+    .header__icons {
+      display: flex;
+      align-items: center;
+    }
+    .header__icon {
+      margin-left: 20px;
+      cursor: pointer;
+    }
+    .header__nav-links .header__icon-link {
+      display: flex;
+      align-items: center;
+      padding: 15px 0;
+      color: #333;
+      text-decoration: none;
+    }
+    .header__nav-links .header__icon-link svg {
+      margin-right: 10px;
+    }
+    .header__main-content {
+      display: flex;
+      margin-top: 20px;
+    }
+    .header__sidebar {
+      width: 220px;
+      padding-right: 20px;
+    }
+    .header__category-list {
+      list-style: none;
+    }
+    .header__category-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #f5f5f5;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .header__category-item a {
+      text-decoration: none;
+      color: #333;
+      font-size: 14px;
+    }
+    .header__hero-banner {
+      background-color: #000;
+      color: white;
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+      height: 350px;
+      display: flex;
+      align-items: center;
+    }
+    .header__hero-content {
+      padding: 40px;
+      z-index: 2;
+      width: 50%;
+    }
+    .header__hero-brand {
+      display: flex;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    .header__hero-brand img {
+      width: 30px;
+      margin-right: 10px;
+    }
+    .header__hero-title {
+      font-size: 46px;
+      font-weight: bold;
+      margin: 20px 0;
+      line-height: 1.1;
+    }
+    .header__shop-now-btn {
+      background-color: transparent;
+      color: white;
+      border: none;
+      padding: 10px 0;
+      font-size: 16px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .header__shop-now-btn svg {
+      margin-left: 8px;
+    }
+    .header__hero-image {
+      position: absolute;
+      right: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 45%;
+      height: auto;
+    }
+    .header__indicators {
+      display: flex;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .header__indicator {
+      width: 10px;
+      height: 10px;
+      background-color: #ccc;
+      border-radius: 50%;
+      margin: 0 5px;
+      cursor: pointer;
+    }
+    .header__indicator.active {
+      background-color: #db4444;
+    }
+    .header__sign-in-link {
+      color: white;
+      text-decoration: none;
+    }
+    .header__language-selector>span>a:hover {
+      text-decoration: underline;
+      color: white;
+      font-weight: bold;
+    }
+    .header__mobile-menu-toggle {
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 25px;
+      height: 20px;
+      cursor: pointer;
+    }
+    .header__mobile-menu-toggle span {
+      display: block;
+      height: 2px;
+      width: 100%;
+      background-color: #000;
+    }
+    @media screen and (max-width: 1024px) {
+      .header__search-bar {
+        width: 250px;
+      }
+      .header__nav-links li {
+        margin: 0 10px;
+      }
+    }
+    @media screen and (max-width: 991px) {
+      .header__navbar {
+        flex-wrap: wrap;
+      }
+      .header__nav-links {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 15px;
+      }
+      .header__search-bar {
+        width: 200px;
+      }
+    }
+    @media screen and (max-width: 768px) {
+      .header__navbar {
+        position: relative;
+      }
+      .header__mobile-menu-toggle {
+        display: flex;
+        order: 1;
+      }
+      .header__logo {
+        order: 2;
+      }
+      .header__nav-links {
+        display: none !important;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background-color: white;
+        flex-direction: column;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        padding: 0;
+      }
+      .header__nav-links.header__show {
+        display: flex !important;
+      }
+      .header__nav-links li {
+        margin: 0;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+      }
+      .header__search-bar {
+        order: 3;
+        width: 100%;
+        margin-top: 15px;
+      }
+      .header__icons {
+        display: none !important;
+      }
+      .header__announcement-content {
+        flex-direction: column;
+        padding: 5px 0;
+      }
+      .header__language-selector {
+        position: static;
+        margin-top: 5px;
+      }
+      .header__main-content {
+        flex-direction: column;
+      }
+      .header__sidebar {
+        width: 100%;
+        padding-right: 0;
+        margin-bottom: 20px;
+      }
+      .header__hero-banner {
+        height: auto;
+        padding: 30px 0;
+      }
+      .header__hero-content {
+        width: 100%;
+        padding: 20px;
+        text-align: center;
+      }
+      .header__hero-title {
+        font-size: 32px;
+      }
+      .header__hero-image {
+        position: static;
+        transform: none;
+        max-width: 80%;
+        margin: 20px auto 0;
+        display: block;
+      }
+      .header__shop-now-btn {
+        margin: 15px auto;
+        justify-content: center;
+      }
+      .header__nav-links .header__icon-link {
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+      }
+    }
+    @media screen and (max-width: 480px) {
+      .header__logo {
+        font-size: 20px;
+      }
+      .header__announcement-bar {
+        font-size: 12px;
+      }
+      .header__hero-title {
+        font-size: 28px;
+      }
+      .header__icons .header__icon {
+        margin: 0 10px;
+      }
+      .header__icon svg {
+        width: 18px;
+        height: 18px;
+      }
+    }
+    @media screen and (min-width: 769px) {
+      .header__dropdown:hover .header__dropdown-content {
+        display: block;
+      }
+      .header__nav-links .header__icon-link {
+        display: none !important;
+      }
+      .header__icons {
+        display: flex !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header__announcement-bar">
+    <div class="header__announcement-content" style="display: flex; align-items: center; justify-content: center;">
+      <div>Summer Sale For All Budget Phones And Free Express Delivery - OFF UPTO 29%! <strong><a href="/shop" style="color: white;">ShopNow</a></strong></div>
+      <div class="header__language-selector">
+        <span>
+          <% if (user) { %>
+            <div class="header__dropdown">
+              <a href="#" class="header__sign-in-link" onclick="toggleHeaderDropdown(event)">Hello <%= locals.user.name %> !</a>
+              <div class="header__dropdown-content">
+                <a href="/userProfile" style="color: black;">Profile</a>
+                <a href="/logout" style="color: black;">Logout</a>
+              </div>
+            </div>
+          <% } else { %>
+            <a href="/signup" class="header__sign-up-link">Sign Up</a>
+            <a href="/login" class="header__sign-in-link">Log in</a>
+          <% } %>
+        </span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+  </div>
+  <header>
+    <div class="header__nav-container">
+      <div class="header__navbar">
+        <div class="header__mobile-menu-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <a href="/home" class="header__logo" style="font-family: 'Unbounded', cursive; color: #454648; font-size: 1.7rem; padding: 2px 10px;">tileFono</a>
+        <ul class="header__nav-links" id="headerNavLinks">
+          <li><a href="/home">Home</a></li>
+          <li><a href="/shop">Shop</a></li>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li class="header__icon-link">
+            <a href="<%= user ? '/userProfile' : '/login?redirect=userProfile' %>" <% if (!user) { %>onclick="showHeaderProfileAlert(event)"<% } %> class="header__icon-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Profile
+            </a>
+          </li>
+          <li class="header__icon-link">
+            <a href="<%= user ? '/wishlists' : '/login?redirect=wishlists' %>" <% if (!user) { %>onclick="showHeaderWishlistAlert(event)"<% } %> class="header__icon-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Wishlist
+            </a>
+          </li>
+          <li class="header__icon-link">
+            <a href="<%= user ? '/cart' : '/login?redirect=cart' %>" <% if (!user) { %>onclick="showHeaderLoginAlert(event)"<% } %> class="header__icon-link">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 22a1 1 0 100-2 1 1 0 000 2zM20 22a1 1 0 100-2 1 1 0 000 2zM1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Cart
+            </a>
+          </li>
+        </ul>
+        <div class="header__icons">
+          <div class="header__icon">
+            <a href="<%= user ? '/userProfile' : '/login?redirect=userProfile' %>" <% if (!user) { %>onclick="showHeaderProfileAlert(event)"<% } %>>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+          <div class="header__icon">
+            <a href="<%= user ? '/wishlists' : '/login?redirect=wishlists' %>" <% if (!user) { %>onclick="showHeaderWishlistAlert(event)"<% } %>>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+          <div class="header__icon">
+            <a href="<%= user ? '/cart' : '/login?redirect=cart' %>" <% if (!user) { %>onclick="showHeaderLoginAlert(event)"<% } %>>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 22a1 1 0 100-2 1 1 0 000 2zM20 22a1 1 0 100-2 1 1 0 000 2zM1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <script>
+    function toggleHeaderDropdown(event) {
+      event.preventDefault();
+      const dropdown = event.currentTarget.closest('.header__dropdown');
+      if (dropdown) {
+        dropdown.classList.toggle('active');
+        console.log('Header dropdown toggled:', dropdown.classList.contains('active'));
+      } else {
+        console.error('Header dropdown element not found');
+      }
+    }
+    document.addEventListener('click', function (event) {
+      const dropdowns = document.querySelectorAll('.header__dropdown');
+      dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(event.target)) {
+          dropdown.classList.remove('active');
+        }
+      });
+    });
+    function toggleHeaderMobileMenu(event) {
+      event.preventDefault();
+      const navLinks = document.getElementById('headerNavLinks');
+      if (navLinks) {
+        navLinks.classList.toggle('header__show');
+        console.log('Header mobile menu toggled:', navLinks.classList.contains('header__show'));
+      } else {
+        console.error('headerNavLinks element not found');
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      const mobileToggle = document.querySelector('.header__mobile-menu-toggle');
+      if (mobileToggle) {
+        mobileToggle.removeEventListener('click', toggleHeaderMobileMenu);
+        mobileToggle.addEventListener('click', toggleHeaderMobileMenu);
+      } else {
+        console.error('Header mobile menu toggle element not found');
+      }
+      if (window.innerWidth <= 768) {
+        const navLinks = document.getElementById('headerNavLinks');
+        if (navLinks) {
+          navLinks.classList.remove('header__show');
+        }
+      }
+    });
+    function showHeaderLoginAlert(event) {
+      event.preventDefault();
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Login Required',
+          text: 'Please login to view your cart items',
+          icon: 'info',
+          confirmButtonText: 'Login Now',
+          showCancelButton: true,
+          cancelButtonText: 'Later',
+          confirmButtonColor: '#e63946',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/login?redirect=cart';
+          }
+        });
+      } else {
+        if (confirm('Please login to view your cart items. Do you want to login now?')) {
+          window.location.href = '/login?redirect=cart';
+        }
+      }
+    }
+    function showHeaderWishlistAlert(event) {
+      event.preventDefault();
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Login Required',
+          text: 'Please login to view your wishlist',
+          icon: 'info',
+          confirmButtonText: 'Login Now',
+          showCancelButton: true,
+          cancelButtonText: 'Later',
+          confirmButtonColor: '#e63946',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/login?redirect=wishlists';
+          }
+        });
+      } else {
+        if (confirm('Please login to view your wishlist. Do you want to login now?')) {
+          window.location.href = '/login?redirect=wishlists';
+        }
+      }
+    }
+    function showHeaderProfileAlert(event) {
+      event.preventDefault();
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          title: 'Login Required',
+          text: 'Please login to view your profile',
+          icon: 'info',
+          confirmButtonText: 'Login Now',
+          showCancelButton: true,
+          cancelButtonText: 'Later',
+          confirmButtonColor: '#e63946',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/login?redirect=userProfile';
+          }
+        });
+      } else {
+        if (confirm('Please login to view your profile. Do you want to login now?')) {
+          window.location.href = '/login?redirect=userProfile';
+        }
+      }
+    }
+  </script>
+</body>
+</html>

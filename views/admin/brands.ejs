@@ -1,0 +1,662 @@
+<%- include("../../views/partials/admin/header") %>
+
+<style>
+    .status-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    margin-right: 8px;
+}
+
+.status-badge.active {
+    background-color: var(--card-bg-blue);
+    color: white;
+}
+
+.status-badge.blocked {
+    background-color: var(--card-bg-red);
+    color: white;
+}
+
+.status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 8px;
+  }
+
+  .status-badge.active {
+      background-color: #27ae60; /* A professional green */
+      color: #fff;
+  }
+
+  .status-badge.blocked {
+      background-color: #e74c3c; /* A professional red */
+      color: #fff;
+  }
+
+  /* Button Styles */
+  .btn {
+      border: none;
+      padding: 5px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+  }
+
+  .btn:hover {
+      transform: translateY(-2px);
+  }
+
+  /* Block Button */
+  .block-btn {
+      background-color: #e74c3c;
+      color: #fff;
+  }
+  .block-btn:hover {
+      background-color: #c0392b;
+  }
+
+  /* Unblock Button */
+  .unblock-btn {
+      background-color: #3498db;
+      color: #fff;
+  }
+  .unblock-btn:hover {
+      background-color: #2980b9;
+  }
+
+  /* Delete Button */
+  .delete-btn {
+      background-color: #f39c12;
+      color: #fff;
+  }
+  .delete-btn:hover {
+      background-color: #d68910;
+  }
+
+  /* Additional styling for the form buttons */
+  button[type="submit"] {
+      background-color: var(--sidebar-bg);
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.3s ease;
+  }
+  button[type="submit"]:hover {
+      background-color: darken(var(--sidebar-bg), 10%);
+  }
+.btn{
+    margin-left: 20px;
+}
+.swal-delete-popup {
+  background-color: #fefefe;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.swal-confirm-btn {
+  background-color: #d33 !important;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.swal-cancel-btn {
+  background-color: #3085d6 !important;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+  
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 10px;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover:not(.active) {
+    background-color: var(--table-hover);
+}
+
+.page-link.active {
+    background-color: var(--sidebar-bg);
+    color: white;
+    border-color: var(--sidebar-bg);
+}
+
+.page-link:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+</style>
+            <!-- Stats Cards for Brands -->
+            <div class="stats-grid">
+                <div class="stat-card purple">
+                    <div class="stat-icon">📱</div>
+                    <div class="stat-info">
+                        <h3>Total Brands</h3>
+                        <div class="value"><%= totalBrands%></div>
+                    </div>
+                </div>
+                <div class="stat-card blue">
+                    <div class="stat-icon">✅</div>
+                    <div class="stat-info">
+                        <h3>Active Brands</h3>
+                        <div class="value"><%= activeBrands%></div>
+                    </div>
+                </div>
+                <div class="stat-card red">
+                    <div class="stat-icon">❌</div>
+                    <div class="stat-info">
+                        <h3>Blocked Brands</h3>
+                        <div class="value"><%= blockedBrands%></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- add brands option -->
+             <!-- Create Category Section -->
+            <div class="product-section" id="create-category-section">
+                <div class="section-header">
+                    <h2 class="section-title">Create New Brand</h2>
+                    <button class="download-btn" id="toggle-create-form">
+                        <span>Show/Hide Form</span>
+                    </button>
+                </div>
+                <div id="create-category-form" style="display: none;">
+                        <form id="brand-form" method="POST" action="/admin/addBrand" enctype="multipart/form-data" >
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                            <div>
+                                <label for="category-name" style="display: block; margin-bottom: 8px; font-weight: 500;">Brand Name</label>
+                                <input type="text" id="category-name" name="name" placeholder="Enter category name" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--bg-secondary); color: var(--text-primary);">
+                            </div>
+                            <div>
+                                <label for="category-image" style="display: block; margin-bottom: 8px; font-weight: 500;">Brand Image</label>
+                                <input type="file" id="category-image" name="image" accept="image/*" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--bg-secondary); color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <div style="display: flex; justify-content: flex-end;">
+                            <button type="submit" style="background-color: var(--sidebar-bg); color: white; border: none; border-radius: 4px; padding: 10px 20px; cursor: pointer;">Add Brand</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Brand Management Section -->
+            <div class="product-section">
+                <div class="section-header">
+                    <h2 class="section-title">Manage Brands</h2>
+                    <div class="date-filter">
+                        <input type="text" id="brand-search" class="date-input" placeholder="🔍 Search brand..." style="width: 400px; height: 40px;">
+                    </div>                    
+                    <button class="download-btn" id="add-category-btn">
+                        <span>Add New Brand</span>
+                        <span>+</span>
+                    </button>
+                </div>
+
+                <!-- Brands Table -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Brand Name</th>
+                            <th>Logo</th>
+                            <th>Products</th>
+                            <th>Status</th>
+                            <th>Block/Unblock</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <%data.reverse().forEach((brand,index)=>{%>
+                        <tr>
+                            
+                            <td><%= index + 1 %></td>
+                            <td><%= brand.brandName %></td>
+                            <td><img src="/uploads/re-image/<%= brand.brandImage %>" alt="<%= brand.brandName %>" class="product-image"></td>
+                            <td>42</td>
+                            <td>
+                                <% if(brand.isBlocked===true) { %>
+                                <span class="badge rounded-pill alert-danger" style="color: #e74c3c;">Blocked</span>
+                                <% } else { %>
+                                <span class="badge rounded-pill alert-success " style="color:green;">Active</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% if(brand.isBlocked===false) {%>
+                                    <button class="btn btn-danger"  style="background-color: #c0392b;"><a href="/admin/blockBrand?id=<%=brand._id%>" class="a" style="text-decoration: none; color: white;">Block</a></button>
+                                <% } else{ %>
+                                    <button class="btn btn-success"  style="background-color: green;" ><a href="/admin/unBlockBrand?id=<%=brand._id%>" class="a" style="text-decoration: none; color: white;">Unblock</a></button>
+                                    <%}%>
+                                </td>                            
+                            <td>
+                                <!-- <button class="edit-btn" data-id="1" style="background: var(--card-bg-blue); color: white; border: none; padding: 5px 10px; border-radius: 4px; margin-right: 5px;">Edit</button> -->
+
+                                <button 
+                                class="delete-btn" 
+                                data-id="<%= brand._id %>" 
+                                style="background: var(--card-bg-red); color: white; border: none; padding: 7px 16px; border-radius: 4px;">
+                                Delete
+                              </button>
+                                                          </td>
+                        </tr>
+                        <%}) %>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button id="prevPage" <%= currentPage <= 1 ? 'disabled' : '' %>>«</button>
+                    <% for(let i = 1; i <= totalPages; i++) { %>
+                        <button class="page-btn <%= i === currentPage ? 'active' : '' %>" data-page="<%= i %>"><%= i %></button>
+                    <% } %>
+                    <button id="nextPage" <%= currentPage >= totalPages ? 'disabled' : '' %>>»</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Brand Modal -->
+    <div id="brand-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background-color: var(--card-bg); padding: 20px; border-radius: 10px; width: 500px; max-width: 90%;">
+            <h2 id="modal-title">Add New Brand</h2>
+            <form id="brand-form" method="POST" action="">
+                <div style="margin-bottom: 15px;">
+                    <label for="brand-name" style="display: block; margin-bottom: 5px;">Brand Name</label>
+                    <input type="text" id="brand-name" name="name" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);" required>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="brand-logo" style="display: block; margin-bottom: 5px;">Brand Logo</label>
+                    <input type="file" id="brand-logo" name="image" accept="image/*" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label for="brand-status" style="display: block; margin-bottom: 5px;">Status</label>
+                    <select id="brand-status" name="brandStatus" style="width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; background-color: var(--bg-secondary); color: var(--text-primary);">
+                        <option value="active">Active</option>
+                        <option value="blocked">Blocked</option>
+                    </select>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" id="close-modal" style="padding: 8px 15px; background-color: var(--border-color); border: none; border-radius: 4px; cursor: pointer;">Cancel</button>
+                    <button type="submit" style="padding: 8px 15px; background-color: var(--sidebar-bg); color: white; border: none; border-radius: 4px; cursor: pointer;">Save Brand</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+    <script>
+
+$(document).on('click', '.delete-btn', function (e) {
+    e.preventDefault();
+    const brandId = $(this).data('id');
+
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this action!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Yes, delete it!',
+      cancelButtonText: 'No, cancel!',
+      reverseButtons: true, // Reverses the order of buttons for better UX
+      customClass: {
+        popup: 'swal-delete-popup', // Custom class for styling
+        confirmButton: 'swal-confirm-btn', // Custom class for confirm button
+        cancelButton: 'swal-cancel-btn' // Custom class for cancel button
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // Show a loading state while deleting
+        Swal.fire({
+          title: 'Deleting...',
+          text: 'Please wait while the brand is being deleted.',
+          allowOutsideClick: false,
+          showConfirmButton: false,
+          willOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
+        // Perform the deletion using AJAX
+        $.ajax({
+          url: `/admin/deleteBrand?id=${brandId}`,
+          method: 'GET', // or 'POST' depending on your backend
+          success: function(response) {
+            Swal.fire({
+              title: 'Deleted!',
+              text: 'The brand has been deleted successfully.',
+              icon: 'success',
+              confirmButtonColor: '#3085d6',
+              confirmButtonText: 'OK'
+            }).then(() => {
+              // Refresh the page or remove the deleted item from the DOM
+              location.reload(); // or use JavaScript to remove the element
+            });
+          },
+          error: function(xhr, status, error) {
+            Swal.fire({
+              title: 'Error!',
+              text: 'There was an error deleting the brand. Please try again.',
+              icon: 'error',
+              confirmButtonColor: '#d33',
+              confirmButtonText: 'OK'
+            });
+          }
+        });
+      } else if (result.dismiss === Swal.DismissReason.cancel) {
+        // If canceled, show a message (optional)
+        Swal.fire({
+          title: 'Cancelled',
+          text: 'The deletion was cancelled.',
+          icon: 'info',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
+        });
+      }
+    });
+});
+
+  const brandSearchInput = document.getElementById('brand-search');
+
+brandSearchInput.addEventListener('input', function() {
+  const searchTerm = this.value.toLowerCase().trim();
+  const rows = document.querySelectorAll('table tbody tr');
+  
+  rows.forEach(row => {
+    // Use the correct cell index for brand name (2nd td)
+    const brandName = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+    
+    if (brandName.includes(searchTerm)) {
+      row.style.display = '';
+    } else {
+      row.style.display = 'none';
+    }
+  });
+  
+  // Count visible rows
+  const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none').length;
+  let noResultsRow = document.getElementById('no-results-row');
+  
+  if (visibleRows === 0) {
+    if (!noResultsRow) {
+      const tbody = document.querySelector('table tbody');
+      noResultsRow = document.createElement('tr');
+      noResultsRow.id = 'no-results-row';
+      noResultsRow.innerHTML = `<td colspan="7" style="text-align: center; padding: 20px;">No brands found matching "${searchTerm}"</td>`;
+      tbody.appendChild(noResultsRow);
+    } else {
+      noResultsRow.querySelector('td').textContent = `No brands found matching "${searchTerm}"`;
+      noResultsRow.style.display = '';
+    }
+  } else if (noResultsRow) {
+    noResultsRow.style.display = 'none';
+  }
+});
+
+// Optional: Clear search with escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && document.activeElement === brandSearchInput) {
+        brandSearchInput.value = '';
+        // Trigger the input event to refresh the table
+        brandSearchInput.dispatchEvent(new Event('input'));
+    }
+});
+    // Status toggle functionality
+    const statusToggles = document.querySelectorAll('.status-toggle');
+    statusToggles.forEach(toggle => {
+        toggle.addEventListener('change', () => {
+            const brandId = toggle.getAttribute('data-id');
+            const newStatus = toggle.value;
+            
+            // In a real app, you would update the status on the server
+            alert(`Brand status updated to "${newStatus}"`);
+        });
+    });
+
+
+    const addCategoryBtn = document.getElementById('add-category-btn');
+const createCategoryForm = document.getElementById('create-category-form');
+const createCategorySection = document.getElementById('create-category-section');
+
+addCategoryBtn.addEventListener('click', () => {
+    // Make sure the form is visible
+    createCategoryForm.style.display = 'block';
+    
+    // Scroll to the form section smoothly
+    createCategorySection.scrollIntoView({ behavior: 'smooth' });
+});
+
+// Keep the toggle functionality for the Show/Hide Form button
+const toggleCreateFormBtn = document.getElementById('toggle-create-form');
+toggleCreateFormBtn.addEventListener('click', () => {
+    if (createCategoryForm.style.display === 'none') {
+        createCategoryForm.style.display = 'block';
+    } else {
+        createCategoryForm.style.display = 'none';
+    }
+});
+
+// Also check for the add-brand-btn if it exists separately from add-category-btn
+const addBrandBtn = document.getElementById('add-brand-btn');
+if (addBrandBtn) {
+    addBrandBtn.addEventListener('click', () => {
+        // Make sure the form is visible
+        createCategoryForm.style.display = 'block';
+        
+        // Scroll to the form section smoothly
+        createCategorySection.scrollIntoView({ behavior: 'smooth' });
+    });
+}
+
+
+  $('#brand-form').on('submit', function (e) {
+    e.preventDefault(); // prevent normal form submission
+
+    const formData = new FormData(this);
+
+    $.ajax({
+      type: 'POST',
+      url: '/admin/addBrand', // same as your form's action
+      data: formData,
+      contentType: false,
+      processData: false,
+      success: function (response) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Success!',
+          text: response.message || 'Brand added successfully!',
+          timer: 2000,
+          showConfirmButton: false
+        });
+        $('#brand-form')[0].reset(); // reset the form
+      },
+      error: function (err) {
+        const errorMessage = err.responseJSON?.error || 'Something went wrong!';
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: errorMessage
+        });
+      }
+    });
+  });
+
+        // Pagination functionality
+        let currentPage = <%= currentPage || 1 %>;
+        const totalPages = <%= totalPages %>;
+
+        function updateTable(data) {
+            const tbody = document.querySelector('table tbody');
+            tbody.innerHTML = ''; // Clear existing rows
+            
+            data.forEach((brand, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${brand.brandName}</td>
+                    <td><img src="/uploads/re-image/${brand.brandImage}" alt="${brand.brandName}" class="product-image"></td>
+                    <td>42</td>
+                    <td>
+                        ${brand.isBlocked ? 
+                            '<span class="badge rounded-pill alert-danger" style="color: #e74c3c;">Blocked</span>' : 
+                            '<span class="badge rounded-pill alert-success" style="color:green;">Active</span>'
+                        }
+                    </td>
+                    <td>
+                        ${brand.isBlocked ? 
+                            `<button class="btn btn-success" style="background-color: green;">
+                                <a href="/admin/unBlockBrand?id=${brand._id}" class="a" style="text-decoration: none; color: white;">Unblock</a>
+                            </button>` :
+                            `<button class="btn btn-danger" style="background-color: #c0392b;">
+                                <a href="/admin/blockBrand?id=${brand._id}" class="a" style="text-decoration: none; color: white;">Block</a>
+                            </button>`
+                        }
+                    </td>
+                    <td>
+                        <button class="delete-btn" data-id="${brand._id}" style="background: var(--card-bg-red); color: white; border: none; padding: 7px 16px; border-radius: 4px;">
+                            Delete
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updatePaginationUI() {
+            // Update active page button
+            document.querySelectorAll('.page-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.page) === currentPage) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Update prev/next buttons
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+        }
+
+        function loadPage(page) {
+            currentPage = page;
+            
+            // Show loading state
+            const tbody = document.querySelector('table tbody');
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Loading...</td></tr>';
+
+            // Fetch data for the new page
+            fetch(`/admin/brands?page=${page}`)
+                .then(response => response.text())
+                .then(html => {
+                    // Parse the HTML response
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Extract the table data
+                    const newData = Array.from(doc.querySelectorAll('table tbody tr')).map(row => {
+                        const brandName = row.querySelector('td:nth-child(2)').textContent;
+                        const brandImage = row.querySelector('td:nth-child(3) img').src.split('/').pop();
+                        const isBlocked = row.querySelector('td:nth-child(5) span').textContent === 'Blocked';
+                        const brandId = row.querySelector('.delete-btn').dataset.id;
+                        
+                        return { brandName, brandImage, isBlocked, _id: brandId };
+                    });
+
+                    // Update the table and pagination UI
+                    updateTable(newData);
+                    updatePaginationUI();
+                })
+                .catch(error => {
+                    console.error('Error loading page:', error);
+                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: red;">Error loading data</td></tr>';
+                });
+        }
+
+        // Event listeners for pagination
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                loadPage(currentPage - 1);
+            }
+        });
+
+        document.getElementById('nextPage').addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                loadPage(currentPage + 1);
+            }
+        });
+
+        document.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const page = parseInt(btn.dataset.page);
+                if (page !== currentPage) {
+                    loadPage(page);
+                }
+            });
+        });
+
+        // Add styles for pagination
+        const style = document.createElement('style');
+        style.textContent = `
+            .pagination {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: 20px;
+                gap: 5px;
+            }
+            .pagination button {
+                padding: 8px 12px;
+                border: 1px solid var(--border-color);
+                background-color: var(--bg-secondary);
+                color: var(--text-primary);
+                cursor: pointer;
+                border-radius: 4px;
+                transition: all 0.3s ease;
+            }
+            .pagination button:hover:not(:disabled),
+            .pagination button:not(.active):hover {
+                background-color: var(--table-hover);
+            }
+            .pagination button:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            .pagination .active {
+                background-color: var(--sidebar-bg);
+                color: white;
+                border-color: var(--sidebar-bg);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+<%- include("../../views/partials/admin/footer") %>

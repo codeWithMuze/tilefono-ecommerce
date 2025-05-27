@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify OTP - BLAKORA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            --primary-color: #111827;
+            --accent-color: #4F46E5;
+            --success-color: #059669;
+            --error-color: #DC2626;
+            --text-primary: #111827;
+            --text-secondary: #4B5563;
+            --border-color: #E5E7EB;
+            --input-bg: #F9FAFB;
+            --hover-bg: #F3F4F6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #F3F4F6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: var(--text-primary);
+        }
+
+        .header {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .main-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .description {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .otp-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            font-size: 1.125rem;
+            background-color: var(--input-bg);
+            text-align: center;
+            letter-spacing: 0.25em;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .otp-input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #4338CA;
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .timer {
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        #resendLink {
+            display: none;
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        #resendLink.active {
+            display: inline-block;
+        }
+
+        #resendLink:hover {
+            text-decoration: underline;
+        }
+
+        .alert-danger {
+            background-color: #FEE2E2;
+            border: 1px solid #FCA5A5;
+            color: var(--error-color);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1.5rem;
+                margin: 1rem;
+                border-radius: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <a href="/home" class="logo">MobileHub</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="container">
+            <h1>Verify your email</h1>
+            <p class="description">We've sent a 6-digit code to your email address. Enter it below to verify your account.</p>
+            
+            <input type="text" id="otpInput" class="otp-input" maxlength="6" placeholder="Enter verification code">
+            <button id="verifyBtn" class="btn btn-primary">Verify Email</button>
+            
+            <div class="timer">
+                <span id="timerText">Resend code in <span id="countdown">60</span> seconds</span>
+                <br>
+                <a href="#" id="resendLink">Resend verification code</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let countdown = 60;
+        let timer;
+        let isOtpExpired = false;
+
+        function startTimer() {
+            clearInterval(timer);
+            countdown = 60;
+            isOtpExpired = false;
+            $('#countdown').text(countdown);
+            $('#timerText').show();
+            $('#resendLink').removeClass('active');
+
+            timer = setInterval(() => {
+                countdown--;
+                $('#countdown').text(countdown);
+                
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    $('#timerText').hide();
+                    $('#resendLink').addClass('active');
+                    isOtpExpired = true;
+                }
+            }, 1000);
+        }
+
+        $(document).ready(function() {
+            startTimer();
+
+            // Handle OTP input to only allow numbers
+            $('#otpInput').on('input', function() {
+                this.value = this.value.replace(/\D/g, '');
+            });
+
+            $('#verifyBtn').click(function() {
+                const otp = $('#otpInput').val();
+
+                // Check if OTP is expired
+                if (isOtpExpired) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Code Expired',
+                        text: 'The verification code has expired. Please request a new one.',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                    return;
+                }
+
+                // Validate OTP format
+                if (otp.length !== 6 || !/^\d+$/.test(otp)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Code',
+                        text: 'Please enter a valid 6-digit verification code.',
+                        confirmButtonColor: '#4F46E5'
+                    });
+                    return;
+                }
+
+                $.ajax({
+                    url: '/verify-otp',
+                    method: 'POST',
+                    data: { otp: otp },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Verified!',
+                                text: response.message,
+                                timer: 1500,
+                                showConfirmButton: false
+                            }).then(() => {
+                                window.location.href = response.redirectUrl || '/';
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid Code',
+                                text: response.message || 'Please enter a valid 6-digit verification code.',
+                                confirmButtonColor: '#4F46E5'
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'Please try again';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMessage,
+                            confirmButtonColor: '#4F46E5'
+                        });
+                    }
+                });
+            });
+
+            $('#resendLink').click(function(e) {
+                e.preventDefault();
+                if (!$(this).hasClass('active')) return;
+
+                // Disable the resend link temporarily
+                $(this).removeClass('active');
+
+                $.ajax({
+                    url: '/resend-otp',
+                    method: 'POST',
+                    beforeSend: function() {
+                        // Show loading state
+                        Swal.fire({
+                            title: 'Sending...',
+                            text: 'Sending new verification code',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            willOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Code Sent!',
+                                text: response.message || 'A new verification code has been sent to your email.',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                            // Clear the input field
+                            $('#otpInput').val('');
+                            // Restart the timer
+                            startTimer();
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message || 'Could not send verification code',
+                                confirmButtonColor: '#4F46E5'
+                            });
+                            // Re-enable the resend link if there's an error
+                            $('#resendLink').addClass('active');
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'Could not send verification code';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMessage,
+                            confirmButtonColor: '#4F46E5'
+                        });
+                        // Re-enable the resend link if there's an error
+                        $('#resendLink').addClass('active');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

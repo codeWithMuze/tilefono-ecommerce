@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice #<%= order.orderId %></title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      background-color: #fff;
+    }
+    
+    .invoice-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 30px;
+      border: 1px solid #eee;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+      font-size: 16px;
+      line-height: 24px;
+    }
+    
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+    
+    .invoice-title {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1a1a1a;
+    }
+    
+    .company-details {
+      text-align: right;
+      font-style: normal;
+      font-size: 15px;
+    }
+    
+    .invoice-details {
+      margin-bottom: 40px;
+      display: flex;
+      justify-content: space-between;
+    }
+    
+    .invoice-details .client {
+      font-size: 15px;
+    }
+    
+    .invoice-details .invoice-info {
+      text-align: right;
+      font-size: 15px;
+    }
+    
+    .invoice-details h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #555;
+    }
+    
+    .invoice-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    
+    .invoice-table th {
+      padding: 12px;
+      text-align: left;
+      background-color: #f8f9fa;
+      border-bottom: 2px solid #ddd;
+    }
+    
+    .invoice-table td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .invoice-table .item-description {
+      width: 50%;
+    }
+    
+    .invoice-table .text-right {
+      text-align: right;
+    }
+    
+    .invoice-summary {
+      float: right;
+      width: 250px;
+    }
+    
+    .invoice-summary table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    .invoice-summary td {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .invoice-summary .total {
+      font-weight: bold;
+      background-color: #f8f9fa;
+      border-top: 2px solid #ddd;
+      border-bottom: 2px solid #ddd;
+    }
+    
+    .footer {
+      margin-top: 70px;
+      text-align: center;
+      font-size: 14px;
+      color: #777;
+    }
+    
+    .payment-info {
+      text-align: left;
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+      font-size: 14px;
+    }
+    
+    /* Print specific styles */
+    @media print {
+      body {
+        padding: 0;
+        background-color: #fff;
+      }
+      
+      .invoice-container {
+        box-shadow: none;
+        border: 0;
+        padding: 0;
+      }
+      
+      .no-print {
+        display: none;
+      }
+      
+      @page {
+        margin: 0.5cm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <% if (printMode) { %>
+    <script>
+      window.onload = function() {
+        window.print();
+      }
+    </script>
+  <% } %>
+  
+  <div class="invoice-container">
+    <div class="invoice-header">
+      <div>
+        <div class="invoice-title">INVOICE</div>
+        <div style="font-size: 15px; margin-top: 5px;">Invoice #<%= order.orderId %></div>
+      </div>
+      
+      <div class="company-details">
+        <div style="font-weight: bold; font-size: 20px;">MobileHub</div>
+        <div>1234 Main Street</div>
+        <div>Mumbai, Maharashtra 400001</div>
+        <div>India</div>
+        <div>support@mobilehub.com</div>
+      </div>
+    </div>
+    
+    <div class="invoice-details">
+      <div class="client">
+        <h2>Billed To:</h2>
+        <% if (order.shippingInfo && order.shippingInfo.name) { %>
+          <div><strong><%= order.shippingInfo.name %></strong></div>
+          <div><%= order.shippingInfo.address %></div>
+          <div><%= order.shippingInfo.city %>, <%= order.shippingInfo.state %> <%= order.shippingInfo.pincode %></div>
+          <div>Phone: <%= order.shippingInfo.mobile %></div>
+        <% } else if (order.address && typeof order.address === 'object') { %>
+          <div><strong><%= order.address.name || user.name || 'Customer' %></strong></div>
+          <div><%= order.address.address || '' %></div>
+          <div><%= order.address.city || '' %>, <%= order.address.state || '' %> <%= order.address.pincode || '' %></div>
+          <div>Phone: <%= order.address.phone || order.address.mobile || 'N/A' %></div>
+        <% } else { %>
+          <div>Address information not available</div>
+        <% } %>
+      </div>
+      
+      <div class="invoice-info">
+        <h2>Invoice Details:</h2>
+        <div><strong>Invoice Date:</strong> <%= new Date(order.invoiceDate || order.createdOn).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'}) %></div>
+        <div><strong>Order ID:</strong> <%= order.orderId %></div>
+        <div><strong>Payment Method:</strong> <%= order.paymentMethod || 'Cash on Delivery' %></div>
+        <div><strong>Status:</strong> <%= order.status %></div>
+      </div>
+    </div>
+    
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>Item Description</th>
+          <th>Quantity</th>
+          <th>Unit Price</th>
+          <th>Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% 
+          let subtotal = 0;
+          if (order.orderedItems && order.orderedItems.length > 0) {
+            order.orderedItems.forEach(item => {
+              const productName = item.product ? item.product.productName : 'Product';
+              const price = item.price || 0;
+              const quantity = item.quantity || 1;
+              const total = price * quantity;
+              subtotal += total;
+        %>
+          <tr>
+            <td class="item-description"><%= productName %></td>
+            <td><%= quantity %></td>
+            <td class="text-right">₹<%= price.toLocaleString() %></td>
+            <td class="text-right">₹<%= total.toLocaleString() %></td>
+          </tr>
+        <% 
+            });
+          } else {
+        %>
+          <tr>
+            <td colspan="4" style="text-align: center;">No items in this order</td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+    
+    <div class="invoice-summary">
+      <table>
+        <tr>
+          <td>Subtotal:</td>
+          <td class="text-right">₹<%= subtotal.toLocaleString() %></td>
+        </tr>
+        <% 
+          const shipping = order.finalAmount - subtotal > 0 ? order.finalAmount - subtotal : 0;
+          const discount = order.discount || 0;
+        %>
+        <tr>
+          <td>Shipping:</td>
+          <td class="text-right">₹<%= shipping.toLocaleString() %></td>
+        </tr>
+        <% if (discount > 0) { %>
+        <tr>
+          <td>Discount:</td>
+          <td class="text-right">-₹<%= discount.toLocaleString() %></td>
+        </tr>
+        <% } %>
+        <tr class="total">
+          <td>Total:</td>
+          <td class="text-right">₹<%= order.finalAmount.toLocaleString() %></td>
+        </tr>
+      </table>
+    </div>
+    
+    <div style="clear: both;"></div>
+    
+    <div class="payment-info">
+      <div><strong>Payment Terms:</strong> Payment due within 14 days</div>
+      <div><strong>Notes:</strong> Thank you for shopping with MobileHub. We appreciate your business!</div>
+    </div>
+    
+    <div class="footer">
+      <p>This is a computer-generated invoice and does not require a signature.</p>
+    </div>
+  </div>
+  
+  <% if (!printMode) { %>
+    <div class="no-print" style="text-align: center; margin-top: 20px;">
+      <button onclick="window.print()">Print Invoice</button>
+      <button onclick="window.close()">Close</button>
+    </div>
+  <% } %>
+</body>
+</html> 

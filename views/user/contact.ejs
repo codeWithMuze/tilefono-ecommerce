@@ -1,0 +1,814 @@
+<%- include("../../views/partials/user/header") %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Your Mobile Store</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f8fafc;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            width: 100%;
+            max-width: 2000px;
+            height: 60vh;
+            position: relative;
+            background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+            overflow: hidden;
+        }
+
+        .hero-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 100px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-container::before {
+            content: '';
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(15, 15, 17, 0.1) 0%, rgba(34, 36, 37, 0.05) 100%);
+            top: -50px;
+            left: -50px;
+            z-index: -1;
+        }
+
+        .hero-container::after {
+            content: '';
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(15, 15, 17, 0.1) 0%, rgba(34, 36, 37, 0.05) 100%);
+            bottom: -30px;
+            right: -30px;
+            z-index: -1;
+        }
+
+        .hero-subtitle {
+            color: #3e3f3fc2;
+            font-size: 18px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 20px;
+            opacity: 0;
+            animation: fadeUp 0.8s forwards;
+            animation-delay: 0.2s;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 30px;
+            position: relative;
+            opacity: 0;
+            animation: fadeUp 0.8s forwards;
+            animation-delay: 0.4s;
+            font-family: 'Unbounded', cursive;
+        }
+
+        .hero-description {
+            max-width: 600px;
+            font-size: 18px;
+            line-height: 1.8;
+            color: #666;
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: fadeUp 0.8s forwards;
+            animation-delay: 0.6s;
+        }
+
+        /* Main Contact Section */
+        .contact-main {
+            max-width: 1200px;
+            margin: -40px auto 0;
+            padding: 0 20px 80px;
+            position: static;
+            z-index: 10;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        /* Contact Form */
+        .contact-form-section {
+            padding: 50px;
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-family: 'Unbounded', cursive;
+            color: #1a1a1a;
+        }
+
+        .form-subtitle {
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 16px;
+        }
+
+        .contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #636566;
+            box-shadow: 0 0 0 3px rgba(99, 101, 102, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background: linear-gradient(90deg, #27292b 0%, #262729 100%);
+            color: white;
+            padding: 16px 40px;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.7s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(10, 10, 11, 0.3);
+        }
+
+        .submit-btn:hover::before {
+            left: 100%;
+        }
+
+        /* Contact Info */
+        .contact-info-section {
+            background: linear-gradient(135deg, #424749 0%, #161617 100%);
+            padding: 50px;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            font-family: 'Unbounded', cursive;
+        }
+
+        .info-subtitle {
+            opacity: 0.9;
+            margin-bottom: 40px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .contact-info-list {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .contact-info-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .info-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .info-content h4 {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .info-content p {
+            opacity: 0.9;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Quick Contact Section */
+        .quick-contact {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .quick-contact-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+            font-family: 'Unbounded', cursive;
+            color: #1a1a1a;
+        }
+
+        .quick-contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .quick-contact-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .quick-contact-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .quick-contact-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 20px;
+            background: linear-gradient(90deg, #636566 0%, #262729 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+        }
+
+        .quick-contact-card h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1a1a1a;
+        }
+
+        .quick-contact-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .quick-contact-btn {
+            display: inline-block;
+            background: transparent;
+            color: #636566;
+            padding: 12px 25px;
+            border: 2px solid #636566;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .quick-contact-btn:hover {
+            background: #636566;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* FAQ Section */
+        .faq-section {
+            background: white;
+            padding: 80px 20px;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-title {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 50px;
+            font-family: 'Unbounded', cursive;
+            color: #1a1a1a;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .faq-question {
+            background: #f8fafc;
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #1a1a1a;
+            transition: background 0.3s ease;
+        }
+
+        .faq-question:hover {
+            background: #f1f5f9;
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 20px;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+
+        .faq-question.active::after {
+            transform: rotate(45deg);
+        }
+
+        .faq-answer {
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .faq-answer.active {
+            padding: 20px;
+            max-height: 200px;
+        }
+
+        .faq-answer p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 14px;
+            }
+
+            .hero-description {
+                font-size: 16px;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
+            .contact-form-section,
+            .contact-info-section {
+                padding: 40px 30px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .quick-contact-title,
+            .faq-title {
+                font-size: 2rem;
+            }
+
+            .quick-contact-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .hero-container {
+                padding: 80px 20px;
+            }
+
+            .contact-form-section,
+            .contact-info-section {
+                padding: 30px 20px;
+            }
+
+            .quick-contact,
+            .faq-section {
+                padding: 60px 20px;
+            }
+
+            .form-title,
+            .info-title {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeUp 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-container">
+            <h3 class="hero-subtitle">Get in Touch</h3>
+            <h1 class="hero-title">We're Here to Help</h1>
+            <p class="hero-description">
+                Have questions about our products? Need technical support? Our expert team is ready to assist you with all your mobile technology needs.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Contact Section -->
+    <section class="contact-main">
+        <div class="contact-grid">
+            <!-- Contact Form -->
+            <div class="contact-form-section">
+                <h2 class="form-title">Send us a Message</h2>
+                <p class="form-subtitle">Fill out the form below and we'll get back to you within 24 hours.</p>
+                
+                <div class="success-message" id="successMessage">
+                    Thank you for your message! We'll get back to you soon.
+                </div>
+
+                <form class="contact-form" id="contactForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="subject">Subject *</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">Select a subject</option>
+                            <option value="product-inquiry">Product Inquiry</option>
+                            <option value="technical-support">Technical Support</option>
+                            <option value="order-status">Order Status</option>
+                            <option value="warranty-claim">Warranty Claim</option>
+                            <option value="return-exchange">Return/Exchange</option>
+                            <option value="partnership">Partnership</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" placeholder="Please describe your inquiry in detail..." required></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+
+            <!-- Contact Info -->
+            <div class="contact-info-section">
+                <h2 class="info-title">Contact Information</h2>
+                <p class="info-subtitle">
+                    Reach out to us through any of these channels. We're available to help you find the perfect mobile device.
+                </p>
+                
+                <div class="contact-info-list">
+                    <div class="contact-info-item">
+                        <div class="info-icon">📍</div>
+                        <div class="info-content">
+                            <h4>Visit Our Store</h4>
+                            <p>123 Tech Street, Mobile Plaza<br>
+                            New Delhi, Delhi 110001<br>
+                            India</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-info-item">
+                        <div class="info-icon">📞</div>
+                        <div class="info-content">
+                            <h4>Call Us</h4>
+                            <p>Customer Support: +91 8089922373<br>
+                            Sales: +91 98765 43211<br>
+                            Mon-Sat: 9:00 AM - 8:00 PM</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-info-item">
+                        <div class="info-icon">✉️</div>
+                        <div class="info-content">
+                            <h4>Email Us</h4>
+                            <p>General: info@yourmobilestore.com<br>
+                            Support: support@yourmobilestore.com<br>
+                            Sales: sales@yourmobilestore.com</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-info-item">
+                        <div class="info-icon">⏰</div>
+                        <div class="info-content">
+                            <h4>Business Hours</h4>
+                            <p>Monday - Saturday: 9:00 AM - 8:00 PM<br>
+                            Sunday: 10:00 AM - 6:00 PM<br>
+                            Online Support: 24/7</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Contact Section -->
+    <section class="quick-contact">
+        <h2 class="quick-contact-title">Quick Contact Options</h2>
+        <div class="quick-contact-grid">
+            <div class="quick-contact-card">
+                <div class="quick-contact-icon">📲</div>
+                <h3>SMS Support</h3>
+                <p>Send us an SMS for quick product inquiries and technical support.</p>
+                <a href="sms:+918089922373" class="quick-contact-btn" target="_blank">Text Us</a>
+            </div>
+            
+            <div class="quick-contact-card">
+                <div class="quick-contact-icon">📱</div>
+                <h3>WhatsApp Support</h3>
+                <p>Connect with us on WhatsApp for quick product inquiries and technical support.</p>
+                <a href="https://wa.me/8089922373" class="quick-contact-btn" target="_blank">Message Us</a>
+            </div>
+            
+            <div class="quick-contact-card">
+                <div class="quick-contact-icon">📧</div>
+                <h3>Email Support</h3>
+                <p>Send us detailed inquiries and we'll respond within 4-6 hours during business days.</p>
+                <a href="mailto:maazmuhammed08@gmail.com" class="quick-contact-btn">Email Now</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="faq-container">
+            <h2 class="faq-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    What payment methods do you accept?
+                </div>
+                <div class="faq-answer">
+                    <p>We accept all major credit cards, debit cards, UPI payments, net banking, and cash on delivery. We also offer EMI options for purchases above ₹10,000.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    What is your return and exchange policy?
+                </div>
+                <div class="faq-answer">
+                    <p>We offer a 7-day return policy for unopened items and a 15-day exchange policy for defective products. All items must be in original condition with complete packaging.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    Do you provide warranty on all products?
+                </div>
+                <div class="faq-answer">
+                    <p>Yes, all our products come with manufacturer warranty. Additionally, we provide 6-month extended warranty on select smartphones and 1-year warranty on accessories.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How long does delivery take?
+                </div>
+                <div class="faq-answer">
+                    <p>We offer same-day delivery within Delhi NCR and 2-3 day delivery to other metro cities. Rural areas may take 4-7 business days depending on location.</p>
+                </div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    Do you offer technical support after purchase?
+                </div>
+                <div class="faq-answer">
+                    <p>Absolutely! We provide free technical support for 1 year after purchase, including software setup, troubleshooting, and maintenance guidance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Contact Form Submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show success message
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.add('show');
+            
+            // Reset form
+            this.reset();
+            
+            // Hide success message after 5 seconds
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 5000);
+        });
+
+        // FAQ Toggle
+        function toggleFAQ(element) {
+            const answer = element.nextElementSibling;
+            const isActive = element.classList.contains('active');
+            
+            // Close all other FAQs
+            document.querySelectorAll('.faq-question').forEach(q => {
+                q.classList.remove('active');
+                q.nextElementSibling.classList.remove('active');
+            });
+            
+            // Toggle current FAQ
+            if (!isActive) {
+                element.classList.add('active');
+                answer.classList.add('active');
+            }
+        }
+
+        // Live Chat Function
+        function openLiveChat() {
+            alert('Live chat would open here. Integration with your preferred chat service needed.');
+        }
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.contact-grid, .quick-contact-card, .faq-item').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Form validation enhancement
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.value.trim() !== '') {
+                    this.style.borderColor = '#059669';
+                } else if (this.hasAttribute('required')) {
+                    this.style.borderColor = '#ef4444';
+                }
+            });
+            
+            input.addEventListener('focus', function() {
+                this.style.borderColor = '#636566';
+            });
+        });
+    </script>
+    <%- include("../../views/partials/user/footer") %>
+
+</body>
+</html>

@@ -1,0 +1,700 @@
+<%- include("../../views/partials/admin/header") %>
+
+<style>
+.product-image {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+    
+.chart-container {
+    position: relative;
+    height: 300px; 
+    width: 100%; 
+    margin-bottom: 20px; 
+}
+
+.chart-container canvas {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+/* Fallback message styling (if the chart fails to render) */
+[id$="Fallback"] {
+    text-align: center;
+    padding: 10px;
+}
+
+.dashboard-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+    
+@media (max-width: 992px) {
+    .dashboard-two-col {
+        grid-template-columns: 1fr;
+    }
+}
+    
+.product-cell, .brand-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+    
+.brand-image {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+    
+.date-select {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+    
+.export-btn {
+    padding: 8px 16px;
+    background-color: var(--sidebar-bg);
+    color: var(--text-light);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+    
+.category-table, .brand-table {
+    margin-top: 20px;
+}
+    
+.badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+    
+.badge.credit {
+    background-color: #2ecc71;
+    color: white;
+}
+    
+.badge.debit {
+    background-color: #e74c3c;
+    color: white;
+}
+
+/* Time filter styling */
+.time-filter {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.time-filter button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.time-filter button.active {
+    background-color: var(--sidebar-bg);
+    color: var(--text-light);
+}
+
+.date-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.apply-filter-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid var(--border-color);
+    background-color: var(--sidebar-bg);
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.filter-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+@media (max-width: 768px) {
+    .filter-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .time-filter {
+        width: 100%;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+}
+</style>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card purple">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+            <h3>Total users</h3>
+            <div class="value"><%=totalUsers%></div>
+        </div>
+    </div>
+    
+    <div class="stat-card orange">
+        <div class="stat-icon">📦</div>
+        <div class="stat-info">
+            <h3>Items sold</h3>
+            <div class="value"><%=itemsSold%></div>
+        </div>
+    </div>
+    
+    <div class="stat-card blue">
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+            <h3>Total Sales</h3>
+            <div class="value">₹<%= totalSales.toLocaleString('en-IN') %></div>
+        </div>
+    </div>
+    
+    <div class="stat-card red">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+            <h3>Pending Orders</h3>
+            <div class="value"><%=pendingOrders%></div>
+        </div>
+    </div>
+</div>
+
+<!-- Time Period Filter -->
+<div class="filter-section">
+    <div class="time-filter">
+      <button type="button" class="time-button <%= timeFilter === 'all' ? 'active' : '' %>" data-period="all">All Time</button>
+      <button type="button" class="time-button <%= timeFilter === 'day' ? 'active' : '' %>" data-period="day">Last Day</button>
+      <button type="button" class="time-button <%= timeFilter === 'week' ? 'active' : '' %>" data-period="week">Last Week</button>
+      <button type="button" class="time-button <%= timeFilter === 'month' ? 'active' : '' %>" data-period="month">Last Month</button>
+      <!-- <button type="button" class="time-button <%= timeFilter === 'custom' ? 'active' : '' %>" data-period="custom">Custom</button> -->
+    </div>
+    
+    <div class="date-filter">
+      <form action="/admin/dashboard" method="GET" id="dateFilterForm">
+        <input type="hidden" name="timeFilter" id="timePeriodInput" value="<%= timeFilter || 'all' %>">
+        <input type="date" class="date-input" name="fromDate" id="fromDateInput" value="<%= pagination.fromDate || '' %>" placeholder="From">
+        <span>To</span>
+        <input type="date" class="date-input" name="toDate" id="toDateInput" value="<%= pagination.toDate || '' %>" placeholder="To">
+        <button type="submit" class="apply-filter-btn">Apply Filter</button>
+      </form>
+    </div>
+  </div>
+
+<!-- Sales Chart -->
+<div class="product-section">
+    <div class="section-header">
+        <h2 class="section-title">Daily Sales</h2>
+    </div>
+    <div class="chart-container">
+        <canvas id="salesChart"></canvas>
+        <div id="salesChartFallback" style="display: none; color: red;">
+            Unable to render the sales chart. Check console for details.
+        </div>
+    </div>
+</div>
+
+<!-- Best Selling Categories -->
+<div class="product-section">
+    <div class="section-header">
+        <h2 class="section-title">Top 10 Categories</h2>
+    </div>
+    <div class="chart-container">
+        <canvas id="categoryChart"></canvas>
+        <div id="categoryChartFallback" style="display: none; color: red;">
+            Unable to render the pie chart. Check console for details.
+        </div>
+    </div>
+    <div class="table-responsive category-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>CATEGORY</th>
+                    <th>UNITS SOLD</th>
+                    <th>REVENUE</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% topCategories.forEach(cat => { %>
+                <tr>
+                    <td><%= cat.name %></td>
+                    <td><%= cat.unitsSold %></td>
+                    <td>₹<%= cat.revenue.toLocaleString('en-IN') %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Best Selling Brands -->
+<div class="product-section">
+    <div class="section-header">
+        <h2 class="section-title">Top 10 Selling Brands</h2>
+    </div>
+    <div class="dashboard-two-col" style="display: flex; align-items: center; justify-content: space-evenly;">
+        <div class="chart-container">
+            <canvas id="brandChart"></canvas>
+            <div id="brandChartFallback" style="display: none; color: red;">
+                Unable to render the pie chart. Check console for details.
+            </div>
+        </div>
+        <div class="table-responsive brand-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>BRAND</th>
+                        <th>UNITS SOLD</th>
+                        <th>REVENUE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% topBrands.forEach(brand => { %>
+                    <tr>
+                        <td>
+                            <div class="brand-cell">
+                                <span><%= brand.name %></span>
+                            </div>
+                        </td>
+                        <td><%= brand.unitsSold %></td>
+                        <td>₹<%= brand.revenue.toLocaleString('en-IN') %></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Top Sold Products -->
+<div class="product-section">
+    <div class="section-header">
+        <h2 class="section-title">Top Sold Products</h2>
+    </div>
+    <div class="chart-container">
+        <canvas id="productChart"></canvas>
+        <div id="productChartFallback" style="display: none; color: red;">
+            Unable to render the pie chart. Check console for details.
+        </div>
+    </div>
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>PRODUCT IMAGE</th>
+                    <th>PRODUCT NAME</th>
+                    <th>BRAND</th>
+                    <th>AMOUNT</th>
+                    <th>REVENUE</th>
+                    <th>QTY SOLD</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% topProducts.forEach(product => { %>
+                <tr>
+                    <td><%= product.id %></td>
+                    <td>
+                        <img src="<%= product.imageUrl || 'https://placehold.co/40x40' %>" alt="<%= product.name %>" class="product-image"> 
+                    </td>
+                    <td><%= product.name %></td>
+                    <td><%= product.brand %></td>
+                    <td>₹<%= product.amount.toLocaleString('en-IN') %></td>
+                    <td>₹<%= product.revenue.toLocaleString('en-IN') %></td>
+                    <td><%= product.qtySold %></td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<!-- Scripts for the charts -->
+<script>
+// Pass server-side data to client-side JavaScript
+const topCategories = <%- JSON.stringify(topCategories) %>;
+const topBrands = <%- JSON.stringify(topBrands) %>;
+const topProducts = <%- JSON.stringify(topProducts) %>;
+const salesData = <%- JSON.stringify(salesData) %>;
+const currentTimePeriod = '<%= timeFilter || "all" %>';
+
+// Debugging: Log data
+console.log('topCategories:', topCategories);
+console.log('topBrands:', topBrands);
+console.log('topProducts:', topProducts);
+console.log('salesData:', salesData);
+console.log('currentTimePeriod:', currentTimePeriod);
+
+// Initialize charts
+let salesChart, categoryChart, brandChart, productChart;
+
+// Function to validate chart data
+function isValidChartData(data) {
+  return data && Array.isArray(data) && data.length > 0;
+}
+
+// Function to fix chart containers
+function fixChartContainers() {
+  const containers = document.querySelectorAll('.chart-container');
+  containers.forEach(container => {
+    container.style.height = '300px';
+  });
+}
+
+// Time filter handling
+document.addEventListener('DOMContentLoaded', function() {
+  const timeButtons = document.querySelectorAll('.time-button');
+  const timePeriodInput = document.getElementById('timePeriodInput');
+  const fromDateInput = document.getElementById('fromDateInput');
+  const toDateInput = document.getElementById('toDateInput');
+  const dateFilterForm = document.getElementById('dateFilterForm');
+
+  // Handle time period button clicks
+  timeButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const period = this.getAttribute('data-period');
+      
+      // Update hidden input value
+      timePeriodInput.value = period;
+
+      // Set active class
+      timeButtons.forEach(btn => btn.classList.remove('active'));
+      this.classList.add('active');
+
+      // Clear custom date inputs for predefined periods
+      if (period !== 'custom') {
+        fromDateInput.value = '';
+        toDateInput.value = '';
+      }
+
+      // Submit the form
+      const url = new URL(dateFilterForm.action, window.location.origin);
+      url.searchParams.set('timeFilter', period);
+      if (period !== 'custom') {
+        url.searchParams.delete('fromDate');
+        url.searchParams.delete('toDate');
+      }
+      window.location.href = url.toString();
+    });
+  });
+
+  // Handle custom date filter submission
+  dateFilterForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const period = timePeriodInput.value;
+    const fromDate = fromDateInput.value;
+    const toDate = toDateInput.value;
+
+    // Validate custom dates
+    if (period === 'custom' && (!fromDate || !toDate)) {
+      alert('Please select both From and To dates for custom filter.');
+      return;
+    }
+    if (period === 'custom' && new Date(fromDate) > new Date(toDate)) {
+      alert('From date cannot be later than To date.');
+      return;
+    }
+
+    // Build URL with appropriate query parameters
+    const url = new URL(dateFilterForm.action, window.location.origin);
+    url.searchParams.set('timeFilter', period);
+    if (period === 'custom' && fromDate && toDate) {
+      url.searchParams.set('fromDate', fromDate);
+      url.searchParams.set('toDate', toDate);
+    } else {
+      url.searchParams.delete('fromDate');
+      url.searchParams.delete('toDate');
+    }
+
+    // Redirect to the constructed URL
+    window.location.href = url.toString();
+  });
+});
+
+// Rest of the chart initialization and theme handling code remains unchanged
+const initializeCharts = () => {
+  fixChartContainers();
+
+  const salesCtx = document.getElementById('salesChart');
+  const salesFallback = document.getElementById('salesChartFallback');
+  if (salesCtx) {
+    const ctx = salesCtx.getContext('2d');
+    if (!ctx || !isValidChartData(salesData)) {
+      console.error('Sales chart failed: Invalid context or data:', salesData);
+      if (salesFallback) salesFallback.style.display = 'block';
+      salesFallback.textContent = 'No sales data available for the selected period.';
+    } else {
+      try {
+        salesChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: salesData.map(item => item._id),
+            datasets: [{
+              label: 'Daily Sales (₹)',
+              data: salesData.map(item => item.totalSales),
+              borderColor: '#3498db',
+              backgroundColor: 'rgba(52, 152, 219, 0.1)',
+              tension: 0.4,
+              fill: true,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return '₹' + context.raw.toLocaleString('en-IN');
+                  },
+                },
+              },
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: {
+                  callback: function(value) {
+                    return '₹' + value.toLocaleString('en-IN');
+                  },
+                },
+              },
+            },
+          },
+        });
+      } catch (error) {
+        console.error('Error initializing sales chart:', error);
+        if (salesFallback) salesFallback.style.display = 'block';
+        salesFallback.textContent = 'Error rendering sales chart.';
+      }
+    }
+  }
+
+  // Update other charts similarly
+  const categoryCtx = document.getElementById('categoryChart');
+  const categoryFallback = document.getElementById('categoryChartFallback');
+  if (categoryCtx) {
+    const ctx = categoryCtx.getContext('2d');
+    if (!ctx || !isValidChartData(topCategories)) {
+      console.error('Category chart failed: Invalid context or data:', topCategories);
+      if (categoryFallback) categoryFallback.style.display = 'block';
+      categoryFallback.textContent = 'No category data available for the selected period.';
+    } else {
+      try {
+        categoryChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: topCategories.map(cat => cat.name),
+            datasets: [{
+              data: topCategories.map(cat => cat.revenue),
+              backgroundColor: ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#e67e22', '#7f8c8d', '#2980b9'],
+              borderWidth: 1,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right' },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.raw || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    return `${label}: ₹${value.toLocaleString('en-IN')} (${percentage}%)`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      } catch (error) {
+        console.error('Error initializing category chart:', error);
+        if (categoryFallback) categoryFallback.style.display = 'block';
+        categoryFallback.textContent = 'Error rendering category chart.';
+      }
+    }
+  }
+
+  const brandCtx = document.getElementById('brandChart');
+  const brandFallback = document.getElementById('brandChartFallback');
+  if (brandCtx) {
+    const ctx = brandCtx.getContext('2d');
+    if (!ctx || !isValidChartData(topBrands)) {
+      console.error('Brand chart failed: Invalid context or data:', topBrands);
+      if (brandFallback) brandFallback.style.display = 'block';
+      brandFallback.textContent = 'No brand data available for the selected period.';
+    } else {
+      try {
+        brandChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: topBrands.map(brand => brand.name),
+            datasets: [{
+              data: topBrands.map(brand => brand.revenue),
+              backgroundColor: ['rgba(52, 152, 219, 0.7)', 'rgba(46, 204, 113, 0.7)', 'rgba(231, 76, 60, 0.7)', 'rgba(243, 156, 18, 0.7)', '#9b59b6', '#1abc9c', '#34495e', '#e67e22', '#7f8c8d', '#2980b9'],
+              borderWidth: 1,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right' },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.raw || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    return `${label}: ₹${value.toLocaleString('en-IN')} (${percentage}%)`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      } catch (error) {
+        console.error('Error initializing brand chart:', error);
+        if (brandFallback) brandFallback.style.display = 'block';
+        brandFallback.textContent = 'Error rendering brand chart.';
+      }
+    }
+  }
+
+  const productCtx = document.getElementById('productChart');
+  const productFallback = document.getElementById('productChartFallback');
+  if (productCtx) {
+    const ctx = productCtx.getContext('2d');
+    if (!ctx || !isValidChartData(topProducts)) {
+      console.error('Product chart failed: Invalid context or data:', topProducts);
+      if (productFallback) productFallback.style.display = 'block';
+      productFallback.textContent = 'No product data available for the selected period.';
+    } else {
+      try {
+        productChart = new Chart(ctx, {
+          type: 'pie',
+          data: {
+            labels: topProducts.map(product => product.name),
+            datasets: [{
+              data: topProducts.map(product => product.revenue),
+              backgroundColor: ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#e67e22', '#7f8c8d', '#2980b9'],
+              borderWidth: 1,
+            }],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right' },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    const label = context.label || '';
+                    const value = context.raw || 0;
+                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                    const percentage = Math.round((value / total) * 100);
+                    return `${label}: ₹${value.toLocaleString('en-IN')} (${percentage}%)`;
+                  },
+                },
+              },
+            },
+          },
+        });
+      } catch (error) {
+        console.error('Error initializing product chart:', error);
+        if (productFallback) productFallback.style.display = 'block';
+        productFallback.textContent = 'Error rendering product chart.';
+      }
+    }
+  }
+};
+
+// Theme handling remains unchanged
+const updateChartsTheme = () => {
+  const isDarkTheme = document.body.classList.contains('dark-theme');
+  const textColor = isDarkTheme ? '#f8f9fa' : '#212529';
+  const gridColor = isDarkTheme ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+  
+  const timeButtons = document.querySelectorAll('.time-button');
+  timeButtons.forEach(button => {
+    if (!button.classList.contains('active')) {
+      button.style.backgroundColor = isDarkTheme ? 'var(--bg-secondary)' : 'var(--bg-secondary)';
+      button.style.color = isDarkTheme ? 'var(--text-primary)' : 'var(--text-primary)';
+    }
+  });
+
+  if (salesChart) {
+    salesChart.options.scales.x.grid.color = gridColor;
+    salesChart.options.scales.y.grid.color = gridColor;
+    salesChart.options.scales.x.ticks.color = textColor;
+    salesChart.options.scales.y.ticks.color = textColor;
+    salesChart.update();
+  }
+
+  if (categoryChart) {
+    categoryChart.options.plugins.legend.labels.color = textColor;
+    categoryChart.update();
+  }
+
+  if (brandChart) {
+    brandChart.options.plugins.legend.labels.color = textColor;
+    brandChart.update();
+  }
+
+  if (productChart) {
+    productChart.options.plugins.legend.labels.color = textColor;
+    productChart.update();
+  }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(initializeCharts, 300);
+  
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      setTimeout(updateChartsTheme, 100);
+    });
+  }
+});
+
+</script>
+
+<%- include("../../views/partials/admin/footer") %>

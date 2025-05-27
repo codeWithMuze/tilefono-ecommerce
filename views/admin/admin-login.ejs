@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tilefono - Admin Login</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #121212;
+      --sidebar-bg: #121212;
+      --sidebar-hover: #2a2a2a;
+      --text-primary: #f8f9fa;
+      --text-secondary: #a0a0a0;
+      --text-light: #ffffff;
+      --border-color: #2c2c2c;
+      --card-bg: #1e1e1e;
+      --card-bg-purple: #6c2c8c;
+      --card-bg-orange: #b35c11;
+      --card-bg-blue: #246b9e;
+      --card-bg-red: #b83227;
+      --accent-color: #246b9e;
+      --table-header: #2a2a2a;
+      --table-hover: #2c2c2c;
+      /* Mapped to original variables */
+      --primary-color: var(--accent-color); /* #246b9e */
+      --primary-dark: #1b4e75; /* Darkened accent-color for hover effects */
+      --secondary-color: var(--text-secondary); /* #a0a0a0 */
+      --background-light: var(--card-bg); /* #1e1e1e */
+      --background-gray: var(--bg-primary); /* #1a1a1a */
+      --text-muted: var(--text-secondary); /* #a0a0a0 */
+      --border-light: var(--border-color); /* #2c2c2c */
+      --border-focus: var(--accent-color); /* #246b9e */
+      --error-color: var(--card-bg-red); /* #b83227 */
+      --error-bg: var(--bg-secondary); /* #121212 */
+      --success-color: #34d399; /* Kept as is since no equivalent in new palette */
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, var(--background-gray) 0%, var(--background-light) 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .login-wrapper {
+      background: var(--background-light);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .logo-container {
+      margin-bottom: 20px;
+    }
+
+    .logo {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary-color);
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .company-tagline {
+      color: var(--text-muted);
+      font-size: 0.8125rem;
+      font-weight: 400;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+
+    .admin-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      letter-spacing: -0.025em;
+    }
+
+    .admin-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+    }
+
+    .admin-badge {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--text-light);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      margin-top: 14px;
+      gap: 6px;
+      letter-spacing: 0.5px;
+      box-shadow: var(--shadow-sm);
+      text-transform: uppercase;
+    }
+
+    .error-message {
+      background: var(--error-bg);
+      border-left: 4px solid var(--error-color);
+      color: var(--error-color);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-section {
+      margin-bottom: 28px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 0.8125rem;
+      color: var(--text-primary);
+      letter-spacing: 0.025em;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1rem;
+      z-index: 2;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 16px 14px 44px;
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 0.9375rem;
+      font-weight: 400;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(36, 107, 158, 0.1);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 1rem;
+      padding: 6px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      z-index: 2;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary-color);
+      background: rgba(36, 107, 158, 0.1);
+    }
+
+    .error-text {
+      color: var(--error-color);
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-top: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      min-height: 18px;
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 0.8125rem;
+    }
+
+    .remember-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    .remember-section input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--primary-color);
+      cursor: pointer;
+    }
+
+    .forgot-link {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      font-size: 0.8125rem;
+    }
+
+    .login-button {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+      color: var(--text-light);
+      border: none;
+      border-radius: 10px;
+      padding: 14px 24px;
+      font-size: 0.9375rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: var(--shadow-md);
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.025em;
+    }
+
+    .footer-section {
+      text-align: center;
+      margin-top: 24px;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .footer-section a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.2s ease;
+    }
+
+    .footer-section a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+
+    .input-error {
+      border-color: var(--error-color) !important;
+      box-shadow: 0 0 0 3px rgba(184, 50, 39, 0.1) !important;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border-light);
+      margin: 20px 0;
+    }
+
+    @media (max-width: 480px) {
+      .login-wrapper {
+        padding: 32px 24px;
+      }
+      
+      .admin-title {
+        font-size: 1.375rem;
+      }
+      
+      .logo {
+        font-size: 1.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-header">
+      <div class="logo-container">
+        <div class="logo">Tilefono</div>
+        <p class="company-tagline">Enterprise Communications Platform</p>
+      </div>
+      
+      <h1 class="admin-title">Administrator Portal</h1>
+      <p class="admin-subtitle">Secure access to system management</p>
+      
+      <div class="admin-badge">
+        <i class="fas fa-shield-alt"></i>
+        <span>Restricted Access</span>
+      </div>
+    </div>
+
+    <% if (message) { %>
+      <div class="error-message" role="alert">
+        <i class="fas fa-exclamation-circle"></i>
+        <div>
+          <strong>Unable to Sign In</strong><br>
+          Please check your email and password, or contact <a href="#" style="color: var(--primary-color); text-decoration: underline;">IT Support</a> for assistance.
+        </div>
+      </div>
+    <% } %>
+
+    <form id="adminLoginForm" method="post" action="/admin/login">
+      <div class="form-section">
+        <div class="form-group">
+          <label for="adminEmail" class="form-label">Email Address</label>
+          <div class="input-wrapper">
+            <i class="fas fa-envelope input-icon"></i>
+            <input
+              type="email"
+              id="adminEmail"
+              name="email"
+              class="form-input"
+              placeholder="admin@company.com"
+              required
+              autocomplete="email"
+            >
+          </div>
+          <div id="emailError" class="error-text"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="adminPassword" class="form-label">Password</label>
+          <div class="input-wrapper">
+            <i class="fas fa-lock input-icon"></i>
+            <input
+              type="password"
+              id="adminPassword"
+              name="password"
+              class="form-input"
+              placeholder="••••••••"
+              required
+              autocomplete="current-password"
+            >
+            <button type="button" id="togglePassword" class="password-toggle">
+              <i class="fas fa-eye"></i>
+            </button>
+          </div>
+          <div id="passwordError" class="error-text"></div>
+        </div>
+
+        <button type="submit" class="login-button">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Sign In</span>
+        </button>
+      </div>
+    </form>
+
+    <div class="divider"></div>
+
+    <div class="footer-section">
+      <p>Need assistance? <a href="#">Contact IT Support</a></p>
+      <p style="margin-top: 8px;">© 2025 Tilefono. All rights reserved.</p>
+    </div>
+  </div>
+
+  <script>
+    // Password Toggle Functionality
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordField = document.getElementById('adminPassword');
+    const toggleIcon = togglePassword.querySelector('i');
+
+    togglePassword.addEventListener('click', function() {
+      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordField.setAttribute('type', type);
+      toggleIcon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
+    });
+
+    // Enhanced Form Validation
+    document.addEventListener("DOMContentLoaded", function () {
+      const adminLoginForm = document.getElementById("adminLoginForm");
+      const emailField = document.getElementById("adminEmail");
+      const passwordField = document.getElementById("adminPassword");
+      const emailError = document.getElementById("emailError");
+      const passwordError = document.getElementById("passwordError");
+
+      // Email validation with better UX
+      emailField.addEventListener("blur", function () {
+        validateEmail();
+      });
+
+      emailField.addEventListener("input", function () {
+        if (emailField.classList.contains("input-error")) {
+          validateEmail();
+        }
+      });
+
+      // Password validation
+      passwordField.addEventListener("blur", function () {
+        validatePassword();
+      });
+
+      passwordField.addEventListener("input", function () {
+        if (passwordField.classList.contains("input-error")) {
+          validatePassword();
+        }
+      });
+
+      function validateEmail() {
+        const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const email = emailField.value.trim();
+        
+        if (!email) {
+          showError(emailField, emailError, "Email address is required");
+          return false;
+        } else if (!emailPattern.test(email)) {
+          showError(emailField, emailError, "Please enter a valid email address");
+          return false;
+        } else {
+          clearError(emailField, emailError);
+          return true;
+        }
+      }
+
+      function validatePassword() {
+        const password = passwordField.value;
+        
+        if (!password) {
+          showError(passwordField, passwordError, "Password is required");
+          return false;
+        } else if (password.length < 8) {
+          showError(passwordField, passwordError, "Password must be at least 8 characters");
+          return false;
+        } else {
+          clearError(passwordField, passwordError);
+          return true;
+        }
+      }
+
+      function showError(field, errorElement, message) {
+        field.classList.add("input-error");
+        errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+      }
+
+      function clearError(field, errorElement) {
+        field.classList.remove("input-error");
+        errorElement.innerHTML = "";
+      }
+
+      // Form submission validation
+      adminLoginForm.addEventListener("submit", function (event) {
+        const isEmailValid = validateEmail();
+        const isPasswordValid = validatePassword();
+
+        if (!isEmailValid || !isPasswordValid) {
+          event.preventDefault();
+          
+          // Focus on first invalid field
+          if (!isEmailValid) {
+            emailField.focus();
+          } else if (!isPasswordValid) {
+            passwordField.focus();
+          }
+        }
+      });
+
+      // Remove error styling on focus
+      [emailField, passwordField].forEach(field => {
+        field.addEventListener('focus', function() {
+          if (this.classList.contains('input-error')) {
+            this.classList.remove('input-error');
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

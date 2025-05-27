@@ -1,0 +1,704 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card purple">
+            <div class="stat-icon">🎉</div>
+            <div class="stat-info">
+                <h3>Active Offers</h3>
+                <span class="value"><%= offers.filter(offer => offer.isListed && new Date(offer.validUpto) >= new Date()).length %></span>
+            </div>
+        </div>
+        <div class="stat-card orange">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-info">
+                <h3>Scheduled Offers</h3>
+                <span class="value"><%= offers.filter(offer => offer.isListed && new Date(offer.validFrom) > new Date()).length %></span>
+            </div>
+        </div>
+        <div class="stat-card blue">
+            <div class="stat-icon">🛍️</div>
+            <div class="stat-info">
+                <h3>Total Products On Sale</h3>
+                <span class="value"><%= offers.filter(offer => offer.isListed && offer.offerType === 'Product').length %></span>
+            </div>
+        </div>
+        <div class="stat-card red">
+            <div class="stat-icon">📅</div>
+            <div class="stat-info">
+                <h3>Expired Offers</h3>
+                <span class="value"><%= offers.filter(offer => new Date(offer.validUpto) < new Date()).length %></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offers Table Section -->
+    <div class="product-section">
+        <div class="section-header">
+            <h2 class="section-title">All Offers</h2>
+            <div class="header-actions">
+                <input type="text" class="date-input" id="search-offers" placeholder="Search offers...">
+                <button class="download-btn" id="add-offer-btn">
+                    <span>➕</span> Add New Offer
+                </button>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Offer Name</th>
+                    <th>Type</th>
+                    <th>Discount</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="offer-table-body">
+                <% offers.forEach(offer => { %>
+                <tr data-id="<%= offer._id %>">
+                    <td><%= offer._id.toString().substring(0, 8) %></td>
+                    <td><%= offer.offerName %></td>
+                    <td><%= offer.offerType %></td>
+                    <td><%= offer.discountAmount %>%</td>
+                    <td><%= new Date(offer.validFrom).toLocaleDateString() %></td>
+                    <td><%= new Date(offer.validUpto).toLocaleDateString() %></td>
+                    <td>
+                        <% 
+                           let status = "Inactive";
+                           let statusColor = "#e74c3c";
+                           
+                           if (offer.isListed) {
+                               const now = new Date();
+                               const validFrom = new Date(offer.validFrom);
+                               const validUpto = new Date(offer.validUpto);
+                               
+                               if (now < validFrom) {
+                                   status = "Scheduled";
+                                   statusColor = "#f39c12";
+                               } else if (now >= validFrom && now <= validUpto) {
+                                   status = "Active";
+                                   statusColor = "#27ae60";
+                               } else {
+                                   status = "Expired";
+                                   statusColor = "#7f8c8d";
+                               }
+                           }
+                        %>
+                        <span style="padding: 5px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 500; background-color: <%= statusColor %>; color: white;"><%= status %></span>
+                    </td>
+                    <td>
+                        <button class="edit-btn" data-id="<%= offer._id %>" style="background: none; border: none; cursor: pointer; padding: 5px;">✏️</button>
+                        <button class="delete-btn" data-id="<%= offer._id %>" style="background: none; border: none; cursor: pointer; padding: 5px;">🗑️</button>
+                        <% if (offer.isListed) { %>
+                            <button class="list-btn" data-id="<%= offer._id %>" data-action="unlist" style="background: none; border: none; cursor: pointer; padding: 5px; color: #e74c3c;" title="Unlist Offer">📴</button>
+                        <% } else { %>
+                            <button class="list-btn" data-id="<%= offer._id %>" data-action="list" style="background: none; border: none; cursor: pointer; padding: 5px; color: #27ae60;" title="List Offer">📶</button>
+                        <% } %>
+                    </td>
+                </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <button class="prev">⬅️</button>
+            <span class="page-item active">1</span>
+            <span class="page-item">2</span>
+            <span class="page-item">3</span>
+            <span class="ellipsis">...</span>
+            <span class="page-item">10</span>
+            <button class="next">➡️</button>
+        </div>
+    </div>
+
+    <!-- Add/Edit Offer Modal -->
+    <div id="offer-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); z-index: 1000; justify-content: center; align-items: center;">
+        <div style="background-color: var(--bg-secondary); border-radius: 10px; padding: 25px; width: 500px; max-width: 90%; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); max-height: 90vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="modal-title">Add New Offer</h2>
+                <button id="close-modal" style="background: none; border: none; cursor: pointer; font-size: 1.5rem;">×</button>
+            </div>
+            <form id="offer-form">
+                <input type="hidden" id="offer-id" name="id">
+                <div style="margin-bottom: 20px;">
+                    <label for="offer-name" style="display: block; margin-bottom: 8px; font-weight: 500;">Offer Name*</label>
+                    <input type="text" id="offer-name" name="offerName" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px;" required placeholder="Enter offer name">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="offer-description" style="display: block; margin-bottom: 8px; font-weight: 500;">Description*</label>
+                    <textarea id="offer-description" name="description" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px; min-height: 80px;" required placeholder="Enter offer description"></textarea>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="offer-type" style="display: block; margin-bottom: 8px; font-weight: 500;">Applicable To*</label>
+                    <select id="offer-type" name="offerType" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px;" required>
+                        <option value="">Select where to apply</option>
+                        <option value="Category">Category</option>
+                        <option value="Brand">Brand</option>
+                        <option value="Product">Product</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;" id="applicable-to-container">
+                    <label for="applicable-to" style="display: block; margin-bottom: 8px; font-weight: 500;">Select Option*</label>
+                    <select id="applicable-to" name="applicableTo" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px;" required>
+                        <option value="">Please select an option</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="discount-type" style="display: block; margin-bottom: 8px; font-weight: 500;">Discount Type*</label>
+                    <select id="discount-type" name="discountType" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px;" required>
+                        <option value="percentage">Percentage Discount</option>
+                    </select>
+                </div>
+                <div style="margin-bottom: 20px;" id="discount-group">
+                    <label for="discount-value" style="display: block; margin-bottom: 8px; font-weight: 500;">Discount Value (%)*</label>
+                    <input type="number" id="discount-value" name="discountAmount" min="1" max="99" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px;" required placeholder="Enter discount percentage">
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="start-date" style="display: block; margin-bottom: 8px; font-weight: 500;">Start Date*</label>
+                    <input type="date" id="start-date" name="validFrom" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px;" required>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <label for="end-date" style="display: block; margin-bottom: 8px; font-weight: 500;">End Date*</label>
+                    <input type="date" id="end-date" name="validUpto" style="width: 100%; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 5px;" required>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button type="button" id="cancel-offer" style="padding: 10px 15px; border: 1px solid var(--border-color); border-radius: 5px; background-color: white">Cancel</button>
+                    <button type="submit" style="padding: 10px 15px; border: none; border-radius: 5px; background-color: var(--sidebar-bg); color: white;">Save Offer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Modal functionality
+    const addOfferBtn = document.getElementById('add-offer-btn');
+    const offerModal = document.getElementById('offer-modal');
+    const closeModal = document.getElementById('close-modal');
+    const cancelOffer = document.getElementById('cancel-offer');
+    const offerForm = document.getElementById('offer-form');
+    const offerType = document.getElementById('offer-type');
+    const applicableTo = document.getElementById('applicable-to');
+    
+    // Pagination variables
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    const tableRows = document.querySelectorAll('#offer-table-body tr');
+    const totalPages = Math.ceil(tableRows.length / rowsPerPage);
+    const paginationContainer = document.querySelector('.pagination');
+    
+    // Initialize pagination
+    function initPagination() {
+        // Clear pagination container
+        paginationContainer.innerHTML = '';
+        
+        // Create prev button
+        const prevButton = document.createElement('button');
+        prevButton.className = 'prev';
+        prevButton.textContent = '⬅️';
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                goToPage(currentPage - 1);
+            }
+        });
+        paginationContainer.appendChild(prevButton);
+        
+        // Create page buttons
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        
+        if (endPage - startPage + 1 < maxVisiblePages && startPage > 1) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+        
+        // First page
+        if (startPage > 1) {
+            const firstPage = document.createElement('span');
+            firstPage.className = 'page-item';
+            firstPage.textContent = '1';
+            firstPage.addEventListener('click', () => goToPage(1));
+            paginationContainer.appendChild(firstPage);
+            
+            if (startPage > 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'ellipsis';
+                ellipsis.textContent = '...';
+                paginationContainer.appendChild(ellipsis);
+            }
+        }
+        
+        // Page numbers
+        for (let i = startPage; i <= endPage; i++) {
+            const pageItem = document.createElement('span');
+            pageItem.className = i === currentPage ? 'page-item active' : 'page-item';
+            pageItem.textContent = i;
+            pageItem.addEventListener('click', () => goToPage(i));
+            paginationContainer.appendChild(pageItem);
+        }
+        
+        // Last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'ellipsis';
+                ellipsis.textContent = '...';
+                paginationContainer.appendChild(ellipsis);
+            }
+            
+            const lastPage = document.createElement('span');
+            lastPage.className = 'page-item';
+            lastPage.textContent = totalPages;
+            lastPage.addEventListener('click', () => goToPage(totalPages));
+            paginationContainer.appendChild(lastPage);
+        }
+        
+        // Create next button
+        const nextButton = document.createElement('button');
+        nextButton.className = 'next';
+        nextButton.textContent = '➡️';
+        nextButton.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1);
+            }
+        });
+        paginationContainer.appendChild(nextButton);
+    }
+    
+    // Function to display the correct rows for current page
+    function displayRows() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        let visibleCount = 0;
+        
+        tableRows.forEach((row, index) => {
+            // Check if row is hidden by search filter
+            if (row.style.display !== 'none') {
+                visibleCount++;
+                // Only show rows that should be visible for current page
+                if (visibleCount > start && visibleCount <= end) {
+                    row.classList.add('visible');
+                    row.style.display = '';
+                } else {
+                    row.classList.remove('visible');
+                    row.style.display = 'none';
+                }
+            }
+        });
+    }
+    
+    // Function to go to specific page
+    function goToPage(pageNum) {
+        currentPage = pageNum;
+        displayRows();
+        updatePaginationDisplay();
+    }
+    
+    // Update the active class on pagination buttons
+    function updatePaginationDisplay() {
+        const pageItems = paginationContainer.querySelectorAll('.page-item');
+        pageItems.forEach(item => {
+            if (parseInt(item.textContent) === currentPage) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+        
+        // Disable/enable prev/next buttons
+        const prevButton = paginationContainer.querySelector('.prev');
+        const nextButton = paginationContainer.querySelector('.next');
+        
+        prevButton.disabled = currentPage === 1;
+        prevButton.style.opacity = currentPage === 1 ? '0.5' : '1';
+        
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.style.opacity = currentPage === totalPages ? '0.5' : '1';
+        
+        // Re-initialize pagination if needed
+        initPagination();
+    }
+    
+    // Initialize pagination on page load
+    initPagination();
+    displayRows();
+    
+    // Fetch categories, products, and brands data from the server
+    let productsData = [];
+    let categoriesData = [];
+    let brandsData = [];
+    
+    <% if (typeof products !== 'undefined') { %>
+        productsData = <%- JSON.stringify(products) %>;
+    <% } %>
+    
+    <% if (typeof categories !== 'undefined') { %>
+        categoriesData = <%- JSON.stringify(categories) %>;
+    <% } %>
+    
+    <% if (typeof brands !== 'undefined') { %>
+        brandsData = <%- JSON.stringify(brands) %>;
+    <% } %>
+    
+    // Update the applicable-to dropdown based on the offer type
+    offerType.addEventListener('change', function() {
+        const selectedType = this.value;
+        applicableTo.innerHTML = '<option value="">Please select an option</option>';
+        
+        if (selectedType === 'Category') {
+            categoriesData.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category._id;
+                option.textContent = category.name;
+                applicableTo.appendChild(option);
+            });
+        } else if (selectedType === 'Brand') {
+            brandsData.forEach(brand => {
+                const option = document.createElement('option');
+                option.value = brand._id;
+                option.textContent = brand.brandName;
+                applicableTo.appendChild(option);
+            });
+        } else if (selectedType === 'Product') {
+            productsData.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product._id;
+                option.textContent = product.productName;
+                applicableTo.appendChild(option);
+            });
+        }
+    });
+
+    // Show modal on add button click
+    addOfferBtn.addEventListener('click', function() {
+        offerModal.style.display = 'flex';
+        document.getElementById('modal-title').innerText = 'Add New Offer';
+        document.getElementById('offer-id').value = '';
+        offerForm.reset();
+        
+        // Set default dates
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('start-date').value = today;
+        
+        const nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        document.getElementById('end-date').value = nextMonth.toISOString().split('T')[0];
+    });
+
+    // Close modal functions
+    closeModal.addEventListener('click', function() {
+        offerModal.style.display = 'none';
+    });
+
+    cancelOffer.addEventListener('click', function() {
+        offerModal.style.display = 'none';
+    });
+
+    // Close modal when clicking outside
+    window.addEventListener('click', function(event) {
+        if (event.target === offerModal) {
+            offerModal.style.display = 'none';
+        }
+    });
+
+    // Edit offer functionality
+    const editButtons = document.querySelectorAll('.edit-btn');
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const offerId = this.getAttribute('data-id');
+            
+            // Fetch offer data from the server
+            fetch(`/admin/offer/${offerId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const offer = data.offer;
+                        
+                        // Populate the form with offer data
+                        document.getElementById('offer-id').value = offer._id;
+                        document.getElementById('offer-name').value = offer.offerName;
+                        document.getElementById('offer-description').value = offer.description;
+                        document.getElementById('offer-type').value = offer.offerType;
+                        
+                        // Trigger change event to load applicable options
+                        const event = new Event('change');
+                        document.getElementById('offer-type').dispatchEvent(event);
+                        
+                        // Set the applicable to value after options are loaded
+                        setTimeout(() => {
+                            document.getElementById('applicable-to').value = offer.applicableTo;
+                        }, 100);
+                        
+                        document.getElementById('discount-type').value = offer.discountType;
+                        document.getElementById('discount-value').value = offer.discountAmount;
+                        
+                        // Format dates for input fields
+                        const validFrom = new Date(offer.validFrom).toISOString().split('T')[0];
+                        const validUpto = new Date(offer.validUpto).toISOString().split('T')[0];
+                        
+                        document.getElementById('start-date').value = validFrom;
+                        document.getElementById('end-date').value = validUpto;
+                        
+                        document.getElementById('modal-title').innerText = 'Edit Offer';
+                        offerModal.style.display = 'flex';
+                    } else {
+                        alert('Failed to load offer data');
+                    }
+                })
+                .catch(err => {
+                    console.error('Error fetching offer:', err);
+                    alert('An error occurred while fetching offer data');
+                });
+        });
+    });
+
+    // Delete offer functionality
+    const deleteButtons = document.querySelectorAll('.delete-btn');
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const offerId = this.getAttribute('data-id');
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will delete the offer and remove any discounts applied to products.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send delete request to server
+                    fetch(`/admin/offer/delete/${offerId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                'Deleted!',
+                                'The offer has been deleted.',
+                                'success'
+                            ).then(() => {
+                                // Remove the row from the table
+                                document.querySelector(`tr[data-id="${offerId}"]`).remove();
+                                // Reinitialize pagination after removal
+                                initPagination();
+                                displayRows();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                data.message || 'Failed to delete offer.',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error deleting offer:', err);
+                        Swal.fire(
+                            'Error!',
+                            'An error occurred while deleting the offer.',
+                            'error'
+                        );
+                    });
+                }
+            });
+        });
+    });
+
+    // List/Unlist offer functionality
+    const listButtons = document.querySelectorAll('.list-btn');
+    listButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const offerId = this.getAttribute('data-id');
+            const action = this.getAttribute('data-action');
+            const isListing = action === 'list';
+            const row = document.querySelector(`tr[data-id="${offerId}"]`);
+            
+            // Show confirmation dialog
+            Swal.fire({
+                title: `Are you sure?`,
+                text: isListing ? "This will make the offer visible to customers." : "This will hide the offer from customers.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: isListing ? '#27ae60' : '#e74c3c',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: isListing ? 'Yes, list it!' : 'Yes, unlist it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send request to server
+                    fetch(`/admin/offer/${action}/${offerId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ isListed: isListing })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: isListing ? 'Listed!' : 'Unlisted!',
+                                text: isListing ? 'The offer is now visible to customers.' : 'The offer is now hidden from customers.',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                // Update the button and status in the table
+                                if (isListing) {
+                                    // Update status cell
+                                    const statusCell = row.cells[6];
+                                    const statusSpan = statusCell.querySelector('span');
+                                    
+                                    const now = new Date();
+                                    const validFrom = new Date(data.offer.validFrom);
+                                    const validUpto = new Date(data.offer.validUpto);
+                                    
+                                    let status = "Inactive";
+                                    let statusColor = "#e74c3c";
+                                    
+                                    if (now < validFrom) {
+                                        status = "Scheduled";
+                                        statusColor = "#f39c12";
+                                    } else if (now >= validFrom && now <= validUpto) {
+                                        status = "Active";
+                                        statusColor = "#27ae60";
+                                    } else {
+                                        status = "Expired";
+                                        statusColor = "#7f8c8d";
+                                    }
+                                    
+                                    statusSpan.textContent = status;
+                                    statusSpan.style.backgroundColor = statusColor;
+                                    
+                                    // Update button
+                                    this.setAttribute('data-action', 'unlist');
+                                    this.setAttribute('title', 'Unlist Offer');
+                                    this.style.color = '#e74c3c';
+                                    this.textContent = '📴';
+                                } else {
+                                    // Update status cell
+                                    const statusCell = row.cells[6];
+                                    const statusSpan = statusCell.querySelector('span');
+                                    statusSpan.textContent = "Inactive";
+                                    statusSpan.style.backgroundColor = "#e74c3c";
+                                    
+                                    // Update button
+                                    this.setAttribute('data-action', 'list');
+                                    this.setAttribute('title', 'List Offer');
+                                    this.style.color = '#27ae60';
+                                    this.textContent = '📶';
+                                }
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                data.message || `Failed to ${isListing ? 'list' : 'unlist'} offer.`,
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(err => {
+                        console.error(`Error ${isListing ? 'listing' : 'unlisting'} offer:`, err);
+                        Swal.fire(
+                            'Error!',
+                            `An error occurred while ${isListing ? 'listing' : 'unlisting'} the offer.`,
+                            'error'
+                        );
+                    });
+                }
+            });
+        });
+    });
+
+    // Form submission
+    offerForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = new FormData(offerForm);
+        const offerId = document.getElementById('offer-id').value;
+        
+        // Convert form data to JSON
+        const jsonData = {};
+        formData.forEach((value, key) => {
+            jsonData[key] = value;
+        });
+        
+        // Set API endpoint and method based on whether we're creating or updating
+        const url = offerId ? `/admin/offer/update/${offerId}` : '/admin/offer/add';
+        const method = offerId ? 'PUT' : 'POST';
+        
+        // Send request to server
+        fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(jsonData)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: offerId ? 'Offer updated successfully!' : 'Offer added successfully!',
+                    showConfirmButton: false,
+                    timer: 1500
+                }).then(() => {
+                    window.location.reload(); // Reload the page to show updated data
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: data.message || 'Failed to save offer.'
+                });
+            }
+        })
+        .catch(err => {
+            console.error('Error saving offer:', err);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: 'An error occurred while saving the offer.'
+            });
+        });
+        
+        // Close the modal
+        offerModal.style.display = 'none';
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('search-offers');
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase();
+        const tableRows = document.querySelectorAll('#offer-table-body tr');
+        
+        tableRows.forEach(row => {
+            const offerName = row.cells[1].textContent.toLowerCase();
+            const offerType = row.cells[2].textContent.toLowerCase();
+            
+            if (offerName.includes(searchTerm) || offerType.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Reset to first page and reinitialize pagination after search
+        currentPage = 1;
+        initPagination();
+        displayRows();
+    });
+});
+</script>
+<%- include("../../views/partials/admin/footer") %>

@@ -1,0 +1,1174 @@
+<%- include("../../views/partials/admin/header") %>
+
+  <!-- CropperJS CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.css"
+    integrity="sha512-087vysR/jM0N5cp13Vlp+ZF9wx6tKbvJLwPO8Iit6J7R+n7uIMMjg37dEgexOshDmDITHYY5useeSmfD1MYiQA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"
+    integrity="sha512-JyCZjCOZoyeQZSd5+YEAcFgz2fowJ1F1hyJOXgtKu4llIa0KneLcidn5bwfutiehUTiOuK87A986BZJMko0eWQ=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/2.1.2/sweetalert.min.js"
+    integrity="sha512-AA1Bzp5Q0K1KanKKmvN/4d3IRKVlv9PYgwFPvm32nPO6QS8yH1HO7LbgB1pgiOxPtfeg5zEn2ba64MUcqJx6CA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <style>
+    .form-group>label {
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: var(--card-bg-color, #fff);
+      margin: 5vh auto;
+      border-radius: 8px;
+      max-width: 800px;
+      width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      animation: modalFadeIn 0.3s;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-header {
+      padding: 15px 20px;
+      border-bottom: 1px solid var(--border-color, #eee);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: var(--text-color, #333);
+    }
+
+    .close-modal {
+      color: var(--text-secondary, #777);
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close-modal:hover {
+      color: var(--accent-color, #3498db);
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-color, #333);
+    }
+
+    input[type="text"],
+    input[type="number"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border-color, #ddd);
+      border-radius: 4px;
+      background-color: var(--input-bg, #fff);
+      color: var(--text-color, #333);
+    }
+
+    .image-preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .image-preview {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border-color, #ddd);
+      position: relative;
+    }
+
+    .image-delete {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #e74c3c;
+      color: white;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .cancel-btn {
+      padding: 10px 15px;
+      background-color: var(--border-color, #ddd);
+      color: var(--text-color, #333);
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      padding: 10px 20px;
+      background-color: var(--accent-color, #3498db);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .submit-btn:hover {
+      background-color: var(--accent-hover, #2980b9);
+    }
+
+    .dark-theme .modal-content {
+      background-color: var(--card-bg-color, #2d3748);
+      color: var(--text-color, #e2e8f0);
+    }
+
+    .dark-theme input,
+    .dark-theme select,
+    .dark-theme textarea {
+      background-color: var(--input-bg, #1a202c);
+      border-color: var(--border-color, #4a5568);
+      color: var(--text-color, #e2e8f0);
+    }
+
+    /* Cropper container styling */
+    #cropperContainer {
+      margin-top: 10px;
+      display: none;
+    }
+
+    #cropperImage {
+      max-width: 100%;
+    }
+
+    .image-wrapper {
+      position: relative;
+      display: inline-block;
+      margin: 8px;
+    }
+
+    .image-preview {
+      width: 100px;
+      height: auto;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+  </style>
+  <!-- Product Stats Section -->
+  <div class="stats-grid">
+    <div class="stat-card purple">
+      <div class="stat-icon">📦</div>
+      <div class="stat-info">
+        <h3>Total Products</h3>
+        <div class="value">
+          <%=totalProduct%>
+        </div>
+      </div>
+    </div>
+    <div class="stat-card orange">
+      <div class="stat-icon">🏷️</div>
+      <div class="stat-info">
+        <h3>On Sale</h3>
+        <div class="value">static</div>
+      </div>
+    </div>
+    <div class="stat-card blue">
+      <div class="stat-icon">📉</div>
+      <div class="stat-info">
+        <h3>Low Stock</h3>
+        <div class="value">static</div>
+      </div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-info">
+        <h3>Out of Stock</h3>
+        <div class="value">static</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product List Section -->
+  <div class="product-section">
+    <div class="section-header">
+      <h2 class="section-title">Product List</h2>
+      <div class="header-actions">
+        <input type="text" name="search" placeholder="Search products..." class="date-input"
+          value="<%= search ? search : '' %>" style="margin-left: 350px; width: 300px;">
+      </div>
+      <button class="download-btn" id="add-category-btn" onclick="window.location.href='/admin/product-add';">
+        <span>Add Product</span>
+        <span>+</span>
+      </button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Brand</th>
+          <th>Category</th>
+          <th>Sale Price</th>
+          <!-- <th>Add Offer</th> -->
+          <th>Quantity</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for (let i=data.length - 1; i>= 0; i--) { %>
+          <tr>
+            <td>
+              <div style="display: flex; align-items: center;">
+                <% if (data[i].productImage && data[i].productImage.length> 0) { %>
+                  <img src="/uploads/product-images/<%= data[i].productImage[0] %>" alt="<%= data[i].productName %>"
+                    style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                  <% } else { %>
+                    <img src="/uploads/product-images/default-image.png" alt="<%= data[i].productName %>"
+                      style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                    <% } %>
+                      <span style="margin-left: 10px;">
+                        <%= data[i].productName %>
+                      </span>
+              </div>
+            </td>
+            <td>
+              <%= data[i].brand %>
+            </td>
+            <td>
+              <%= data[i].category ? data[i].category.name : 'Uncategorized' %>
+            </td>
+            <td>
+              <%= data[i].salePrice %>
+            </td>
+            <!-- <td>
+
+              <% if(locals.data[i].productOffer===0 ) { %>
+                <button class="add-offer-button" data-product-id="<%= data[i]._id %>"
+                  onclick="addOffer('<%= data[i]._id %>')"
+                  style="background-color: #27ae60; color: white; padding: 5px 10px; border-radius: 4px; border: none; font-size: 0.8rem;">
+                  Add Offer
+                </button>
+                <% } else { %>
+
+                  <button class="remove-offer-button" data-product-id="<%= data[i]._id %>"
+                    onclick="removeOffer('<%=data[i]._id%>')"
+                    style="background-color: #f39c12; color: white; padding: 5px 10px; border-radius: 4px; border: none; font-size: 0.8rem;">
+                    Remove Offer
+                  </button>
+                  <% } %>
+            </td> -->
+            <td>
+              <% if (data[i].quantity> 0) { %>
+                <span style="color: #27ae60; font-weight: 500;">
+                  <%= data[i].quantity %>
+                </span>
+                <% } else { %>
+                  <span style="color: #e74c3c; font-weight: 500;">Out of Stock</span>
+                  <% } %>
+            </td>
+            <td>
+              <% if (data[i].isBlocked===false) { %>
+                <span style="color: #27ae60; font-weight: 500;">Active</span>
+                <% } else { %>
+                  <span style="color: #e74c3c; font-weight: 500;">Blocked</span>
+                  <% } %>
+            </td>
+            <td>
+              <div style="display: flex; gap: 5px;">
+                <button class="edit-product-button" data-product-id="<%= data[i]._id %>"
+                  style="background-color: var(--accent-color); color: white; padding: 5px 10px; border-radius: 4px; border: none; font-size: 0.8rem;">
+                  Edit
+                </button>
+                <% if (data[i].isBlocked===false) { %>
+                  <button class="block-btn" data-id="<%= data[i]._id %>"
+                    style="background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                    Block
+                  </button>
+                  <% } else { %>
+                    <button class="unblock-btn" data-id="<%= data[i]._id %>"
+                      style="background-color: #27ae60; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                      Unblock
+                    </button>
+                    <% } %>
+
+                      <form action="/admin/product/delete/<%= data[i]._id %>" method="POST" class="delete-form">
+                        <button type="button" class="delete-btn" data-id="<%= data[i]._id %>"
+                          style="background-color: #e74c3c; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                          Delete
+                        </button>
+                      </form>
+              </div>
+            </td>
+          </tr>
+          <% } %>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <% if (currentPage> 1) { %>
+        <a href="?page=<%= currentPage - 1 %><%= search ? '&search=' + search : '' %>"><button>«</button></a>
+        <% } else { %>
+          <button disabled>«</button>
+          <% } %>
+
+            <% let startPage=Math.max(1, currentPage - 2); let endPage=Math.min(totalPages, startPage + 4); if (endPage
+              - startPage < 4 && totalPages> 4) {
+              startPage = Math.max(1, endPage - 4);
+              }
+              for (let i = startPage; i <= endPage; i++) { %>
+                <% if (i===parseInt(currentPage)) { %>
+                  <span class="active page-item">
+                    <%= i %>
+                  </span>
+                  <% } else { %>
+                    <a href="?page=<%= i %><%= search ? '&search=' + search : '' %>"><span>
+                        <%= i %>
+                      </span></a>
+                    <% } %>
+                      <% } %>
+
+                        <% if (endPage < totalPages) { %>
+                          <span class="ellipsis">...</span>
+                          <a href="?page=<%= totalPages %><%= search ? '&search=' + search : '' %>"><span>
+                              <%= totalPages %>
+                            </span></a>
+                          <% } %>
+
+                            <% if (currentPage < totalPages) { %>
+                              <a
+                                href="?page=<%= parseInt(currentPage) + 1 %><%= search ? '&search=' + search : '' %>"><button>»</button></a>
+                              <% } else { %>
+                                <button disabled>»</button>
+                                <% } %>
+    </div>
+  </div>
+  <!-- Edit Product Modal -->
+  <div id="editProductModal" class="modal">
+    <div class="modal-content"
+      style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+        <h2 style="background-color: var(--bg-secondary); color: var(--text-primary)">Edit Product</h2>
+        <span class="close-modal" style="color: var(--text-secondary);">&times;</span>
+      </div>
+      <div class="modal-body">
+        <form id="editProductForm" enctype="multipart/form-data">
+          <input type="hidden" id="productId" name="productId">
+          <input type="hidden" id="removedImages" name="removedImages">
+          <!-- Hidden field to hold removed image names -->
+
+          <div class="form-group">
+            <label for="productNameModal">Product Name</label>
+            <input type="text" id="productNameModal" name="productName" required
+              style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="brandModal">Brand</label>
+              <input type="text" id="brandModal" name="brand" required
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+            </div>
+            <div class="form-group">
+              <label for="categoryModal">Category</label>
+              <select id="categoryModal" name="category" required
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                <option value="default">Select Category</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="regularPriceModal">Regular Price</label>
+              <input type="number" id="regularPriceModal" name="regularPrice" min="0" step="0.01" required
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+            </div>
+            <div class="form-group">
+              <label for="salePriceModal">Sale Price</label>
+              <input type="number" id="salePriceModal" name="salePrice" min="0" step="0.01" required
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quantityModal">Quantity</label>
+              <input type="number" id="quantityModal" name="quantity" min="0" required
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+            </div>
+            <div class="form-group">
+              <label for="offerModal">Offer (%)</label>
+              <input type="number" id="offerModal" name="offer" min="0" max="100"
+                style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="descriptionModal">Description</label>
+            <textarea id="descriptionModal" name="description" rows="4"
+              style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);"></textarea>
+          </div>
+
+          <!-- Image display and remove -->
+          <div class="form-group">
+            <label>Current Images</label>
+            <div id="currentImages" class="image-preview-container"></div>
+          </div>
+
+          <!-- Image upload -->
+          <div class="form-group">
+            <label for="newImagesModal">Add New Images</label>
+            <input type="file" id="newImagesModal" name="newImages" accept="image/JPEG/PNG" multiple
+              style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);"
+              onchange="initCropper(event, 1)">
+            <div id="cropperContainer" style="margin-top:10px; display:none;">
+              <img id="cropperImage" style="max-width:100%;" />
+              <button type="button" id="cropImageBtn" class="submit-btn" style="margin-top:10px;">Crop</button>
+            </div>
+            <input type="hidden" id="croppedImageData" name="croppedImageData">
+          </div>
+
+          <!-- Form action buttons -->
+          <div class="form-actions">
+            <button type="button" class="cancel-btn" onclick="closeEditModal()"
+              style="background-color: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">Cancel</button>
+            <button type="submit" class="submit-btn">Save Changes</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Cropper Modal (Standalone) -->
+  <div id="cropperModal"
+    style="display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(5px);">
+    <div class="modal-content"
+      style="background: var(--bg-secondary); border-radius: 8px; max-width: 700px; width: 90%; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header"
+        style="display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid var(--border-color);">
+        <h4 style="margin: 0; color: var(--text-primary);">Crop Image</h4>
+        <button type="button" class="close-btn" id="closeModalBtn"
+          style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">×</button>
+      </div>
+      <div class="cropper-container"
+        style="position: relative; height: 350px; background: #f0f0f0; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+        <img id="cropperModalImage" src="" alt="Crop Image" style="max-width: 100%; display: block;">
+      </div>
+      <div class="cropper-controls"
+        style="padding: 15px 20px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div class="zoom-controls" style="display: flex; gap: 5px;">
+          <button type="button" id="zoomInBtn" class="btn btn-icon" title="Zoom In"
+            style="width: 36px; height: 36px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">+</button>
+          <button type="button" id="zoomOutBtn" class="btn btn-icon" title="Zoom Out"
+            style="width: 36px; height: 36px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">–</button>
+          <button type="button" id="rotateBtn" class="btn btn-icon" title="Rotate"
+            style="width: 36px; height: 36px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">↻</button>
+          <button type="button" id="resetBtn" class="btn btn-icon" title="Reset"
+            style="width: 36px; height: 36px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">↺</button>
+        </div>
+        <div class="ratio-controls" style="display: flex; gap: 5px;">
+          <button type="button" class="btn btn-sm aspect-btn active" data-ratio="1"
+            style="padding: 6px 12px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">1:1</button>
+          <button type="button" class="btn btn-sm aspect-btn" data-ratio="4/3"
+            style="padding: 6px 12px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">4:3</button>
+          <button type="button" class="btn btn-sm aspect-btn" data-ratio="16/9"
+            style="padding: 6px 12px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">16:9</button>
+          <button type="button" class="btn btn-sm aspect-btn" data-ratio="0"
+            style="padding: 6px 12px; border-radius: 4px; background: var(--bg-secondary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer;">Free</button>
+        </div>
+      </div>
+      <div class="modal-actions" style="padding: 15px 20px; display: flex; justify-content: flex-end; gap: 15px;">
+        <button id="cancelCropButton" type="button" class="btn btn-secondary"
+          style="padding: 10px 20px; border-radius: 6px; cursor: pointer;">Cancel</button>
+        <button id="saveCropButton" type="button" class="btn btn-primary"
+          style="padding: 10px 20px; border-radius: 6px; cursor: pointer;">Apply & Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CropperJS JS -->
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"
+    integrity="sha512-W+ayK4EzWvlI53mQR1nlZ8Be58LwItnwVL4mH05nxmRJcx8QzaxuytZ6V0u6OKUO9b3C5AC+iAh0KSVhj9+SlA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script>
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // Block product functionality
+      const blockButtons = document.querySelectorAll('.block-btn');
+      blockButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          const productId = this.getAttribute('data-id');
+
+          Swal.fire({
+            title: 'Block Product?',
+            text: "This product will be hidden from customers.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#e74c3c',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, block it!'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch(`/admin/product/block/${productId}`, {
+                method: 'POST'
+              })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    Swal.fire(
+                      'Blocked!',
+                      'Product has been blocked.',
+                      'success'
+                    ).then(() => window.location.reload());
+                  } else {
+                    Swal.fire(
+                      'Error!',
+                      data.error || 'Something went wrong.',
+                      'error'
+                    );
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  Swal.fire(
+                    'Error!',
+                    'Failed to block the product.',
+                    'error'
+                  );
+                });
+            }
+          });
+        });
+      });
+
+      // Unblock product functionality
+      const unblockButtons = document.querySelectorAll('.unblock-btn');
+      unblockButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          const productId = this.getAttribute('data-id');
+
+          Swal.fire({
+            title: 'Unblock Product?',
+            text: "This product will be visible to customers again.",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#27ae60',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, unblock it!'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch(`/admin/product/unblock/${productId}`, {
+                method: 'POST'
+              })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    Swal.fire(
+                      'Unblocked!',
+                      'Product has been unblocked.',
+                      'success'
+                    ).then(() => window.location.reload());
+                  } else {
+                    Swal.fire(
+                      'Error!',
+                      data.error || 'Something went wrong.',
+                      'error'
+                    );
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  Swal.fire(
+                    'Error!',
+                    'Failed to unblock the product.',
+                    'error'
+                  );
+                });
+            }
+          });
+        });
+      });
+    });
+
+
+    // Add click event listeners to all add-offer buttons
+    document.addEventListener('DOMContentLoaded', function () {
+      console.log("Setting up add offer button listeners");
+
+      const addOfferButtons = document.querySelectorAll('.add-offer-button');
+      console.log(`Found ${addOfferButtons.length} add offer buttons`);
+
+      addOfferButtons.forEach(button => {
+        button.addEventListener('click', function () {
+          const productId = this.getAttribute('data-product-id');
+          console.log("Add offer button clicked, product ID:", productId);
+          addOffer(productId);
+        });
+      });
+    });
+
+    // Global array to store 
+    // cropped files
+    window.croppedFiles = [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+      // ===============================
+      // Cropper Modal and Functions
+      // ===============================
+      let cropperModal;      // The cropper modal element
+      let cropperInstance;   // Cropper instance for the modal image
+      let currentCropInput;  // File input element that triggered cropping
+
+      cropperModal = document.getElementById('cropperModal');
+      const modalImage = document.getElementById('cropperModalImage');
+      modalImage.setAttribute('crossOrigin', 'anonymous');
+
+      // Function to initialize cropper from a file input
+      window.initCropper = function (event, index) {
+        const files = event.target.files;
+        if (!files || files.length === 0) return;
+
+        // Check total images (existing + new)
+        const currentImages = document.querySelectorAll('#currentImages img').length;
+        const croppedImages = window.croppedFiles ? window.croppedFiles.length : 0;
+        const totalImages = currentImages + croppedImages;
+        const newFilesCount = files.length;
+
+        // If adding these files would exceed the limit
+        if (totalImages + newFilesCount > 5) {
+          const remainingSlots = 5 - totalImages;
+          Swal.fire({
+            icon: 'warning',
+            title: 'Image Limit Warning',
+            text: `You can only add ${remainingSlots} more image(s). Please select fewer images.`,
+            confirmButtonText: 'OK'
+          });
+          event.target.value = ''; // Clear the file input
+          return;
+        }
+
+        // Store files for processing
+        window.filesToProcess = Array.from(files);
+        window.currentFileIndex = 0;
+        window.processedFiles = [];
+
+        // Start processing the first file
+        processNextFile();
+      };
+
+      function processNextFile() {
+        if (window.currentFileIndex >= window.filesToProcess.length) {
+          // All files processed
+          if (window.processedFiles.length > 0) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: `Successfully added ${window.processedFiles.length} image(s)!`,
+              confirmButtonText: 'OK'
+            });
+          }
+          return;
+        }
+
+        const file = window.filesToProcess[window.currentFileIndex];
+        const imageURL = URL.createObjectURL(file);
+        
+        // Clear any existing cropper instance
+        if (cropperInstance) {
+          cropperInstance.destroy();
+          cropperInstance = null;
+        }
+
+        // Update modal image
+        const modalImage = document.getElementById('cropperModalImage');
+        modalImage.src = imageURL;
+        document.getElementById('cropperModal').style.display = 'flex';
+
+        // Initialize cropper with specific dimensions
+        cropperInstance = new Cropper(modalImage, {
+          aspectRatio: 1,
+          viewMode: 2,
+          autoCropArea: 1,
+          responsive: true,
+          guides: true,
+          dragMode: 'move',
+          minContainerWidth: 440,
+          minContainerHeight: 440,
+          minCanvasWidth: 440,
+          minCanvasHeight: 440,
+          cropBoxResizable: true,
+          cropBoxMovable: true,
+          toggleDragModeOnDblclick: true
+        });
+
+        // Update modal title to show progress
+        document.querySelector('#cropperModal .modal-header h4').textContent =
+          `Crop Image ${window.currentFileIndex + 1} of ${window.filesToProcess.length}`;
+      }
+
+      // Modify the save crop button handler
+      document.getElementById('saveCropButton').addEventListener('click', function () {
+        if (!cropperInstance) return;
+
+        // Get the cropped canvas
+        const canvas = cropperInstance.getCroppedCanvas({
+          width: 440,
+          height: 440,
+          minWidth: 440,
+          minHeight: 440,
+          maxWidth: 440,
+          maxHeight: 440,
+          fillColor: '#fff',
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: 'high'
+        });
+
+        if (!canvas) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Failed to crop image.',
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
+
+        // Convert canvas to blob
+        canvas.toBlob(function (blob) {
+          if (!blob) return;
+
+          const fileName = "cropped_" + Date.now() + "_" + window.currentFileIndex + ".png";
+          const croppedFile = new File([blob], fileName, { type: "image/png" });
+          
+          // Add to processed files
+          window.processedFiles.push(croppedFile);
+          window.croppedFiles.push(croppedFile);
+
+          // Update preview
+          const previewContainer = document.getElementById('currentImages');
+          const wrapper = document.createElement('div');
+          wrapper.style.position = 'relative';
+          wrapper.style.margin = '5px';
+
+          const imgEl = document.createElement('img');
+          imgEl.src = URL.createObjectURL(blob);
+          imgEl.classList.add('image-preview');
+          imgEl.style.width = '100px';
+          imgEl.style.height = '100px';
+          imgEl.style.objectFit = 'cover';
+          imgEl.style.border = '1px solid #ccc';
+          imgEl.style.borderRadius = '8px';
+
+          const removeBtn = document.createElement('button');
+          removeBtn.style.width = '20px';
+          removeBtn.innerText = '❌';
+          removeBtn.style.position = 'absolute';
+          removeBtn.style.top = '2px';
+          removeBtn.style.right = '2px';
+          removeBtn.style.background = 'white';
+          removeBtn.style.border = 'none';
+          removeBtn.style.borderRadius = '30%';
+          removeBtn.style.cursor = 'pointer';
+
+          removeBtn.addEventListener('click', () => {
+            wrapper.remove();
+            window.croppedFiles = window.croppedFiles.filter(file => file.name !== fileName);
+          });
+
+          wrapper.appendChild(imgEl);
+          wrapper.appendChild(removeBtn);
+          previewContainer.appendChild(wrapper);
+
+          // Process next file
+          window.currentFileIndex++;
+          document.getElementById('cropperModal').style.display = 'none';
+          processNextFile();
+        }, "image/png", 0.9);
+      });
+
+      // Modify the cancel crop button handler
+      document.getElementById('cancelCropButton').addEventListener('click', function () {
+        if (cropperInstance) {
+          cropperInstance.destroy();
+          cropperInstance = null;
+        }
+        document.getElementById('cropperModal').style.display = 'none';
+        window.currentFileIndex++;
+        processNextFile();
+      });
+
+      // Aspect ratio controls
+      document.querySelectorAll('#cropperModal .aspect-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const ratio = this.getAttribute('data-ratio');
+          document.querySelectorAll('#cropperModal .aspect-btn').forEach(btn => btn.classList.remove('active'));
+          this.classList.add('active');
+          cropperInstance.setAspectRatio(ratio === '0' ? NaN : eval(ratio));
+        });
+      });
+
+      // Zoom, rotate, reset controls
+      document.getElementById('zoomInBtn')?.addEventListener('click', () => { cropperInstance && cropperInstance.zoom(0.1); });
+      document.getElementById('zoomOutBtn')?.addEventListener('click', () => { cropperInstance && cropperInstance.zoom(-0.1); });
+      document.getElementById('rotateBtn')?.addEventListener('click', () => { cropperInstance && cropperInstance.rotate(90); });
+      document.getElementById('resetBtn')?.addEventListener('click', () => { cropperInstance && cropperInstance.reset(); });
+
+      // Remove the old save button click handler since we're not using the cropper modal anymore
+      document.getElementById('saveCropButton').removeEventListener('click', function () { });
+
+      // Close modal via close button
+      document.getElementById('closeModalBtn').addEventListener('click', function () {
+        if (cropperInstance) {
+          cropperInstance.destroy();
+          cropperInstance = null;
+        }
+        if (currentCropInput) {
+          currentCropInput.value = "";
+        }
+        cropperModal.style.display = "none";
+      });
+      // ===============================
+      // End of Cropper Modal Section
+      // ===============================
+
+      // ===============================
+      // Existing Product Edit Modal Functions
+      // ===============================
+      const editModal = document.getElementById('editProductModal');
+      const closeModal = document.querySelector('.close-modal');
+      const editForm = document.getElementById('editProductForm');
+
+      const productIdField = document.getElementById('productId');
+      const removedImagesField = document.getElementById('removedImages');
+
+      const productNameField = document.getElementById('productNameModal');
+      const brandField = document.getElementById('brandModal');
+      const categoryField = document.getElementById('categoryModal');
+      const regularPriceField = document.getElementById('regularPriceModal');
+      const salePriceField = document.getElementById('salePriceModal');
+      const quantityField = document.getElementById('quantityModal');
+      const offerField = document.getElementById('offerModal');
+      const descriptionField = document.getElementById('descriptionModal');
+      const currentImagesContainer = document.getElementById('currentImages');
+
+      document.querySelectorAll('.edit-product-button').forEach(button => {
+        button.addEventListener('click', function () {
+          const productId = this.getAttribute('data-product-id');
+          
+          // First fetch product data
+          fetch(`/admin/product/data/${productId}`)
+            .then(response => response.json())
+            .then(product => {
+              productIdField.value = product._id;
+              productNameField.value = product.productName;
+              brandField.value = product.brand;
+              
+              // Clear the categories dropdown
+              categoryField.innerHTML = '<option value="">Select Category</option>';
+              
+              // Then fetch all categories to populate the dropdown
+              fetch('/admin/categories')
+                .then(response => response.json())
+                .then(categories => {
+                  categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category._id;
+                    option.textContent = category.name;
+                    
+                    // Set the current product's category as selected
+                    if (product.category && category._id === product.category._id) {
+                      option.selected = true;
+                    }
+                    
+                    categoryField.appendChild(option);
+                  });
+                })
+                .catch(error => {
+                  console.error('Error loading categories:', error);
+                });
+              
+              regularPriceField.value = product.regularPrice;
+              salePriceField.value = product.salePrice;
+              quantityField.value = product.quantity;
+              offerField.value = product.offer && product.offer !== "No Offer" ? product.offer : "";
+              descriptionField.value = product.description || "";
+
+              // Reset containers and cropped files
+              currentImagesContainer.innerHTML = '';
+              window.croppedFiles = []; // Clear any previous cropped files
+              const removedImages = [];
+
+              if (product.productImage && product.productImage.length > 0) {
+                product.productImage.forEach(image => {
+                  const wrapper = document.createElement('div');
+                  wrapper.style.position = 'relative';
+
+                  const imgEl = document.createElement('img');
+                  imgEl.src = `/uploads/product-images/${image}`;
+                  imgEl.classList.add('image-preview');
+                  imgEl.style.width = '100px';
+                  imgEl.style.height = '100px';
+                  imgEl.style.objectFit = 'cover';
+                  imgEl.style.border = '1px solid #ccc';
+                  imgEl.style.borderRadius = '8px';
+
+                  if(imgEl==='JPG/PNG'){
+                    
+                  }
+
+                  const removeBtn = document.createElement('button');
+                  removeBtn.style.width = '20px';
+                  removeBtn.innerText = '❌';
+                  removeBtn.style.position = 'absolute';
+                  removeBtn.style.top = '2px';
+                  removeBtn.style.right = '2px';
+                  removeBtn.style.background = 'white';
+                  removeBtn.style.border = 'none';
+                  removeBtn.style.borderRadius = '30%';
+                  removeBtn.style.cursor = 'pointer';
+
+                  removeBtn.addEventListener('click', () => {
+                    wrapper.remove();
+                    removedImages.push(image);
+                    removedImagesField.value = JSON.stringify(removedImages);
+                  });
+
+                  wrapper.appendChild(imgEl);
+                  wrapper.appendChild(removeBtn);
+                  currentImagesContainer.appendChild(wrapper);
+                });
+              }
+
+              document.getElementById('newImagesModal').value = "";
+              removedImagesField.value = "[]";
+
+              editModal.style.display = 'block';
+            })
+            .catch(error => {
+              console.error('Error fetching product data:', error);
+              Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load product data. Please try again.'
+              });
+            });
+        });
+      });
+
+      editForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        console.log("✅ Form Submitted!");
+
+        const productId = productIdField.value;
+        const formData = new FormData(editForm);
+
+
+        // Check total images before submitting
+        const currentImages = document.querySelectorAll('#currentImages img').length;
+        const croppedImages = window.croppedFiles ? window.croppedFiles.length : 0;
+        const totalImages = currentImages + croppedImages;
+
+        // Only show error if we're actually exceeding the limit
+        if (totalImages >= 6) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Too Many Images',
+            text: 'You can only have a maximum of 5 images per product. Please remove some images before saving.',
+            confirmButtonText: 'OK'
+          });
+          return;
+        }
+
+        // Clear any existing newImages from formData to prevent duplicates
+        formData.delete('newImages');
+
+        // Append cropped images from cropper only if they exist
+        if (window.croppedFiles && window.croppedFiles.length > 0) {
+          window.croppedFiles.forEach((file, index) => {
+            formData.append('newImages', file);
+          });
+        }
+
+        // Clear the croppedFiles array after adding to formData
+        window.croppedFiles = [];
+
+        fetch(`/admin/product/edit/${productId}`, {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(data => {
+            console.log("✅ Server Response:", data);
+
+            if (data.success) {
+              closeEditModal();
+              Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Product updated successfully!',
+                confirmButtonText: 'OK'
+              }).then(() => window.location.reload());
+            } else {
+              Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: data.message || 'Failed to update product. Please try again.',
+                confirmButtonText: 'Try Again'
+              });
+            }
+          })
+          .catch(err => {
+            console.error('❌ Error Submitting Form:', err);
+            Swal.fire({
+              icon: 'error',
+              title: 'Error!',
+              text: 'An error occurred while updating the product. Please try again later.',
+              confirmButtonText: 'OK'
+            });
+          });
+      });
+
+
+      closeModal.addEventListener('click', closeEditModal);
+      window.addEventListener('click', function (e) {
+        if (e.target === editModal) {
+          closeEditModal();
+        }
+      });
+
+      function closeEditModal() {
+        document.getElementById('editProductModal').style.display = 'none';
+      }
+
+      // ===============================
+      // End of Product Edit Modal Section
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const deleteButtons = document.querySelectorAll('.delete-btn');
+
+      deleteButtons.forEach(button => {
+        button.addEventListener('click', function (e) {
+          e.preventDefault(); // Prevent default form submission
+
+          const productId = this.getAttribute('data-id');
+
+          Swal.fire({
+            title: 'Are you sure?',
+            text: "This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+          }).then((result) => {
+            if (result.isConfirmed) {
+              fetch(`/admin/product/delete/${productId}`, {
+                method: 'POST'
+              })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    Swal.fire(
+                      'Deleted!',
+                      'Your product has been deleted.',
+                      'success'
+                    ).then(() => window.location.reload());
+                  } else {
+                    Swal.fire(
+                      'Error!',
+                      data.error || 'Something went wrong.',
+                      'error'
+                    );
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  Swal.fire(
+                    'Error!',
+                    'Failed to delete the product.',
+                    'error'
+                  );
+                });
+            }
+          });
+        });
+      });
+    });
+
+
+    function closeEditModal() {
+      document.getElementById('editProductModal').style.display = 'none';
+    }
+    
+    
+    
+    
+
+  </script>
+
+  <%- include("../../views/partials/admin/footer") %>

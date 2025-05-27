@@ -1,0 +1,875 @@
+<%- include("../../views/partials/admin/header") %>
+<body>
+            <!-- Banner Management Content -->
+            <div class="product-section">
+                <div class="section-header">
+                    <h2 class="section-title">Current Banners</h2>
+                    <a href="/admin/addBanner" style="text-decoration: none;"><button class="download-btn" id="add-banner-btn">
+                        <span>➕</span>
+                        Add New Banner
+                    </button></a>
+                </div>
+
+                <!-- Banner Table -->
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Banner Image</th>
+                            <th>Title</th>
+                            <th>Description</th>
+                            <th>Status</th>
+                            <th>Added Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                       <% if(locals.data) { %>
+                        <% for(let i=0;i< data.length;i++ ) { %>
+                        <tr>
+                            <td><img src="/uploads/product-images/<%=data[i].image %>" alt="" class="product-image"></td>
+                            <td><%= data[i].title %></td>
+                            <td><%= data[i].description%></td>
+                            <% if(data[i].startDate < Date.now() && data[i].enddate > Date.now() ) { %>
+                            <td><span class="status-badge active">Active</span></td>
+                            <% } else {%>
+                            <td><span class="status-badge active">No Active</span></td>
+                                <% } %>
+                            <td>Feb 25, 2025</td>
+                            <td class="action" data-title="Remove" ><a href="/admin/deleteBanner?id=<%=data[i]._id %>">
+                                <button class="action-btn delete">🗑️</button></a>
+                            </td>
+                        </tr>
+                        <% } %>
+                        <% } else {%>
+                            No Banner Found
+                        <% } %>
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <button>&laquo;</button>
+                    <span class="active page-item">1</span>
+                    <span>2</span>
+                    <span class="ellipsis">...</span>
+                    <span>5</span>
+                    <button>&raquo;</button>
+                </div>
+            </div>
+
+            <!-- Add/Edit Banner Modal -->
+            <div id="banner-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Add New Banner</h3>
+                        <span class="close-modal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="banner-form">
+                            <div class="form-group">
+                                <label for="banner-title">Banner Title</label>
+                                <input type="text" id="banner-title" name="title" placeholder="Enter banner title" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="banner-position">Position</label>
+                                <select id="banner-position" name="position" required>
+                                    <option value="">Select position</option>
+                                    <option value="home_hero">Home Hero</option>
+                                    <option value="category_page">Category Page</option>
+                                    <option value="product_page">Product Page</option>
+                                    <option value="home_footer">Home Footer</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="banner-link">Link URL</label>
+                                <input type="url" id="banner-link" name="link" placeholder="https://example.com/page">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="banner-image">Banner Image</label>
+                                <div class="file-input-container">
+                                    <input type="file" id="banner-image" name="image" accept="image/*" required>
+                                    <div class="file-preview"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="banner-status">Status</label>
+                                <div class="toggle-container">
+                                    <input type="checkbox" id="banner-status" name="status" checked>
+                                    <label for="banner-status" class="toggle-label"></label>
+                                    <span class="status-text">Active</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="banner-description">Description (Optional)</label>
+                                <textarea id="banner-description" name="description" rows="3" placeholder="Enter banner description"></textarea>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="cancel-btn">Cancel</button>
+                                <button type="submit" class="save-btn">Save Banner</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Existing styles from your shared CSS */
+        :root {
+            --bg-primary: #f8f9fa;
+            --bg-secondary: #ffffff;
+            --sidebar-bg: #1e2a78;
+            --sidebar-hover: #2a3a8c;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-light: #ffffff;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
+            --card-bg-purple: #8e44ad;
+            --card-bg-orange: #e67e22;
+            --card-bg-blue: #3498db;
+            --card-bg-red: #e74c3c;
+            --accent-color: #3498db;
+            --table-header: #f1f2f6;
+            --table-hover: #f8f9fa;
+            --pagination-active: #2a3a8c;
+        }
+
+        .dark-theme {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #121212;
+            --sidebar-bg: #121212;
+            --sidebar-hover: #2a2a2a;
+            --text-primary: #f8f9fa;
+            --text-secondary: #a0a0a0;
+            --text-light: #ffffff;
+            --border-color: #2c2c2c;
+            --card-bg: #1e1e1e;
+            --card-bg-purple: #6c2c8c;
+            --card-bg-orange: #b35c11;
+            --card-bg-blue: #246b9e;
+            --card-bg-red: #b83227;
+            --accent-color: #246b9e;
+            --table-header: #2a2a2a;
+            --table-hover: #2c2c2c;
+            --pagination-active: #246b9e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: none;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+            background-color: var(--sidebar-bg);
+            color: var(--text-light);
+            padding: 20px 0;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 0 20px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 5px;
+        }
+
+        .sidebar-menu a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background-color: var(--sidebar-hover);
+            border-left: 4px solid var(--text-light);
+        }
+
+        .sidebar-menu .icon {
+            margin-right: 10px;
+        }
+
+        .sidebar-menu .logout {
+            color: #e74c3c;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .download-btn {
+            display: flex;
+            align-items: center;
+            background-color: var(--sidebar-bg);
+            color: var(--text-light);
+            border: none;
+            border-radius: 4px;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            gap: 10px;
+        }
+
+        .product-section {
+            background-color: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background-color: var(--table-header);
+            padding: 12px 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tbody td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--text-primary);
+        }
+
+        tbody tr:hover {
+            background-color: var(--table-hover);
+        }
+
+        .product-image {
+            width: 60px;
+            height: 30px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-top: 20px;
+            gap: 8px;
+        }
+
+        .pagination span, .pagination button {
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .pagination a {
+            text-decoration: none;
+            color: white;
+        }
+
+        .pagination span.active {
+            background-color: var(--pagination-active);
+            color: white;
+            border-color: var(--pagination-active);
+        }
+
+        .pagination > .page-item {
+            background-color: var(--pagination-active);
+            color: white;
+            border-color: var(--pagination-active);
+        }
+
+        .pagination button {
+            background-color: var(--bg-secondary);
+        }
+
+        .pagination .ellipsis {
+            border: none;
+            background: none;
+        }
+
+        .profile-dropdown {
+            position: relative;
+        }
+
+        .profile-btn {
+            display: flex;
+            align-items: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--accent-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .profile-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            width: 200px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+
+        .profile-dropdown-content.show {
+            display: block;
+        }
+
+        .profile-dropdown-content a {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: background-color 0.3s ease;
+        }
+
+        .profile-dropdown-content a:hover {
+            background-color: var(--table-hover);
+        }
+
+        .profile-dropdown-content a .icon {
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+
+        .profile-dropdown-content hr {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 5px 0;
+        }
+
+        .profile-dropdown-content .logout-link {
+            color: #e74c3c;
+        }
+
+        /* Additional styles for banner management */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-badge.active {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-badge.inactive {
+            background-color: var(--text-secondary);
+            color: white;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 3px 6px;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.edit:hover {
+            color: var(--accent-color);
+        }
+
+        .action-btn.delete:hover {
+            color: var(--card-bg-red);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            margin: 50px auto;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s;
+        }
+
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-20px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+
+        .modal-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .close-modal:hover {
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="url"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .file-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .file-preview {
+            min-height: 100px;
+            border: 1px dashed var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toggle-container input[type="checkbox"] {
+            display: none;
+        }
+
+        .toggle-label {
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+            background-color: var(--text-secondary);
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-label::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 16px;
+            height: 16px;
+            background-color: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        input[type="checkbox"]:checked + .toggle-label {
+            background-color: #28a745;
+        }
+
+        input[type="checkbox"]:checked + .toggle-label::after {
+            left: 22px;
+        }
+
+        .status-text {
+            font-size: 0.9rem;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .cancel-btn {
+            padding: 8px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .save-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            background-color: var(--sidebar-bg);
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 20px auto;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const deleteButtons = document.querySelectorAll(".delete");
+
+        deleteButtons.forEach(button => {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+
+                const deleteUrl = this.closest("a").getAttribute("href");
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = deleteUrl;
+                    }
+                });
+            });
+        });
+    });
+
+
+    document.getElementById("banner-form").addEventListener("submit", function(event) {
+        event.preventDefault(); // Prevent default form submission
+
+        // Example AJAX logic for submission
+        const formData = new FormData(this);
+
+        fetch('/admin/addBanner', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Banner Created!',
+                    text: 'Your banner has been added successfully.',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    window.location.reload(); // Refresh to show new banner
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to add banner. Please try again.',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(() => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops!',
+                text: 'Something went wrong. Please try again.',
+                confirmButtonText: 'OK'
+            });
+        });
+    });
+
+        // Profile Dropdown
+        const profileBtn = document.getElementById('profile-btn');
+        const profileDropdown = document.getElementById('profile-dropdown-content');
+
+        profileBtn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            profileDropdown.classList.toggle('show');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!profileBtn.contains(event.target) && profileDropdown.classList.contains('show')) {
+                profileDropdown.classList.remove('show');
+            }
+        });
+
+        profileDropdown.addEventListener('click', (event) => {
+            event.stopPropagation();
+        });
+
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        
+        const savedTheme = localStorage.getItem('admin-theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-theme');
+            themeToggle.textContent = '☀️';
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-theme');
+            
+            if (body.classList.contains('dark-theme')) {
+                localStorage.setItem('admin-theme', 'dark');
+                themeToggle.textContent = '☀️';
+            } else {
+                localStorage.setItem('admin-theme', 'light');
+                themeToggle.textContent = '🌙';
+            }
+        });
+
+        // Banner Modal
+        const addBannerBtn = document.getElementById('add-banner-btn');
+        const bannerModal = document.getElementById('banner-modal');
+        const closeModal = document.querySelector('.close-modal');
+        const cancelBtn = document.querySelector('.cancel-btn');
+        const bannerForm = document.getElementById('banner-form');
+        const bannerStatus = document.getElementById('banner-status');
+        const statusText = document.querySelector('.status-text');
+        
+        addBannerBtn.addEventListener('click', () => {
+            bannerModal.style.display = 'block';
+        });
+        
+        closeModal.addEventListener('click', () => {
+            bannerModal.style.display = 'none';
+        });
+        
+        cancelBtn.addEventListener('click', () => {
+            bannerModal.style.display = 'none';
+        });
+        
+        window.addEventListener('click', (event) => {
+            if (event.target === bannerModal) {
+                bannerModal.style.display = 'none';
+            }
+        });
+        
+        bannerStatus.addEventListener('change', () => {
+            statusText.textContent = bannerStatus.checked ? 'Active' : 'Inactive';
+        });
+        
+        // File Preview
+        const bannerImage = document.getElementById('banner-image');
+        const filePreview = document.querySelector('.file-preview');
+        
+        bannerImage.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    filePreview.innerHTML = `<img src="${e.target.result}" alt="Banner Preview" style="max-width: 100%; max-height: 200px;">`;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                filePreview.innerHTML = 'No file selected';
+            }
+        });
+        
+        // Form Submit
+        bannerForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            // Process form data here
+            alert('Banner saved successfully!');
+            bannerModal.style.display = 'none';
+        });
+
+        // Active Navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            
+            const navLinks = document.querySelectorAll('.sidebar-menu a');
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            navLinks.forEach(link => {
+                const linkPath = link.getAttribute('href');
+                
+                if (linkPath && currentPath.includes(linkPath) && linkPath !== '/') {
+                    link.classList.add('active');
+                    
+                    const parentMenuItem = link.closest('.dropdown, .submenu, .has-children');
+                    if (parentMenuItem) {
+                        parentMenuItem.classList.add('active', 'open');
+                    }
+                }
+                
+                if (linkPath === '/' && (currentPath === '/' || currentPath === '/dashboard' || currentPath === '/index.html')) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+<%- include("../../views/partials/admin/footer") %>

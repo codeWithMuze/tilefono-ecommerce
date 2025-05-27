@@ -1,0 +1,686 @@
+<%- include("../../views/partials/user/header") %>
+
+<style>
+    * {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background-color: #f8fafc;
+        color: #4a5568;
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        line-height: 1.6;
+    }
+    
+    .success-container {
+        max-width: 1200px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    
+    .success-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .success-header h1 {
+        font-family: 'Unbounded', cursive;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #333;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.4s;
+        opacity: 0;
+    }
+    
+    .success-header p {
+        font-size: 18px;
+        color: #666;
+        max-width: 600px;
+        margin: 0 auto;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.6s;
+        opacity: 0;
+    }
+    
+    .success-badge {
+        width: 90px;
+        height: 90px;
+        background: linear-gradient(90deg, #636566 0%, #262729 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 10px 20px rgba(67, 97, 238, 0.2);
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.2s;
+        opacity: 0;
+    }
+    
+    .success-badge svg {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .success-badge path {
+        stroke: white;
+        stroke-width: 3;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-dasharray: 80;
+        stroke-dashoffset: 80;
+        animation: check 1s forwards;
+    }
+    
+    @keyframes check {
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+    
+    .order-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.5fr;
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .order-summary-card, .timeline-card {
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        padding: 30px;
+        height: fit-content;
+        animation: fadeUp 0.8s forwards;
+        animation-delay: 0.8s;
+        opacity: 0;
+    }
+    
+    .order-summary-card h2, .timeline-card h2 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-top: 0;
+        margin-bottom: 25px;
+        color: #4a5568;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 15px;
+        font-family: 'Roboto', sans-serif;
+    }
+    
+    .order-summary-card h2 i, .timeline-card h2 i {
+        color: #333;
+    }
+    
+    .summary-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .summary-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 15px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .summary-item:last-child {
+        border-bottom: none;
+    }
+    
+    .summary-label {
+        color: #718096;
+        font-size: 15px;
+    }
+    
+    .summary-value {
+        font-weight: 600;
+        color: #4a5568;
+        font-size: 15px;
+    }
+
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        background-color: #edf2f7;
+    }
+    
+    .total-amount {
+        margin-top: 20px;
+        padding-top: 20px;
+        border-top: 2px dashed #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .total-label {
+        font-size: 18px;
+        font-weight: 600;
+        color: #4a5568;
+    }
+    
+    .total-value {
+        font-size: 22px;
+        font-weight: 700;
+        background: linear-gradient(90deg, #111, #333);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .timeline-card {
+        position: relative;
+    }
+    
+    .track-order-btn {
+        position: absolute;
+        top: 25px;
+        right: 30px;
+        background: linear-gradient(90deg, #636566 0%, #262729 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 15px;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+    }
+    
+    .track-order-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+    }
+    
+    .timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 8px;
+        width: 2px;
+        background: #e2e8f0;
+    }
+    
+    .timeline:after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 8px;
+        width: 2px;
+        background: linear-gradient(to bottom, #333 0%, #636566 30%, #e2e8f0 50%);
+        transform: scaleY(0);
+        transform-origin: top;
+        animation: progress-line 1.5s ease-out forwards;
+        animation-delay: 1s;
+    }
+    
+    @keyframes progress-line {
+        to {
+            transform: scaleY(1);
+        }
+    }
+    
+    .timeline-step {
+        position: relative;
+        padding-bottom: 24px;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeUp 0.5s forwards;
+    }
+    
+    .timeline-step:nth-child(1) {
+        animation-delay: 0.2s;
+    }
+    
+    .timeline-step:nth-child(2) {
+        animation-delay: 0.4s;
+    }
+    
+    .timeline-step:nth-child(3) {
+        animation-delay: 0.6s;
+    }
+    
+    .timeline-step:nth-child(4) {
+        animation-delay: 0.8s;
+    }
+    
+    .timeline-step:nth-child(5) {
+        animation-delay: 1s;
+    }
+    
+    .timeline-step:last-child {
+        padding-bottom: 0;
+    }
+    
+    @keyframes fadeUp {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .timeline-step.completed .timeline-title {
+        color: #333;
+    }
+    
+    .timeline-step.active .timeline-title {
+        color: #333;
+        font-weight: 700;
+    }
+    
+    .timeline-step.active .timeline-content {
+        animation: highlight 3s infinite;
+    }
+    
+    @keyframes highlight {
+        0%, 100% {
+            transform: translateX(0);
+        }
+        5% {
+            transform: translateX(5px);
+        }
+        10% {
+            transform: translateX(-2px);
+        }
+        15% {
+            transform: translateX(0);
+        }
+    }
+    
+    .timeline-dot {
+        position: absolute;
+        left: -30px;
+        top: 0;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-dot:before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-step.completed .timeline-dot {
+        background-color: #333;
+        box-shadow: 0 0 0 4px rgba(51, 51, 51, 0.2);
+    }
+    
+    .timeline-step.completed .timeline-dot:before {
+        background-color: #fff;
+    }
+    
+    .timeline-step.active .timeline-dot {
+        background-color: #666;
+        animation: pulse 2s infinite;
+    }
+    
+    .timeline-step.active .timeline-dot:before {
+        background-color: white;
+        animation: pulse-inner 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(67, 67, 67, 0.4);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(67, 67, 67, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(67, 67, 67, 0);
+        }
+    }
+    
+    @keyframes pulse-inner {
+        0% {
+            transform: scale(1);
+        }
+        50% {
+            transform: scale(1.2);
+        }
+        100% {
+            transform: scale(1);
+        }
+    }
+    
+    .timeline-content {
+        margin-bottom: 4px;
+    }
+    
+    .timeline-date {
+        display: block;
+        font-size: 13px;
+        color: #718096;
+        margin-bottom: 6px;
+    }
+    
+    .timeline-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 8px;
+        color: #4a5568;
+    }
+    
+    .timeline-text {
+        font-size: 14px;
+        color: #718096;
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .action-buttons {
+        margin-top: 30px;
+        display: flex;
+        gap: 15px;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 15px;
+        text-decoration: none;
+        transition: all 0.3s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(90deg, #636566 0%, #262729 100%);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-outline {
+        background-color: transparent;
+        color: #333;
+        border: 1px solid #333;
+    }
+    
+    .btn-outline:hover {
+        background-color: rgba(51, 51, 51, 0.05);
+        transform: translateY(-5px);
+    }
+    
+    .payment-methods {
+        display: flex;
+        justify-content: center;
+        margin-top: 30px;
+        gap: 15px;
+    }
+    
+    .payment-icon {
+        opacity: 0.6;
+        transition: all 0.2s ease;
+    }
+    
+    .payment-icon:hover {
+        opacity: 1;
+    }
+    
+    @media (max-width: 900px) {
+        .order-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .btn {
+            width: 100%;
+        }
+    }
+    
+    .confetti {
+        position: fixed;
+        width: 15px;
+        height: 15px;
+        border-radius: 2px;
+        animation: confetti-fall linear forwards;
+    }
+    
+    @keyframes confetti-fall {
+        0% {
+            transform: translateY(-100vh) rotate(0deg);
+            opacity: 1;
+        }
+        
+        100% {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+        }
+    }
+</style>
+
+<div class="success-container">
+    <div class="success-header">
+        <div class="success-badge">
+            <svg viewBox="0 0 30 30">
+                <path d="M5 15 L12 22 L25 8" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your purchase. Your order has been confirmed and is now being processed.</p>
+    </div>
+    
+    <div class="order-grid">
+        <div class="order-summary-card">
+            <h2><i class="fas fa-receipt"></i> Order Summary</h2>
+            
+            <ul class="summary-list">
+                <li class="summary-item">
+                    <span class="summary-label">Order ID</span>
+                    <span class="summary-value">#<%= order._id.toString().substr(-6) %></span>
+                </li>
+                <li class="summary-item">
+                    <span class="summary-label">Date</span>
+                    <span class="summary-value"><%= new Date(order.createdOn).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                </li>
+                <li class="summary-item">
+                    <span class="summary-label">Payment Method</span>
+                    <span class="summary-value"><%= order.paymentMethod === 'razorpay' ? 'Online Payment' : 'Cash on Delivery' %></span>
+                </li>
+                <li class="summary-item">
+                    <span class="summary-label">Products</span>
+                    <span class="summary-value"><%= order.orderedItems.length %> items</span>
+                </li>
+                <li class="summary-item">
+                    <span class="summary-label">Status</span>
+                    <span class="summary-value status-badge <%= order.status.toLowerCase() %>">
+                        <%= order.status %>
+                    </span>
+                </li>
+            </ul>
+            
+            <div class="total-amount">
+                <span class="total-label">Total Amount</span>
+                <span class="total-value">₹<%= order.finalAmount.toLocaleString('en-IN') %></span>
+            </div>
+            
+            <div class="action-buttons">
+                <a href="/order" class="btn btn-primary">
+                    <i class="fas fa-box"></i> View Orders
+                </a>
+                <a href="/shop" class="btn btn-outline">
+                    <i class="fas fa-shopping-bag"></i> Continue Shopping
+                </a>
+            </div>
+        </div>
+        
+        <div class="timeline-card">
+            <h2><i class="fas fa-shipping-fast"></i> Order Status</h2>
+            
+            <a href="/track-order/<%= order._id %>" class="track-order-btn">
+                <i class="fas fa-truck"></i> Track Order
+            </a>
+            
+            <div class="timeline">
+                <div class="timeline-step completed">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-date"><%= new Date(order.invoiceDate || order.createdOn).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %>, <%= new Date(order.invoiceDate || order.createdOn).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit'}) %></span>
+                        <h3 class="timeline-title">Order Confirmed</h3>
+                        <p class="timeline-text">Your order has been received and confirmed. Payment <%= order.status === 'Processing' ? 'will be collected on delivery' : 'successfully processed' %>.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-step active">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-date"><%= new Date().toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></span>
+                        <h3 class="timeline-title">Processing Order</h3>
+                        <p class="timeline-text">We're preparing your items for shipment. Your products are being packaged with care.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-date">Expected <%= new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></span>
+                        <h3 class="timeline-title">Shipped</h3>
+                        <p class="timeline-text">Your order will be handed over to our delivery partner. You'll receive tracking information.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-date">Expected <%= new Date(Date.now() + 4 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></span>
+                        <h3 class="timeline-title">Out for Delivery</h3>
+                        <p class="timeline-text">Your package will be on its way to your doorstep. Our delivery partner will contact you.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-step">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-content">
+                        <span class="timeline-date">Expected <%= new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {month: 'short', day: 'numeric'}) %></span>
+                        <h3 class="timeline-title">Delivered</h3>
+                        <p class="timeline-text">Your order will be delivered to your specified address. Enjoy your purchase!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="payment-methods">
+        <span class="payment-icon">
+            <i class="fab fa-cc-visa fa-2x"></i>
+        </span>
+        <span class="payment-icon">
+            <i class="fab fa-cc-mastercard fa-2x"></i>
+        </span>
+        <span class="payment-icon">
+            <i class="fab fa-cc-paypal fa-2x"></i>
+        </span>
+        <span class="payment-icon">
+            <i class="fas fa-money-bill-wave fa-2x"></i>
+        </span>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Create confetti
+        const colors = ['#636566', '#262729', '#4a5568', '#718096', '#333'];
+        const shapes = ['square', 'circle'];
+        
+        for (let i = 0; i < 100; i++) {
+            createConfetti(
+                colors[Math.floor(Math.random() * colors.length)],
+                shapes[Math.floor(Math.random() * shapes.length)]
+            );
+        }
+        
+        function createConfetti(color, shape) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            // Random position
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = color;
+            
+            // Random shape
+            if (shape === 'circle') {
+                confetti.style.borderRadius = '50%';
+            }
+            
+            // Random size
+            const size = Math.random() * 10 + 5;
+            confetti.style.width = size + 'px';
+            confetti.style.height = size + 'px';
+            
+            // Random rotation
+            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+            
+            // Random animation duration
+            const duration = Math.random() * 3 + 2;
+            confetti.style.animationDuration = duration + 's';
+            
+            document.body.appendChild(confetti);
+            
+            // Remove after animation completes
+            setTimeout(() => {
+                confetti.remove();
+            }, duration * 1000);
+        }
+    });
+</script>
+
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Add Inter font for better typography -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<!-- Add Poppins and Unbounded fonts to match home page -->
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500&family=Nunito:wght@400;600&display=swap" rel="stylesheet">
+
+<%- include("../../views/partials/user/footer") %>
