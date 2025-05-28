@@ -1,2 +1,0 @@
-this is the partiall part of my project which is shoul dbe there in every page , as i build the customer and dashbaord page , generate the category page same as this theme
-so here we can produyce the noraml yhing in here 
