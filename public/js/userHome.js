@@ -9,44 +9,53 @@ document.addEventListener("DOMContentLoaded", function () {
     let currentIndex = 0;
     let autoSlideInterval;
 
+    // Dynamically calculate the slide width
+    function getSlideWidth() {
+        return carouselContainer.offsetWidth;
+    }
+
     function setSlidePosition() {
-      track.style.transform = `translateX(-${currentIndex * 100}%)`;
-      updateDots();
+        const slideWidth = getSlideWidth();
+        track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+        updateDots();
     }
 
     function updateDots() {
-      dots.forEach((dot, index) => {
-        dot.classList.toggle('active', index === currentIndex);
-      });
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentIndex);
+        });
     }
 
     function moveToNextSlide() {
-      currentIndex = (currentIndex + 1) % slides.length;
-      setSlidePosition();
+        currentIndex = (currentIndex + 1) % slides.length;
+        setSlidePosition();
     }
 
     function moveToPrevSlide() {
-      currentIndex = (currentIndex - 1 + slides.length) % slides.length;
-      setSlidePosition();
+        currentIndex = (currentIndex - 1 + slides.length) % slides.length;
+        setSlidePosition();
     }
 
     nextButton.addEventListener('click', moveToNextSlide);
     prevButton.addEventListener('click', moveToPrevSlide);
 
     dots.forEach(dot => {
-      dot.addEventListener('click', function () {
-        currentIndex = parseInt(this.getAttribute('data-index'));
-        setSlidePosition();
-      });
+        dot.addEventListener('click', function () {
+            currentIndex = parseInt(this.getAttribute('data-index'));
+            setSlidePosition();
+        });
     });
 
     function startAutoSlide() {
-      autoSlideInterval = setInterval(moveToNextSlide, 5000);
+        autoSlideInterval = setInterval(moveToNextSlide, 5000);
     }
 
     function stopAutoSlide() {
-      clearInterval(autoSlideInterval);
+        clearInterval(autoSlideInterval);
     }
+
+    // Adjust slide positions on window resize
+    window.addEventListener('resize', setSlidePosition);
 
     // Start auto-scroll
     startAutoSlide();
@@ -54,4 +63,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Pause on hover
     carouselContainer.addEventListener('mouseenter', stopAutoSlide);
     carouselContainer.addEventListener('mouseleave', startAutoSlide);
-  });
+
+    // Initialize slide positions
+    setSlidePosition();
+});

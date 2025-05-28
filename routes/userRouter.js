@@ -5,8 +5,10 @@ const passport = require('passport')
 const profileController= require('../controllers/user/profileController')
 const {userAuth,adminAuth} = require('../middlewares/auth');
 const cartController=require('../controllers/user/cartController')
+const paymentController = require('../controllers/user/paymentController')
 const orderController=require('../controllers/user/orderController')
 const wishlistController= require('../controllers/user/wishlistController')
+
 
 const { updateLocale } = require('moment')
 const multer = require('multer');
@@ -49,7 +51,7 @@ router.get('/pageNotFound',userController.pageNotFound)
 router.get('/home', userController.loadHomePage);
 router.get("/signup", userController.loadSignUp);
 router.get("/shop",userController.loadShopping);
-router.post('/cart/addToCart', userController.addToCartInShop)    // add cart to the userControler page same copy as mattedh
+router.post('/cart/addToCart', userController.addToCartInShop);
 router.post('/signup', userController.signup);
 router.post('/verify-otp', userController.verifyOtp);
 router.post('/resend-otp', userController.resendOtp)
@@ -58,10 +60,8 @@ router.get('/contact', userController.loadContactPage);
 
 
 
-
+// Google OAuth routes
 router.get('/auth/google',passport.authenticate('google', { scope: ['profile', 'email'] }));
-
-
 router.get('/auth/google/callback',
 passport.authenticate('google', { failureRedirect: '/signup' }),
 (req, res) => {
@@ -69,6 +69,7 @@ passport.authenticate('google', { failureRedirect: '/signup' }),
 }
 );
 
+// user controller routes
 router.get('/login',userController.loadLogin); 
 router.post('/login',userController.login);
 router.get('/logout',userController.logout)
@@ -76,7 +77,6 @@ router.get('/forgot-password',profileController.getForgotPassPage);
 router.post('/forgot-password', userController.postForgotPassRequest);
 router.get('/OTP-Login',userController.loadOTPLoginPage)
 router.post('/verify-signup-otp',userController.postVerifyForgetOtp)
-
 router.post('/forgot-resend-otp', userController.forgetResendOTP);
 
 
@@ -114,8 +114,6 @@ router.get('/search', userController.searchProducts);
 router.get('/cart',cartController.loadCartPage)
 router.post('/cart/add', cartController.addToCart)
 router.post('/cart/remove/:id', cartController.removeFromCart);
-// router.post('/cart/remove',userController.decreaseProductCount)
-// router.post('/cart/update',userController.increaseProductCount)
 router.post('/cart/update-quantity', userAuth, cartController.updateQuantity);
 
 // Coupon routes
@@ -131,176 +129,29 @@ router.get('/checkout/buy-now', userAuth, userController.loadBuyNowCheckout)
 // order route
 router.get('/order', userAuth, orderController.loadOrderPage);
 router.post('/create-order', userAuth, orderController.createOrder);
-
-// Return order route
-// Order return is handled by the /request-return route
-
 //cancel order route 
 router.post('/cancel-order/:orderId', userAuth, orderController.cancelOrder);
+
+
 //payment routes
-router.get('/payment-success', userAuth, userController.loadPaymentPage)
-router.get('/payment/:orderId', userAuth, userController.loadRazorpayPaymentPage)
-router.post('/verify-payment', userAuth, userController.verifyRazorpayPayment)
-router.get('/track-order/:orderId', userAuth, userController.loadTrackOrder)
-router.get('/track-order', userAuth, userController.loadTrackOrder)
+router.get('/payment-success', userAuth, paymentController.loadPaymentPage)
+router.get('/payment/:orderId', userAuth, paymentController.loadRazorpayPaymentPage)
+router.post('/verify-payment', userAuth, paymentController.verifyRazorpayPayment)
+router.get('/track-order/:orderId', userAuth, paymentController.loadTrackOrder)
+router.get('/track-order', userAuth, paymentController.loadTrackOrder)
 
 // Payment failed page route
-router.get('/payment-failed', userAuth, async (req, res) => {
-try {
-    const { orderId, error_code, error_message } = req.query;
-    
-    if (!orderId) {
-        return res.status(400).redirect('/order?error=Invalid request. Order ID missing.');
-    }
-    
-    // Fetch the order details
-    const order = await Order.findById(orderId);
-    
-    if (!order) {
-        return res.status(404).redirect('/order?error=Order not found.');
-    }
-    
-    // Render the payment failed page
-    res.render('payment-failed', {
-        order,
-        user: req.session.user,
-        error: {
-            code: error_code,
-            message: error_message || 'Payment processing failed.'
-        }
-    });
-} catch (error) {
-    console.error('Payment Failed Page Error:', error);
-    res.status(500).redirect('/order?error=Something went wrong.');
-}
-});
+router.get('/payment-failed', userAuth, paymentController.loadPaymentFailedPage);
 
 // Retry payment API endpoint
-router.post('/retry-payment', userAuth, async (req, res) => {
-try {
-    const { orderId } = req.body;
-    
-    if (!orderId) {
-        return res.status(400).json({
-            success: false,
-            message: 'Order ID is required'
-        });
-    }
-    
-    // Find the order
-    const order = await Order.findById(orderId);
-    
-    if (!order) {
-        return res.status(404).json({
-            success: false,
-            message: 'Order not found'
-        });
-    }
-    
-    // Check if this order belongs to the logged-in user
-    const user = await User.findOne({
-        _id: req.session.user._id,
-        orderHistory: { $in: [orderId] }
-    });
-    
-    if (!user) {
-        return res.status(403).json({
-            success: false,
-            message: 'You do not have permission to retry this payment'
-        });
-    }
-    
-    // If it's been a while since the order was created, we might want to create a new Razorpay order
-    const orderCreatedTime = new Date(order.createdOn || order.createdAt).getTime();
-    const currentTime = new Date().getTime();
-    const hoursSinceCreation = (currentTime - orderCreatedTime) / (1000 * 60 * 60);
-    
-    let razorpayOrderId = order.paymentDetails?.razorpayOrderId;
-    
-    // If order is more than 24 hours old or doesn't have a Razorpay order ID, create a new one
-    if (hoursSinceCreation > 24 || !razorpayOrderId) {
-        try {
-            // Create a new Razorpay order
-            const amountInPaise = Math.round(order.finalAmount * 100);
-            
-            const razorpay = new Razorpay({
-                key_id: razorpayConfig.keyId,
-                key_secret: razorpayConfig.keySecret
-            });
-            
-            // Try to create a real Razorpay order
-            try {
-                const basicParams = {
-                    amount: amountInPaise,
-                    currency: 'INR',
-                    receipt: order._id.toString()
-                };
-                
-                const rzpResponse = await razorpay.orders.create(basicParams);
-                
-                if (rzpResponse && rzpResponse.id) {
-                    razorpayOrderId = rzpResponse.id;
-                    
-                    // Update the order with new Razorpay details
-                    order.paymentDetails = {
-                        ...order.paymentDetails,
-                        razorpayOrderId: razorpayOrderId,
-                        retryCount: (order.paymentDetails?.retryCount || 0) + 1,
-                        lastRetryDate: new Date()
-                    };
-                    
-                    await order.save();
-                }
-            } catch (createError) {
-                console.error('Failed to create new Razorpay order for retry:', createError);
-                
-                // Fall back to using a dummy order ID
-                razorpayOrderId = 'order_demo_' + Math.random().toString(36).substring(2, 15);
-                
-                // Update the order with fallback details
-                order.paymentDetails = {
-                    ...order.paymentDetails,
-                    razorpayOrderId: razorpayOrderId,
-                    isDemoOrder: true,
-                    retryCount: (order.paymentDetails?.retryCount || 0) + 1,
-                    lastRetryDate: new Date()
-                };
-                
-                await order.save();
-            }
-        } catch (error) {
-            console.error('Error creating new Razorpay order for retry:', error);
-            // Continue with the existing order ID if available, or use a dummy one
-            if (!razorpayOrderId) {
-                razorpayOrderId = 'order_demo_' + Math.random().toString(36).substring(2, 15);
-            }
-        }
-    }
-    
-    // Return order details for retry
-    return res.json({
-        success: true,
-        orderId: order._id,
-        amount: order.finalAmount,
-        razorpayOrderId: razorpayOrderId,
-        currency: 'INR',
-        isDemoOrder: razorpayOrderId.startsWith('order_demo_')
-    });
-    
-} catch (error) {
-    console.error('Retry payment error:', error);
-    return res.status(500).json({
-        success: false,
-        message: 'An error occurred while retrying payment'
-    });
-}
-});
+router.post('/retry-payment/:orderId', userAuth, paymentController.retryPayment);
 
-// // Authentication check
-// router.get('/check-auth', (req, res) => {
-//     const isAuthenticated = req.session.user ? true : false;
-//     res.json({ isAuthenticated });
-// });
+
+// Authentication check
+router.get('/check-auth', (req, res) => {
+    const isAuthenticated = req.session.user ? true : false;
+    res.json({ isAuthenticated });
+});
 
 // Wishlist
 router.get('/wishlists',userAuth,wishlistController.loadWishlistPage)

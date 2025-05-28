@@ -49,7 +49,7 @@
         padding: 10px;
         font-size: 1em;
         border-radius: 5px;
-        border: 1px solid #ccc;
+        /* border: 1px solid #ccc; */
         cursor: pointer;
         width: 200px;
     }
@@ -62,7 +62,7 @@
     }
 
     .product-card {
-        border: 1px solid #ddd;
+        border: 0.1px solid #ddd;
         border-radius: 10px;
         overflow: hidden;
         background-color: white;
@@ -243,7 +243,6 @@
     }
 
     .discover-button:hover {
-        transform: translateY(-5px);
         box-shadow: 0 15px 30px rgba(11, 12, 12, 0.4);
     }
 
@@ -433,18 +432,20 @@
     .section {
         background: #ffffff;
         border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         padding: 30px;
+        transition: transform 0.3s ease;
     }
 
     .section h2 {
-        color: #4a5568;
-        font-size: 24px;
-        font-weight: 600;
+        color: #1e293b;
+        font-size: 28px;
+        font-weight: 700;
         border-bottom: 2px solid #e2e8f0;
         padding-bottom: 15px;
         margin-bottom: 25px;
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Unbounded', cursive;
+        letter-spacing: 0.5px;
     }
 
     .products {
@@ -455,47 +456,174 @@
 
     .product-card {
         background: #ffffff;
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 20px;
         text-align: center;
-        border: 1px solid #e2e8f0;
-        transition: none;
+        /* border: 1px solid #e2e8f0; */
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-card:hover {
+        box-shadow: 0 8px 25px rgba(99, 99, 99, 0.1);
+        text-decoration: none;
     }
 
     .product-card img {
         max-width: 100%;
-        height: 250px;
-        object-fit: cover;
+        height: 220px;
+        object-fit: contain;
         border-radius: 8px;
+        transition: transform 0.3s ease;
+        margin-bottom: 15px;
+    }
+
+    .product-card:hover img {
+        transform: scale(1.05);
     }
 
     .product-card h3 {
         font-size: 18px;
-        color: #4a5568;
-        margin: 15px 0;
+        color: #1e293b;
+        margin: 10px 0;
         font-weight: 600;
-        font-family: 'Roboto', sans-serif;
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.4;
+        min-height: 44px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .price-container {
+        margin: 10px 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
     }
 
     .product-card .price {
-        color: #718096;
-        font-size: 20px;
+        color: #111827;
+        font-size: 22px;
+        font-weight: 700;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .original-price {
+        text-decoration: line-through;
+        color: #6b7280;
+        font-size: 16px;
+        font-weight: 400;
+    }
+
+    .savings {
+        color: #059669;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .discount-badge {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: linear-gradient(90deg, #e11d48, #be123c);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 12px;
+        z-index: 1;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .discount-badge i {
+        font-size: 14px;
+    }
+
+    .product-offers {
+        margin-top: 10px;
+        text-align: left;
+        font-size: 14px;
+        color: #059669;
+        background: #f0fdf4;
+        padding: 10px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-offers h4 {
+        font-size: 16px;
         font-weight: bold;
-        margin: 15px 0;
-        font-family: 'Roboto', sans-serif;
+        margin-bottom: 5px;
+        color: #065f46;
+    }
+
+    .product-offers ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .product-offers li {
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #065f46;
+    }
+
+    .product-offers li i {
+        color: #10b981;
+        font-size: 14px;
+    }
+
+    .product-card .price-container .savings {
+        color: #16a34a;
+        font-size: 14px;
+        font-weight: 600;
     }
 
     .product-card button {
-        background: #edf2f7;
-        color: #4a5568;
+        background: linear-gradient(90deg, #111827 0%, #374151 100%);
+        color: white;
         border: none;
-        padding: 12px 25px;
+        padding: 12px 30px;
         border-radius: 25px;
         cursor: pointer;
         font-size: 16px;
-        font-weight: 500;
+        font-weight: 600;
         font-family: 'Poppins', sans-serif;
-        box-shadow: none;
+        transition: all 2s ease-in;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .product-card button:hover {
+        background: linear-gradient(90deg, #0f131a 0%, #27292c 100%);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+
+
+    .product-card a {
+        text-decoration: none; 
+    }
+
+    .product-card a:hover {
+        text-decoration: none; 
     }
 
     @media (max-width: 768px) {
@@ -508,7 +636,7 @@
         }
 
         .section h2 {
-            font-size: 20px;
+            font-size: 24px;
         }
 
         .product-card {
@@ -516,12 +644,48 @@
         }
 
         .product-card img {
-            height: 200px;
+            height: 180px;
+        }
+
+        .product-card h3 {
+            font-size: 16px;
+            min-height: 40px;
+        }
+
+        .product-card .price {
+            font-size: 18px;
+        }
+
+        .original-price {
+            font-size: 14px;
+        }
+
+        .savings {
+            font-size: 13px;
         }
 
         .product-card button {
             padding: 10px 20px;
             font-size: 14px;
+        }
+
+        .discount-badge {
+            font-size: 11px;
+            padding: 5px 10px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .products {
+            grid-template-columns: 1fr;
+        }
+
+        .product-card img {
+            height: 160px;
+        }
+
+        .section h2 {
+            font-size: 20px;
         }
     }
 
@@ -532,7 +696,7 @@
         margin: 0;
         overflow: hidden;
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        border-radius: 8px;
+        /* border-radius: 8px; */
     }
 
     .carousel-track {
@@ -549,6 +713,17 @@
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .carousel-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 8px;
     }
 
     .carousel-buttons {
@@ -663,106 +838,25 @@
             height: 8px;
         }
     }
-
-    .product-link {
-        text-decoration: none;
-        color: inherit;
-        display: block;
-        height: 100%;
-    }
-
-    .product-card {
-        position: relative;
-        transition: transform 0.3s ease;
-    }
-
-    .product-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .product-card img {
-        width: 100%;
-        height: 280px;
-        object-fit: contain;
-        margin-bottom: 15px;
-        transition: transform 0.2s ease;
-    }
-
-    .product-card:hover img {
-        transform: scale(1.05);
-    }
-
-    .view-details {
-        background: linear-gradient(90deg, #636566 0%, #262729 100%);
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 25px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        margin-top: 10px;
-        width: 100%;
-    }
-
-    .view-details:hover {
-        opacity: 0.9;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-    .product-card h3 {
-        color: #1a1a1a;
-        margin: 10px 0;
-        font-size: 1.1rem;
-        font-weight: 600;
-    }
-
-    .price {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #111827;
-        margin: 10px 0;
-    }
-
-    .discount-badge {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #e94444;
-        color: white;
-        padding: 5px 10px;
-        border-radius: 5px;
-        font-weight: bold;
-        font-size: 0.9em;
-        z-index: 1;
-    }
-
-    .price-container {
-        margin: 10px 0;
-    }
-
-    .original-price {
-        text-decoration: line-through;
-        color: #666;
-        font-size: 0.9em;
-        margin-left: 8px;
-    }
-
-    .savings {
-        color: #059669;
-        font-size: 0.9em;
-        margin-top: 5px;
-        font-weight: 600;
-    }
 </style>
 
 <div class="carousel-container">
     <div class="carousel-track">
+        <!-- Example of an image slide -->
         <div class="carousel-slide" style="background-image: url('/img/miPhone.avif');"></div>
-        <div class="carousel-slide" style="background-image: url('/img/56f120efa4b0d158e2fc278a77216b62.jpg');"></div>
-        <div class="carousel-slide" style="background-image: url('/img/13_Desktop.jpg');"></div>
+        
+        <!-- Example of a video slide -->
+        <div class="carousel-slide">
+            <video autoplay muted loop playsinline class="carousel-video">
+                <source src="/video/0515_OnePlus13s_Horizontal.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+        
+        <!-- Another image slide -->
+        <div class="carousel-slide" style="background-image: url('/img/iphone-banner.jpg');"></div>
+
+
     </div>
     
     <div class="carousel-buttons">
@@ -811,19 +905,45 @@
                     <% products.featured.forEach(function(product) { %>
                         <div class="product-card">
                             <a href="/product/<%= product._id %>" class="product-link">
+                                <% if (product.offers && product.offers.length > 0) { %>
+                                    <div class="discount-badge">
+                                        <%= product.offers[0].discountAmount %>% OFF
+                                    </div>
+                                <% } %>
                                 <img 
                                     src="<%= product.productImage && product.productImage.length > 0 ? 
                                         `${imageBasePath}${product.productImage[0]}` : 
                                         '/img/products/default-product.jpg' %>" 
-                                    alt="<%= product.productName %>"
+                                    alt="<%= product.productName || 'Product' %>"
                                     onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
                                 >
                                 <h3><%= product.productName %></h3>
-                                <p class="price">₹<%= product.salePrice.toLocaleString('en-IN') %></p>
-                                <% if (product.discount > 0) { %>
-                                    <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">
-                                        Save ₹<%= product.discount.toLocaleString('en-IN') %>
+                                <div class="price-container">
+                                    <p class="price">
+                                        <% if (product.offers && product.offers.length > 0) { %>
+                                            ₹<%= (product.regularPrice - (product.regularPrice * product.offers[0].discountAmount / 100)).toLocaleString('en-IN') %>
+                                            <span class="original-price">
+                                                ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                            </span>
+                                        <% } else { %>
+                                            ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                        <% } %>
                                     </p>
+                                    <% if (product.offers && product.offers.length > 0) { %>
+                                        <p class="savings">
+                                            Save ₹<%= (product.regularPrice * product.offers[0].discountAmount / 100).toLocaleString('en-IN') %>
+                                        </p>
+                                    <% } %>
+                                </div>
+                                <% if (product.offers && product.offers.length > 0) { %>
+                                    <!-- <div class="product-offers">
+                                        <h4>Offers:</h4>
+                                        <ul>
+                                            <% product.offers.forEach(function(offer) { %>
+                                                <li><%= offer.offerName %> - <%= offer.discountAmount %>% OFF</li>
+                                            <% }); %>
+                                        </ul>
+                                    </div> -->
                                 <% } %>
                                 <button class="view-details">View Details</button>
                             </a>
@@ -834,7 +954,9 @@
                         <a href="/product/iphone-15-pro" class="product-link">
                             <img src="/img/products/iphone15pro.jpg" alt="iPhone 15 Pro">
                             <h3>iPhone 15 Pro</h3>
-                            <p class="price">₹134,900</p>
+                            <div class="price-container">
+                                <p class="price">₹149,900</p>
+                            </div>
                             <button class="view-details">View Details</button>
                         </a>
                     </div>
@@ -850,9 +972,11 @@
                     <% products.topOffers.forEach(function(product) { %>
                         <div class="product-card">
                             <a href="/product/<%= product._id %>" class="product-link">
-                                <div class="discount-badge">
-                                    <%= product.discountPercentage %>% OFF
-                                </div>
+                                <% if (product.offers && product.offers.length > 0) { %>
+                                    <div class="discount-badge">
+                                        <i class="fas fa-tag"></i> <%= product.offers[0].discountAmount %>% OFF
+                                    </div>
+                                <% } %>
                                 <img 
                                     src="<%= product.productImage && product.productImage.length > 0 ? 
                                         `${imageBasePath}${product.productImage[0]}` : 
@@ -860,39 +984,43 @@
                                     alt="<%= product.productName || 'Product' %>"
                                     onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
                                 >
-                                <h3><%= product.productName || 'Product Name' %></h3>
+                                <h3><%= product.productName %></h3>
                                 <div class="price-container">
                                     <p class="price">
-                                        ₹<%= (product.salePrice || 0).toLocaleString('en-IN') %>
-                                        <span class="original-price">
-                                            ₹<%= ((product.salePrice || 0) + (product.discount || 0)).toLocaleString('en-IN') %>
-                                        </span>
+                                        <% if (product.offers && product.offers.length > 0) { %>
+                                            ₹<%= (product.regularPrice - (product.regularPrice * product.offers[0].discountAmount / 100)).toLocaleString('en-IN') %>
+                                            <span class="original-price">
+                                                ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                            </span>
+                                        <% } else { %>
+                                            ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                        <% } %>
                                     </p>
-                                    <p class="savings">
-                                        Save ₹<%= (product.discount || 0).toLocaleString('en-IN') %>
-                                    </p>
+                                    <% if (product.offers && product.offers.length > 0) { %>
+                                        <p class="savings">
+                                            Save ₹<%= (product.regularPrice * product.offers[0].discountAmount / 100).toLocaleString('en-IN') %>
+                                        </p>
+                                    <% } %>
                                 </div>
+                                <% if (product.offers && product.offers.length > 0) { %>
+                                    <!-- <div class="product-offers">
+                                        <h4>Available Offers:</h4>
+                                        <ul>
+                                            <% product.offers.forEach(function(offer) { %>
+                                                <li>
+                                                    <i class="fas fa-check-circle"></i> 
+                                                    <strong><%= offer.offerName %></strong> - <%= offer.discountAmount %>% OFF
+                                                </li>
+                                            <% }); %>
+                                        </ul>
+                                    </div> -->
+                                <% } %>
                                 <button class="view-details">View Details</button>
                             </a>
                         </div>
                     <% }); %>
                 <% } else { %>
-                    <div class="product-card">
-                        <a href="/product/samsung-s23-fe" class="product-link">
-                            <img src="/img/products/samsung-s23-fe.jpg" alt="Samsung S23 FE">
-                            <h3>Samsung S23 FE 5G</h3>
-                            <p class="price">₹49,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹59,999</span></p>
-                            <button class="view-details">View Details</button>
-                        </a>
-                    </div>
-                    <div class="product-card">
-                        <a href="/product/oneplus-11r" class="product-link">
-                            <img src="/img/products/oneplus-11r.jpg" alt="OnePlus 11R">
-                            <h3>OnePlus 11R 5G</h3>
-                            <p class="price">₹39,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹44,999</span></p>
-                            <button class="view-details">View Details</button>
-                        </a>
-                    </div>
+                    <p>No top offers available at the moment.</p>
                 <% } %>
             </div>
         </div>
@@ -905,15 +1033,36 @@
                     <% products.under25000.forEach(function(product) { %>
                         <div class="product-card">
                             <a href="/product/<%= product._id %>" class="product-link">
+                                <% if (product.appliedOffer && product.appliedOffer.discountAmount > 0) { %>
+                                    <div class="discount-badge">
+                                        <%= product.appliedOffer.discountAmount %>% OFF
+                                    </div>
+                                <% } %>
                                 <img 
                                     src="<%= product.productImage && product.productImage.length > 0 ? 
                                         `${imageBasePath}${product.productImage[0]}` : 
                                         '/img/products/default-product.jpg' %>" 
-                                    alt="<%= product.productName %>"
+                                    alt="<%= product.productName || 'Product' %>"
                                     onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
                                 >
                                 <h3><%= product.productName %></h3>
-                                <p class="price">₹<%= product.salePrice.toLocaleString('en-IN') %></p>
+                                <div class="price-container">
+                                    <p class="price">
+                                        <% if (product.appliedOffer && product.appliedOffer.discountAmount > 0) { %>
+                                            ₹<%= product.discountedPrice.toLocaleString('en-IN') %>
+                                            <span class="original-price">
+                                                ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                            </span>
+                                        <% } else { %>
+                                            ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                        <% } %>
+                                    </p>
+                                    <% if (product.appliedOffer && product.appliedOffer.discountAmount > 0) { %>
+                                        <p class="savings">
+                                            Save ₹<%= (product.regularPrice - product.discountedPrice).toLocaleString('en-IN') %>
+                                        </p>
+                                    <% } %>
+                                </div>
                                 <button class="view-details">View Details</button>
                             </a>
                         </div>
@@ -923,7 +1072,9 @@
                         <a href="/product/redmi-note-13" class="product-link">
                             <img src="/img/products/redmi-note-13.jpg" alt="Redmi Note 13">
                             <h3>Redmi Note 13 5G</h3>
-                            <p class="price">₹19,999</p>
+                            <div class="price-container">
+                                <p class="price">₹19,999</p>
+                            </div>
                             <button class="view-details">View Details</button>
                         </a>
                     </div>
@@ -931,7 +1082,9 @@
                         <a href="/product/realme-11" class="product-link">
                             <img src="/img/products/realme-11.jpg" alt="Realme 11">
                             <h3>Realme 11 5G</h3>
-                            <p class="price">₹21,999</p>
+                            <div class="price-container">
+                                <p class="price">₹21,999</p>
+                            </div>
                             <button class="view-details">View Details</button>
                         </a>
                     </div>
@@ -939,7 +1092,9 @@
                         <a href="/product/poco-x6" class="product-link">
                             <img src="/img/products/poco-x6.jpg" alt="POCO X6">
                             <h3>POCO X6 5G</h3>
-                            <p class="price">₹23,999</p>
+                            <div class="price-container">
+                                <p class="price">₹23,999</p>
+                            </div>
                             <button class="view-details">View Details</button>
                         </a>
                     </div>
@@ -955,6 +1110,11 @@
                     <% products.bestDeals.forEach(function(product) { %>
                         <div class="product-card">
                             <a href="/product/<%= product._id %>" class="product-link">
+                                <% if (product.appliedOffer && product.appliedOffer.discountAmount > 0) { %>
+                                    <div class="discount-badge">
+                                        <%= product.appliedOffer.discountAmount %>% OFF
+                                    </div>
+                                <% } %>
                                 <img 
                                     src="<%= product.productImage && product.productImage.length > 0 ? 
                                         `${imageBasePath}${product.productImage[0]}` : 
@@ -962,20 +1122,24 @@
                                     alt="<%= product.productName || 'Product' %>"
                                     onerror="this.onerror=null; this.src='/img/products/default-product.jpg'; console.log('Image failed to load:', this.src);"
                                 >
-                                <h3><%= product.productName || 'Product Name' %></h3>
-                                <p class="price">
-                                    ₹<%= (product.salePrice || 0).toLocaleString('en-IN') %>
-                                    <% if (product.discount && product.discount > 0) { %>
-                                        <span class="original-price">
-                                            ₹<%= ((product.salePrice || 0) + (product.discount || 0)).toLocaleString('en-IN') %>
-                                        </span>
-                                    <% } %>
-                                </p>
-                                <% if (product.discount && product.discount > 0) { %>
-                                    <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">
-                                        Save ₹<%= (product.discount || 0).toLocaleString('en-IN') %>
+                                <h3><%= product.productName %></h3>
+                                <div class="price-container">
+                                    <p class="price">
+                                        <% if (product.appliedOffer && product.appliedOffer.discountAmount > 0) { %>
+                                            ₹<%= product.discountedPrice.toLocaleString('en-IN') %>
+                                            <span class="original-price">
+                                                ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                            </span>
+                                        <% } else { %>
+                                            ₹<%= product.regularPrice.toLocaleString('en-IN') %>
+                                        <% } %>
                                     </p>
-                                <% } %>
+                                    <% if (product.appliedOffer && product.appliedOffer.discountAmount > 0) { %>
+                                        <p class="savings">
+                                            Save ₹<%= (product.regularPrice - product.discountedPrice).toLocaleString('en-IN') %>
+                                        </p>
+                                    <% } %>
+                                </div>
                                 <button class="view-details">View Details</button>
                             </a>
                         </div>
@@ -985,8 +1149,9 @@
                         <a href="/product/pixel-7a" class="product-link">
                             <img src="/img/products/pixel-7a.jpg" alt="Google Pixel 7a">
                             <h3>Google Pixel 7a</h3>
-                            <p class="price">₹35,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹43,999</span></p>
-                            <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">Save ₹8,000</p>
+                            <div class="price-container">
+                                <p class="price">₹43,999</p>
+                            </div>
                             <button class="view-details">View Details</button>
                         </a>
                     </div>
@@ -994,8 +1159,9 @@
                         <a href="/product/nothing-phone-2" class="product-link">
                             <img src="/img/products/nothing-phone-2.jpg" alt="Nothing Phone (2)">
                             <h3>Nothing Phone (2)</h3>
-                            <p class="price">₹32,999 <span style="text-decoration: line-through; color: #666; font-size: 0.9em;">₹39,999</span></p>
-                            <p style="color: #059669; font-size: 0.9em; margin-top: -10px;">Save ₹7,000</p>
+                            <div class="price-container">
+                                <p class="price">₹39,999</p>
+                            </div>
                             <button class="view-details">View Details</button>
                         </a>
                     </div>
@@ -1021,7 +1187,7 @@
         <p>2 years warranty on all products</p>
     </div>
     <div class="benefit-item">
-        <img src="https://api.icon(rd).iconify.design/solar:card-bold.svg" alt="Secure Payment">
+        <img src="https://api.iconify.design/solar:card-bold.svg" alt="Secure Payment">
         <h3>Secure Payment</h3>
         <p>100% secure payment methods</p>
     </div>

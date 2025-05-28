@@ -103,13 +103,19 @@ const loadHomePage = async (req, res) => {
     let allProducts = await Product.find({
       isBlocked: false,
       quantity: { $gt: 0 }
-    }).select('_id productName salePrice productImage discount regularPrice isFeatured category')
-      .populate('category')
+    }).select('_id productName salePrice productImage discount regularPrice isFeatured category brand')
+      .populate('category brand')
       .lean();
 
-    // console.log('Found products:', allProducts.length);
+    // Fetch all active offers
+    const offers = await Offer.find({
+      isListed: true,
+      isDeleted: false,
+      validFrom: { $lte: new Date() },
+      validUpto: { $gte: new Date() }
+    }).lean();
 
-    // Ensure all products have required fields with default values
+    // Attach offers to products
     const processedProducts = allProducts.map(product => {
       // Process the image path
       let images = [];
@@ -117,16 +123,32 @@ const loadHomePage = async (req, res) => {
         images = product.productImage.map(img => img.replace(/\\/g, '/'));
       }
 
-
       const actualDiscount = product.regularPrice - product.salePrice;
-      const discountPercentage = product.regularPrice ?
-        Math.round((actualDiscount / product.regularPrice) * 100) : 0;
-
+      const discountPercentage = product.regularPrice
+        ? Math.round((actualDiscount / product.regularPrice) * 100)
+        : 0;
 
       const limitedProductName = (product.productName || 'Unnamed Product')
         .split(' ')
         .slice(0, 15)
         .join(' ');
+
+      // Filter offers applicable to this product
+      const productOffers = offers.filter(offer => {
+        if (offer.offerType === 'Product' && offer.applicableTo.toString() === product._id.toString()) {
+          return true;
+        }
+        if (offer.offerType === 'Brand' && offer.applicableTo.toString() === product.brand?._id?.toString()) {
+          return true;
+        }
+        if (offer.offerType === 'Category' && offer.applicableTo.toString() === product.category?._id?.toString()) {
+          return true;
+        }
+        return false;
+      });
+
+      // Sort offers by discount amount (highest first)
+      productOffers.sort((a, b) => b.discountAmount - a.discountAmount);
 
       return {
         ...product,
@@ -135,14 +157,14 @@ const loadHomePage = async (req, res) => {
         regularPrice: product.regularPrice || 0,
         discount: actualDiscount || 0,
         productImage: images,
-        discountPercentage: discountPercentage
+        discountPercentage: discountPercentage,
+        offers: productOffers // Attach offers to the product
       };
     });
 
-
+    // Organize products into sections
     let featuredProducts = processedProducts.filter(p => p.isFeatured);
     if (featuredProducts.length < 3) {
-
       const remainingNeeded = 3 - featuredProducts.length;
       const nonFeaturedProducts = processedProducts.filter(p => !p.isFeatured);
       const randomProducts = [];
@@ -154,27 +176,20 @@ const loadHomePage = async (req, res) => {
     }
     featuredProducts = featuredProducts.slice(0, 3);
 
-
     const topOffers = processedProducts
-      .filter(p => p.regularPrice > p.salePrice)
-      .sort((a, b) => b.discountPercentage - a.discountPercentage)
+      .filter(p => p.offers && p.offers.length > 0) // Ensure products have offers
+      .sort((a, b) => b.offers[0].discountAmount - a.offers[0].discountAmount) // Sort by highest discount
       .slice(0, 3);
-
-
-
 
     const bestDeals = processedProducts
       .filter(p => p.salePrice >= 40000 && p.regularPrice > p.salePrice)
       .sort((a, b) => b.discount - a.discount)
       .slice(0, 3);
 
-
-
     const under25000 = processedProducts
       .filter(p => p.salePrice < 25000)
       .sort((a, b) => a.salePrice - b.salePrice)
       .slice(0, 3);
-
 
     const organizedProducts = {
       featured: featuredProducts,
@@ -182,8 +197,6 @@ const loadHomePage = async (req, res) => {
       under25000: under25000,
       bestDeals: bestDeals
     };
-
-
 
     if (user) {
       const userData = await User.findOne({ _id: user._id });
@@ -333,9 +346,6 @@ const loadShopping = async (req, res) => {
 
     let sortOption = {};
     switch (sort) {
-      case 'newest':
-        sortOption = { createdAt: -1 };
-        break;
       case 'price_low':
         sortOption = { salePrice: 1 };
         break;
@@ -346,7 +356,6 @@ const loadShopping = async (req, res) => {
         sortOption = { createdAt: -1 };
     }
 
-
     const totalProducts = await Product.countDocuments(query);
     const totalPages = Math.ceil(totalProducts / limit);
 
@@ -355,17 +364,63 @@ const loadShopping = async (req, res) => {
       .skip((page - 1) * limit)
       .limit(limit)
       .populate('category')
-      .exec();
+      .lean();
+
+    // Fetch all active offers
+    const offers = await Offer.find({
+      isListed: true,
+      isDeleted: false,
+      validFrom: { $lte: new Date() },
+      validUpto: { $gte: new Date() }
+    }).lean();
+
+    // Attach offers to products
+    const processedProducts = products.map(product => {
+      const productOffers = offers.filter(offer => {
+        if (offer.offerType === 'Product' && offer.applicableTo.toString() === product._id.toString()) {
+          return true;
+        }
+        if (offer.offerType === 'Category' && offer.applicableTo.toString() === product.category._id.toString()) {
+          return true;
+        }
+        if (offer.offerType === 'Brand' && offer.applicableTo.toString() === product.brand.toString()) {
+          return true;
+        }
+        return false;
+      });
+
+      productOffers.sort((a, b) => b.discountAmount - a.discountAmount);
+
+      const bestOffer = productOffers[0] || null;
+
+      if (bestOffer) {
+        const discountAmount = bestOffer.discountType === 'percentage'
+          ? (product.regularPrice * bestOffer.discountAmount) / 100
+          : bestOffer.discountAmount;
+
+        product.finalPrice = Math.max(0, product.regularPrice - discountAmount);
+        product.discountPercentage = bestOffer.discountType === 'percentage'
+          ? bestOffer.discountAmount
+          : Math.round((discountAmount / product.regularPrice) * 100);
+        product.bestOffer = bestOffer;
+      } else {
+        product.finalPrice = product.salePrice || product.regularPrice;
+        product.discountPercentage = 0;
+        product.bestOffer = null;
+      }
+
+      return product;
+    });
 
     res.render("shop", {
-      products,
+      products: processedProducts,
       totalPages,
       currentPage: page,
       search,
       sort,
       category,
       categories,
-      brand: brands,
+      brands,
       priceMin,
       priceMax,
       findUser: userData,
@@ -970,6 +1025,7 @@ const loadBuyNowCheckout = async (req, res) => {
     const buyNowItem = {
       product: {
         productName: product.productName,
+        productName: product.productName,
         name: product.productName,
         salePrice: product.salePrice,
         price: product.salePrice,
@@ -1000,421 +1056,6 @@ const loadBuyNowCheckout = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
-
-const loadPaymentPage = async (req, res) => {
-  try {
-
-    const { orderId } = req.query;
-
-    if (!orderId) {
-      return res.status(400).render('error', {
-        message: 'Invalid request. Order ID missing.',
-        error: { status: 400 }
-      });
-    }
-
-
-    const order = await Order.findById(orderId)
-      .populate({
-        path: 'orderedItems.product',
-        select: 'productName salePrice productImage'
-      });
-
-    if (!order) {
-      console.log(`Order not found with ID: ${orderId}`);
-      return res.status(404).render('error', {
-        message: 'Order not found.',
-        error: { status: 404 }
-      });
-    }
-
-    if (order.paymentMethod === 'razorpay' && order.paymentDetails && order.paymentDetails.verified) {
-      if (order.status === 'Pending') {
-        order.status = 'Processing';
-        await order.save();
-      }
-    }
-
-
-    res.render('payment-success', {
-      title: 'Payment Successful',
-      order,
-      user: req.session.user
-    });
-
-  } catch (error) {
-    console.error('Payment Success Error:', error);
-    res.status(500).render('error', {
-      message: 'Something went wrong.',
-      error: { status: 500 }
-    });
-  }
-}
-
-const loadTrackOrder = async (req, res) => {
-  try {
-    const urlParamId = req.params.orderId;
-    const queryParamId = req.query.orderId;
-    const userId = req.session.user._id;
-
-    let order;
-
-
-    if (urlParamId) {
-      order = await Order.findById(urlParamId)
-        .populate('orderedItems.product')
-        .populate('address');
-    }
-
-    else if (queryParamId) {
-      order = await Order.findOne({ orderId: queryParamId })
-        .populate('orderedItems.product')
-        .populate('address');
-    } else {
-
-      return res.render('track-order', {
-        user: req.session.user,
-        initial: true
-      });
-    }
-
-    if (!order) {
-      return res.render('track-order', {
-        user: req.session.user,
-        error: 'Order not found. Please check the ID and try again.'
-      });
-    }
-
-    console.log('Found order:', order._id.toString());
-    console.log('Address type:', typeof order.address);
-
-
-    try {
-
-      const addressDoc = await Address.findOne({ userId: userId });
-
-      if (addressDoc && addressDoc.address && addressDoc.address.length > 0) {
-        console.log('Found address document with entries:', addressDoc.address.length);
-
-
-        const userAddress = addressDoc.address.find(addr => addr.isDefault) || addressDoc.address[0];
-
-
-        order.shippingInfo = {
-          name: userAddress.name,
-          address: userAddress.landmark,
-          landmark: userAddress.landmark,
-          city: userAddress.city,
-          state: userAddress.state,
-          pincode: userAddress.pincode,
-          mobile: userAddress.phone,
-          addressType: userAddress.addressType
-        };
-
-        console.log('Set shipping info:', order.shippingInfo);
-      } else {
-        console.log('No address entries found for user');
-      }
-    } catch (err) {
-      console.error('Error fetching address information:', err);
-
-    }
-
-    res.render('track-order', {
-      order,
-      user: req.session.user,
-    });
-
-  } catch (error) {
-    console.error('Error loading track order page:', error);
-    res.status(500).render('track-order', {
-      user: req.session.user,
-      error: 'Something went wrong while trying to find your order. Please try again.'
-    });
-  }
-}
-
-
-const loadRazorpayPaymentPage = async (req, res) => {
-  try {
-    const orderId = req.params.orderId || req.query.orderId;
-
-    if (!orderId) {
-      return res.status(400).render('error', {
-        message: 'Invalid request. Order ID missing.',
-        error: { status: 400 }
-      });
-    }
-
-    // Find the order and verify all price calculations
-    const order = await Order.findById(orderId);
-
-    if (!order) {
-      console.log(`Order not found with ID: ${orderId}`);
-      return res.status(404).render('error', {
-        message: 'Order not found.',
-        error: { status: 404 }
-      });
-    }
-
-    // Store the verified final amount in session for consistency
-    // This ensures the amount displayed in UI matches what's charged by Razorpay
-    req.session.verifiedPaymentAmount = order.finalAmount;
-    req.session.verifiedOrderId = orderId;
-
-    console.log('Payment verification info:', {
-      orderId: orderId,
-      originalAmount: order.totalAmount,
-      productDiscount: order.productDiscount || 0,
-      couponDiscount: order.couponDiscount || 0,
-      offerDiscount: order.offerDiscount || 0,
-      finalAmount: order.finalAmount,
-      verifiedAmount: req.session.verifiedPaymentAmount
-    });
-
-    // Pass the order data and session to the payment view
-    res.render('user/payment', {
-      title: 'Complete Payment',
-      order,
-      user: req.session.user,
-      session: req.session // Pass session to template for verified amount
-    });
-
-  } catch (error) {
-    console.error('Payment Page Error:', error);
-    res.status(500).render('error', {
-      message: 'Something went wrong while loading the payment page.',
-      error: { status: 500 }
-    });
-  }
-}
-
-
-const verifyRazorpayPayment = async (req, res) => {
-  try {
-    console.log('Payment verification request received:', req.body);
-    const { razorpay_payment_id, razorpay_order_id, razorpay_signature, order_id, payment_status } = req.body;
-
-    // Find the order first
-    const order = await Order.findById(order_id);
-    if (!order) {
-      console.error('Order not found for payment verification:', order_id);
-      return res.status(404).json({
-        success: false,
-        message: 'Order not found'
-      });
-    }
-
-    console.log('Found order:', order._id, 'with current status:', order.status);
-
-    // Handle explicit payment failure
-    if (payment_status === 'failed') {
-      // Keep order status as 'Pending' for failed payments
-      order.paymentDetails = {
-        ...order.paymentDetails,
-        failed: true,
-        failedAt: new Date(),
-        error: req.body.error || 'Payment failed',
-        errorDescription: req.body.error_description || 'Unknown error'
-      };
-
-      await order.save();
-
-      console.log('Payment marked as failed, order status remains Pending');
-
-      return res.status(200).json({
-        success: false,
-        message: 'Payment failed. You can try again.',
-        order: {
-          id: order._id,
-          status: order.status
-        }
-      });
-    }
-
-    // For successful payments, proceed with validation
-    // Validation of required parameters
-    if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
-      console.error('Missing payment verification details:', {
-        has_payment_id: !!razorpay_payment_id,
-        has_order_id: !!razorpay_order_id,
-        has_signature: !!razorpay_signature
-      });
-
-      // Payment verification failed, but keep the order in 'Pending' status
-      return res.status(400).json({
-        success: false,
-        message: 'Missing payment verification details',
-        order: {
-          id: order._id,
-          status: 'Pending'
-        }
-      });
-    }
-
-    const razorpayConfig = require('../../config/razorpay');
-    console.log('Razorpay key ID:', razorpayConfig.keyId.substring(0, 4) + '***');
-
-    // Check for demo orders
-    const isDemoOrder = order.paymentDetails &&
-      (order.paymentDetails.isDemoOrder ||
-        order.paymentDetails.isFallbackOrder ||
-        razorpay_order_id.startsWith('order_demo_'));
-
-    let isSignatureValid = false;
-
-    if (isDemoOrder) {
-      console.log('This is a demo/fallback order, accepting payment without verification');
-      isSignatureValid = true;
-    } else {
-      const crypto = require('crypto');
-
-      const generated_signature = crypto.createHmac('sha256', razorpayConfig.keySecret)
-        .update(razorpay_order_id + "|" + razorpay_payment_id)
-        .digest('hex');
-
-      console.log('Signature verification:');
-      console.log('- Generated:', generated_signature.substring(0, 6) + '***');
-      console.log('- Received :', razorpay_signature.substring(0, 6) + '***');
-
-      // Compare signatures
-      isSignatureValid = generated_signature === razorpay_signature;
-    }
-
-    if (!isSignatureValid) {
-      console.error('Signature validation failed');
-
-      // Update payment details but keep status as 'Pending'
-      order.paymentDetails = {
-        ...order.paymentDetails,
-        verificationFailed: true,
-        failedAt: new Date(),
-        error: 'Invalid signature'
-      };
-
-      await order.save();
-
-      return res.status(400).json({
-        success: false,
-        message: 'Payment verification failed: Invalid signature',
-        order: {
-          id: order._id,
-          status: order.status
-        }
-      });
-    }
-
-    console.log('Payment signature verification successful');
-
-    // Verify that the order amount matches the session verified amount
-    const verifiedAmount = req.session.verifiedPaymentAmount;
-    console.log('Payment amount verification:', {
-      id: order._id,
-      orderFinalAmount: order.finalAmount,
-      sessionVerifiedAmount: verifiedAmount,
-      status: order.status
-    });
-
-    // If we have a verified amount in the session, make sure it matches the order amount
-    if (verifiedAmount && order.finalAmount !== verifiedAmount) {
-      console.error('Payment amount mismatch detected:', {
-        orderAmount: order.finalAmount,
-        verifiedAmount: verifiedAmount
-      });
-
-      // Update payment details but keep status as 'Pending'
-      order.paymentDetails = {
-        ...order.paymentDetails,
-        verificationFailed: true,
-        failedAt: new Date(),
-        error: 'Amount mismatch',
-        orderAmount: order.finalAmount,
-        receivedAmount: verifiedAmount
-      };
-
-      await order.save();
-
-      return res.status(400).json({
-        success: false,
-        message: 'Payment verification failed: Amount mismatch',
-        order: {
-          id: order._id,
-          status: order.status
-        }
-      });
-    }
-
-    // Check for duplicate payment
-    if (order.status === 'Paid' || order.status === 'Processing' || order.status === 'Shipped' || order.status === 'Delivered') {
-      console.log('Order already processed:', order.status);
-      return res.status(200).json({
-        success: true,
-        message: 'Payment already processed',
-        order: {
-          id: order._id,
-          status: order.status
-        }
-      });
-    }
-
-    // All verification passed, update order status to 'Processing'
-    order.status = 'Processing';
-    order.paymentStatus = 'Paid';
-    order.paymentDetails = {
-      razorpayOrderId: razorpay_order_id,
-      paymentId: razorpay_payment_id,
-      signature: razorpay_signature,
-      verified: true,
-      paidAt: new Date(),
-      verifiedAmount: verifiedAmount || order.finalAmount, // Store the verified amount used
-      paymentMethod: 'razorpay'
-    };
-
-    await order.save();
-    console.log('Order status updated to Processing with verified payment amount');
-
-    // Clear the session verification data now that payment is complete
-    req.session.verifiedPaymentAmount = null;
-    req.session.verifiedOrderId = null;
-
-    return res.status(200).json({
-      success: true,
-      message: 'Payment verification successful',
-      order: {
-        id: order._id,
-        status: order.status
-      }
-    });
-
-  } catch (error) {
-    console.error('Payment Verification Error:', error);
-
-    // Try to update the order if we have the ID, marking it as having an error
-    // but keeping status as 'Pending'
-    try {
-      if (req.body.order_id) {
-        const order = await Order.findById(req.body.order_id);
-        if (order) {
-          order.paymentDetails = {
-            ...order.paymentDetails,
-            error: error.message || 'Unknown error',
-            errorTime: new Date()
-          };
-          await order.save();
-          console.log('Updated order with error details, status remains Pending');
-        }
-      }
-    } catch (saveError) {
-      console.error('Error updating order with payment error:', saveError);
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Payment verification failed',
-      error: error.message
-    });
-  }
-}
 
 const loadOTPLoginPage = async (req, res) => {
   try {
@@ -1552,10 +1193,6 @@ module.exports = {
   searchProducts, liveSearch,
   loadProductDetail,
   addToCartInShop, loadCheckout,
-  loadPaymentPage,
-  loadTrackOrder,
-  loadRazorpayPaymentPage,
-  verifyRazorpayPayment,
   loadBuyNowCheckout,
   loadOTPLoginPage,
   postForgotPassRequest,
