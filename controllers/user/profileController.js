@@ -4,6 +4,8 @@ const bcrypt= require('bcrypt')
 const env= require('dotenv').config()
 const session=require('express-session');
 const Address= require('../../models/addressSchema')
+const fs = require('fs');
+const path = require('path');
 
 function generateOtp(){
     const digits='1234567890'
@@ -341,40 +343,44 @@ const updatePassword = async (req, res) => {
         res.redirect('/pageNotFound')
     }
   };
+
+
   const postAddAddress = async (req, res) => {
     try {
-        console.log("🔹 Inside postAddAddress function");
 
-        if (!req.session) return res.json({ success: false, message: "Session not found!" });
+        if (!req.session) {
+            return res.json({ success: false, message: "Session not found!" });
+        }
 
         const userId = req.session.user;
-        if (!userId) return res.json({ success: false, message: "User not logged in!" });
+        if (!userId) {
+            return res.json({ success: false, message: "User not logged in!" });
+        }
 
         const userData = await User.findById(userId);
+        if (!userData) {
+            return res.json({ success: false, message: "User not found!" });
+        }
 
         const { addressType, name, city, landmark, state, pincode, phone, altPhone } = req.body;
-        console.log("📍 Address Data Received:", req.body);
 
         let userAddress = await Address.findOne({ userId: userId });
 
         if (!userAddress) {
-            console.log("📌 No address found, creating new one.");
             userAddress = new Address({
                 userId: userId,
                 address: [{ addressType, name, city, landmark, state, pincode, phone, altPhone }]
             });
             await userAddress.save();
         } else {
-            console.log("✏️ Updating existing address.");
             userAddress.address.push({ addressType, name, city, landmark, state, pincode, phone, altPhone });
             await userAddress.save();
         }
 
-        console.log("✅ Address added successfully!");
         res.json({ success: true, message: "Address added successfully!" });
 
     } catch (err) {
-        console.log('❌ Error in postAddAddress:', err);
+        console.error('❌ Error in postAddAddress:', err);
         res.json({ success: false, message: "Error saving address!" });
     }
 };
@@ -408,6 +414,43 @@ const updateProfile = async (req, res) => {
             success: false,
             message: "There was a problem updating your profile. Please try again later."
         });
+    }
+};
+
+
+const uploadProfilePicture = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+
+        if (!req.file) {
+            return res.status(400).json({ success: false, message: 'No file uploaded' });
+        }
+
+        const profilePicPath = `/uploads/profile-pictures/${req.file.filename}`;
+
+        // Update the user's profile picture in the database
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Delete the old profile picture if it exists
+        if (user.profilePic) {
+            const oldPicPath = path.join(__dirname, '../../public', user.profilePic);
+            if (fs.existsSync(oldPicPath)) {
+                fs.unlinkSync(oldPicPath);
+            }
+        }
+
+        user.profilePic = profilePicPath;
+        await user.save();
+
+        req.session.user.profilePic = profilePicPath; // Update session data
+
+        return res.status(200).json({ success: true, message: 'Profile picture updated successfully', profilePic: profilePicPath });
+    } catch (error) {
+        console.error('Error uploading profile picture:', error);
+        return res.status(500).json({ success: false, message: 'Failed to upload profile picture' });
     }
 };
 
@@ -462,6 +505,37 @@ const updateAddress = async (req, res) => {
             message: "There was a problem updating your address. Please try again later."
         });
     }
+};  
+
+const removeProfilePicture = async (req, res) => {
+    try {
+        const userId = req.session.user._id;
+
+        // Find the user
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ success: false, message: 'User not found' });
+        }
+
+        // Remove the profile picture file if it exists
+        if (user.profilePic) {
+            const profilePicPath = path.join(__dirname, '../../public', user.profilePic);
+            if (fs.existsSync(profilePicPath)) {
+                fs.unlinkSync(profilePicPath);
+            }
+        }
+
+        // Update the user's profile picture in the database
+        user.profilePic = null;
+        await user.save();
+
+        req.session.user.profilePic = null; // Update session data
+
+        return res.status(200).json({ success: true, message: 'Profile picture removed successfully' });
+    } catch (error) {
+        console.error('Error removing profile picture:', error);
+        return res.status(500).json({ success: false, message: 'Failed to remove profile picture' });
+    }
 };
 
 const uploadDP= async (req,res)=>{
@@ -487,71 +561,87 @@ const uploadDP= async (req,res)=>{
 }
 
 
-
 const addMoneyToWallet = async (req, res) => {
     try {
         const { amount } = req.body;
         const userId = req.session.user;
-        
-        // Convert amount to a number to ensure it's a valid numeric value
+
+        // Validate user session
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized: Please log in again.',
+            });
+        }
+
+        // Convert amount to a number and validate
         const amountValue = parseFloat(amount);
-        
         if (isNaN(amountValue) || amountValue <= 0) {
             return res.status(400).json({
                 success: false,
-                message: "Please enter a valid amount"
+                message: 'Please enter a valid amount greater than zero.',
             });
         }
-        
 
+        // Optional: Add maximum amount validation (e.g., ₹50,000)
+        if (amountValue > 50000) {
+            return res.status(400).json({
+                success: false,
+                message: 'Amount cannot exceed ₹50,000.',
+            });
+        }
+
+        // Find user
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({
                 success: false,
-                message: "User not found"
+                message: 'User not found.',
             });
         }
-        
 
+        // Initialize wallet if undefined
         if (typeof user.wallet !== 'number') {
             user.wallet = 0;
         }
-        
-        // Add the amount to the user's wallet
-        user.wallet += amountValue;
-        
 
+        // Add amount to wallet
+        user.wallet += amountValue;
+
+        // Create transaction
         const transaction = {
             amount: amountValue,
             type: 'credit',
             description: 'Added to wallet',
-            date: new Date()
+            date: new Date(),
         };
-        
 
+        // Initialize wallet history if undefined
         if (!user.walletHistory) {
             user.walletHistory = [];
         }
-        
 
+        // Add transaction to history
         user.walletHistory.push(transaction);
-        
 
+        // Save user
         await user.save();
-        
+
+        // Return response
         return res.status(200).json({
             success: true,
-            message: "Amount added to wallet successfully",
-            walletBalance: user.wallet
+            message: 'Amount added to wallet successfully.',
+            walletBalance: user.wallet,
         });
     } catch (error) {
-        console.error("Error adding money to wallet:", error);
+        console.error('Error adding money to wallet:', error);
         return res.status(500).json({
             success: false,
-            message: "An error occurred while adding money to wallet"
+            message: 'An error occurred while adding money to wallet.',
         });
     }
 };
+
 
 const getWalletTransactions = async (req, res) => {
     try {
@@ -584,9 +674,17 @@ const getWalletTransactions = async (req, res) => {
 
 module.exports= {
     getForgotPassPage,
-    forgotEmailValid,sendVerificationEmail,userProfile,changeEmail,
-    changeEmailValid,verifyEmailOtp,updateEmail,changePassword,
-    changePasswordValid,verifyPassOtp,updatePassword,
+    forgotEmailValid,
+    sendVerificationEmail,
+    userProfile,
+    changeEmail,
+    changeEmailValid,
+    verifyEmailOtp,
+    updateEmail,
+    changePassword,
+    changePasswordValid,
+    verifyPassOtp,
+    updatePassword,
     resendOtp,
     addAddress,
     postAddAddress,
@@ -594,5 +692,7 @@ module.exports= {
     updateAddress,uploadDP,
     addMoneyToWallet,
     getWalletTransactions,
+    uploadProfilePicture,
+    removeProfilePicture
 
 }

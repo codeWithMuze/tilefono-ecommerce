@@ -97,6 +97,9 @@ router.get('/userProfile',userAuth,profileController.userProfile)
 router.get('/product/:id', userController.loadProductDetail);
 // profile photo add
 router.post('/update-profile-picture',upload.single('profilePic'),profileController.uploadDP)
+router.post('/user/upload-profile-pic', upload.single('profilePic'), profileController.uploadProfilePicture);
+router.delete('/user/remove-profile-pic', profileController.removeProfilePicture);
+
 
 
 //adress management

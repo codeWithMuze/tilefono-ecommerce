@@ -64,7 +64,8 @@ const pageNotFound = async (req, res) => {
 
 const loadSignUp = async (req, res) => {
   try {
-    return res.render("signup");
+    return res.render("signup",{message: ""});
+
   } catch (error) {
     console.log('Home page is not loading', error);
     res.status(500).send('Server error');
@@ -477,25 +478,26 @@ const addToCartInShop = async (req, res) => {
   }
 };
 
-
 const signup = async (req, res) => {
   try {
+    console.log('hsdiufhweius',req.body);
     const { name, phone, email, password, confirmPassword } = req.body;
-
     if (password !== confirmPassword) {
       return res.render('signup', { message: "Passwords do not match" });
     }
+    console.log('0')
 
     const findUser = await User.findOne({ email });
     if (findUser) {
       return res.render("signup", { message: "User with this email already exists" });
     }
+    console.log('0.5')
     const findUser2 = await User.findOne({ phone });
     if (findUser2) {
       return res.render("signup", { message: "User with this phone number already exists, try to login with this number" });
     }
-
-
+    
+    console.log('1')
     const otp = generateOtp();
     const emailSent = await sendVerificationEmail(email, otp);
 
@@ -503,6 +505,7 @@ const signup = async (req, res) => {
       return res.json({ success: false, message: "Email error" });
     }
 
+    console.log('2')
 
     const counter = await Counter.findOneAndUpdate(
       { name: 'customerID' },  // 
@@ -514,8 +517,9 @@ const signup = async (req, res) => {
 
     req.session.userOtp = otp;
     req.session.userData = { name, phone, email, password, customerID };
-
     req.session.save();
+    console.log('3')
+
 
 
     res.render("verify-otp");
@@ -526,6 +530,7 @@ const signup = async (req, res) => {
     res.redirect('/pageNotFound');
   }
 };
+
 
 
 const verifyOtp = async (req, res) => {
@@ -598,7 +603,7 @@ const loadLogin = async (req, res) => {
     if (!req.session.user) {
       const message = req.query.message || '';
       const redirect = req.query.redirect || '';
-      return res.render('login', { message, redirect });
+      return res.render('login', { message,  });
     } else {
       res.redirect('/home');
     }
@@ -611,7 +616,7 @@ const loadLogin = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const findUser = await User.findOne({ email });
+    const findUser = await User.findOne({ email ,isAdmin: false });
 
     if (!findUser) {
       return res.render('login', { message: 'User not found' });

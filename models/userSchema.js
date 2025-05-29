@@ -79,8 +79,9 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
     },
-    referalCode: {
-        type: String
+    referralCode: {
+        type: String,
+        unique: true 
     },
     redeemed: {
         type: Boolean,

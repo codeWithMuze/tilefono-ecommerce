@@ -473,21 +473,36 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Handle error messages
-      const message = ''; // This would come from your server template
+      // Handle error messages from server
+      const message = '<%= message %>'; // Access the message variable from the server
+      const errorDiv = document.getElementById('error-message');
+  
       if (message && message.trim() !== '') {
-        const errorDiv = document.getElementById('error-message');
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
+        errorDiv.scrollIntoView({ behavior: 'smooth' });
+        // Optionally, hide the error message after a few seconds
+        setTimeout(() => {
+          errorDiv.style.display = 'none';
+        }, 5000); // Hide after 5 seconds
       }
       
       // Handle form submission
       const form = document.querySelector('form');
       form.addEventListener('submit', function(e) {
-        // Add any client-side validation here if needed
-        console.log('Form submitted');
+        // Optional client-side validation
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+  
+        if (!email || !password) {
+          e.preventDefault();
+          errorDiv.textContent = 'Please fill in all fields';
+          errorDiv.style.display = 'block';
+          errorDiv.scrollIntoView({ behavior: 'smooth' });
+          return;
+        }
       });
-
+  
       // Handle image loading error gracefully
       const img = document.querySelector('.responsive-image');
       const placeholder = document.querySelector('.demo-placeholder');
