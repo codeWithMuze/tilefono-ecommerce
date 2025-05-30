@@ -1253,50 +1253,34 @@
       </div>
 
       <!-- Shipping Information -->
-      <div class="shipping-info">
-        <div class="shipping-header">
-          <i class="fas fa-map-marker-alt"></i>
-          Shipping Address
-        </div>
-        <div class="shipping-address">
-          <% if (order.shippingInfo && order.shippingInfo.name) { %>
-            <div class="shipping-name"><%= order.shippingInfo.name %></div>
-            <div class="shipping-full-address">
-              <%= order.shippingInfo.address %><% if (order.shippingInfo.landmark) { %>, <%= order.shippingInfo.landmark %><% } %>
-              <br><%= order.shippingInfo.city %>, <%= order.shippingInfo.state %> <%= order.shippingInfo.pincode %>
-            </div>
-            <div class="shipping-contact">
-              <i class="fas fa-phone-alt"></i> <%= order.shippingInfo.mobile %>
-            </div>
-            <% if (order.shippingInfo.addressType) { %>
-              <div class="address-type"><%= order.shippingInfo.addressType %></div>
-            <% } %>
-          <% } else if (order.address && typeof order.address === 'object') { %>
-            <!-- Direct from address object if available -->
-            <div class="shipping-name"><%= order.address.name || 'Customer' %></div>
-            <div class="shipping-full-address">
-              <% if (order.address.addresses && order.address.addresses.length > 0) { %>
-                <%= order.address.addresses[0].address || '' %>
-                <br><%= order.address.addresses[0].city || '' %>, <%= order.address.addresses[0].state || '' %> <%= order.address.addresses[0].pincode || '' %>
-              <% } else if (order.address.address) { %>
-                <%= order.address.address %>
-                <br><%= order.address.city || '' %>, <%= order.address.state || '' %> <%= order.address.pincode || '' %>
-              <% } %>
-            </div>
-            <div class="shipping-contact">
-              <i class="fas fa-phone-alt"></i> <%= order.address.phone || order.address.mobile || 'N/A' %>
-            </div>
-          <% } else if (order.address && typeof order.address === 'string') { %>
-            <div class="address-text"><%= order.address %></div>
-          <% } else { %>
-            <div class="no-address-message">
-              <i class="fas fa-exclamation-circle"></i>
-              Address information is not available for this order.
-              <small class="debug-info">Please contact customer support and mention your order ID: <%= order.orderId || order._id %></small>
-            </div>
-          <% } %>
-        </div>
+      <!-- Shipping Information -->
+<div class="shipping-info">
+  <div class="shipping-header">
+    <i class="fas fa-map-marker-alt"></i>
+    Shipping Address
+  </div>
+  <div class="shipping-address">
+    <% if (order.shippingInfo && order.shippingInfo.name) { %>
+      <div class="shipping-name"><%= order.shippingInfo.name %></div>
+      <div class="shipping-full-address">
+        <%= order.shippingInfo.address %><% if (order.shippingInfo.landmark) { %>, <%= order.shippingInfo.landmark %><% } %>
+        <br><%= order.shippingInfo.city %>, <%= order.shippingInfo.state %> <%= order.shippingInfo.pincode %>
       </div>
+      <div class="shipping-contact">
+        <i class="fas fa-phone-alt"></i> <%= order.shippingInfo.mobile || 'N/A' %>
+      </div>
+      <% if (order.shippingInfo.addressType) { %>
+        <div class="address-type"><%= order.shippingInfo.addressType %></div>
+      <% } %>
+    <% } else { %>
+      <div class="no-address-message">
+        <i class="fas fa-exclamation-circle"></i>
+        Address information is not available for this order.
+        <small class="debug-info">Please contact customer support and mention your order ID: <%= order.orderId || order._id %></small>
+      </div>
+    <% } %>
+  </div> 
+</div>
 
       <!-- Helper Actions -->
       <div class="helper-actions">

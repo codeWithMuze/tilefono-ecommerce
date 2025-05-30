@@ -35,7 +35,6 @@
         },
         address:{
             type:String,
-            ref:'User',
             required:true,
         },
         invoiceDate:{

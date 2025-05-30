@@ -63,6 +63,9 @@ const userSchema = new mongoose.Schema({
             enum: ['credit', 'debit']
         },
         description: String,
+        transactionId: {
+            type: String,
+        },
         date: {
             type: Date,
             default: Date.now

@@ -2,7 +2,7 @@ const Order = require('../../models/orderSchema');
 const Address = require('../../models/addressSchema');
 const razorpayConfig = require('../../config/razorpay');
 const crypto = require('crypto');
-
+const mongoose = require('mongoose');
 
 
 const loadPaymentPage = async (req, res) => {
@@ -18,7 +18,7 @@ const loadPaymentPage = async (req, res) => {
       }
   
   
-      const order = await Order.findById(orderId)
+      const order = await Order.findById(orderId) 
         .populate({
           path: 'orderedItems.product',
           select: 'productName salePrice productImage'
@@ -59,84 +59,69 @@ const loadPaymentPage = async (req, res) => {
     try {
       const urlParamId = req.params.orderId;
       const queryParamId = req.query.orderId;
-      const userId = req.session.user._id;
+      const userId = req.session.user?._id;
+  
+      console.log('Session user:', req.session.user);
+      console.log('Order ID input:', { urlParamId, queryParamId });
   
       let order;
-  
-  
-      if (urlParamId) {
+      if (urlParamId && mongoose.Types.ObjectId.isValid(urlParamId)) {
         order = await Order.findById(urlParamId)
           .populate('orderedItems.product')
           .populate('address');
-      }
-  
-      else if (queryParamId) {
+      } else if (queryParamId) {
         order = await Order.findOne({ orderId: queryParamId })
           .populate('orderedItems.product')
           .populate('address');
       } else {
-  
+        console.error('Invalid Order ID format:', { urlParamId, queryParamId });
         return res.render('track-order', {
           user: req.session.user,
-          initial: true
+          initial: true,
+          error: 'Invalid Order ID format. Please check and try again.',
         });
       }
   
       if (!order) {
+        console.error('Order not found:', { urlParamId, queryParamId });
         return res.render('track-order', {
           user: req.session.user,
-          error: 'Order not found. Please check the ID and try again.'
+          error: 'Order not found. Please check the ID and try again.',
         });
       }
   
-      console.log('Found order:', order._id.toString());
-      console.log('Address type:', typeof order.address);
+      console.log('Order address:', order.address); // Debug populated address
   
-  
-      try {
-  
-        const addressDoc = await Address.findOne({ userId: userId });
-  
-        if (addressDoc && addressDoc.address && addressDoc.address.length > 0) {
-          console.log('Found address document with entries:', addressDoc.address.length);
-  
-  
-          const userAddress = addressDoc.address.find(addr => addr.isDefault) || addressDoc.address[0];
-  
-  
-          order.shippingInfo = {
-            name: userAddress.name,
-            address: userAddress.landmark,
-            landmark: userAddress.landmark,
-            city: userAddress.city,
-            state: userAddress.state,
-            pincode: userAddress.pincode,
-            mobile: userAddress.phone,
-            addressType: userAddress.addressType
-          };
-  
-          console.log('Set shipping info:', order.shippingInfo);
-        } else {
-          console.log('No address entries found for user');
-        }
-      } catch (err) {
-        console.error('Error fetching address information:', err);
-  
+      // Set shippingInfo from populated address
+      if (order.address && order.address.address && order.address.address.length > 0) {
+        const userAddress = order.address.address.find(addr => addr.isDefault) || order.address.address[0];
+        order.shippingInfo = {
+          name: userAddress.name || 'N/A',
+          address: userAddress.address || userAddress.landmark || 'N/A',
+          landmark: userAddress.landmark || '',
+          city: userAddress.city || 'N/A',
+          state: userAddress.state || 'N/A',
+          pincode: userAddress.pincode || 'N/A',
+          mobile: userAddress.phone || userAddress.mobile || 'N/A',
+          addressType: userAddress.addressType || 'N/A',
+        };
+      } else {
+        console.log('No valid address data for order');
+        order.shippingInfo = null; // Ensure fallback in template
       }
   
       res.render('track-order', {
         order,
         user: req.session.user,
       });
-  
     } catch (error) {
       console.error('Error loading track order page:', error);
       res.status(500).render('track-order', {
         user: req.session.user,
-        error: 'Something went wrong while trying to find your order. Please try again.'
+        error: 'Something went wrong while trying to find your order. Please try again.',
       });
     }
-  }
+  };
   
   
   const loadRazorpayPaymentPage = async (req, res) => {
@@ -545,7 +530,7 @@ const loadPaymentPage = async (req, res) => {
         // Return order details for retry
         return res.json({
             success: true,
-            orderId: order._id,
+            orderId: order._id, 
             amount: order.finalAmount,
             razorpayOrderId: razorpayOrderId,
             currency: 'INR',

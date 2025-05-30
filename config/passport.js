@@ -3,6 +3,7 @@ const GoogleStrategy=require('passport-google-oauth20').Strategy
 const User=require("../models/userSchema")
 const env= require('dotenv').config()
 const Counter=require('../models/counterSchema')
+const referral= require('../utils/referralCodeGenerator')
 
 
 
@@ -29,12 +30,17 @@ passport.use(new GoogleStrategy(
                 );
                 const customerID = counter.seq.toString().padStart(6, '0');
 
+                const referralCode = referral(profile.displayName);
+                // Check if the referral code already exists
+
+
                 // Create new user with customerID
                 user = new User({
                     name: profile.displayName,
                     email: profile.emails[0].value,
                     googleId: profile.id,
-                    customerID: customerID
+                    customerID: customerID,
+                    referralCode: referralCode,
                 });
                 await user.save();
                 return done(null, user);
@@ -44,6 +50,9 @@ passport.use(new GoogleStrategy(
         }
     }
 ));
+
+
+
 
 
 

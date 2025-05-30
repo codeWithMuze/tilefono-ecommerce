@@ -109,7 +109,9 @@ const userProfile=async(req,res)=>{
             }
         }
         
-
+        refferalCode = userData.referralCode || 'N/A'; 
+        console.log(refferalCode)// Ensure referralCode is defined
+        
         let walletTransactions = [];
         if (userData.walletHistory && Array.isArray(userData.walletHistory)) {
             walletTransactions = userData.walletHistory;
@@ -119,7 +121,8 @@ const userProfile=async(req,res)=>{
             user: userData,
             userAddress: addressData,
             walletBalance: walletBalance,
-            walletTransactions: walletTransactions
+            walletTransactions: walletTransactions,
+            refferalCode: refferalCode  
         });
         
     } catch(error){
@@ -370,7 +373,7 @@ const updatePassword = async (req, res) => {
             userAddress = new Address({
                 userId: userId,
                 address: [{ addressType, name, city, landmark, state, pincode, phone, altPhone }]
-            });
+            }); 
             await userAddress.save();
         } else {
             userAddress.address.push({ addressType, name, city, landmark, state, pincode, phone, altPhone });
