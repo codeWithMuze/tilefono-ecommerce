@@ -11,7 +11,7 @@ passport.use(new GoogleStrategy(
     {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: 'http://tilefono.shop/auth/google/callback', 
+        callbackURL: 'https://tilefono.shop/auth/google/callback', 
     },
     async (accessToken, refreshToken, profile, done) => {
         try {
@@ -31,10 +31,8 @@ passport.use(new GoogleStrategy(
                 const customerID = counter.seq.toString().padStart(6, '0');
 
                 const referralCode = referral(profile.displayName);
-                // Check if the referral code already exists
 
 
-                // Create new user with customerID
                 user = new User({
                     name: profile.displayName,
                     email: profile.emails[0].value,
